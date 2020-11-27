@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -42,6 +44,11 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_image_display);
 
 
@@ -49,6 +56,9 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
             tvFolderName = findViewById(R.id.foldername);
             tvFolderName.setText(getIntent().getStringExtra("folderName"));
             folderPath =  getIntent().getStringExtra("folderPath");
+        }else{
+            tvFolderName = findViewById(R.id.foldername);
+            tvFolderName.setText("All Media");
         }
 
         arAllMedia = new ArrayList<>();
@@ -159,11 +169,11 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
      * @param path a String corresponding to a folder path on the device external storage
      */
     public ArrayList<MediaItem> getAllImagesByFolder(String path){
-        ArrayList<MediaItem> images = new ArrayList<>();
-        Uri allVideosuri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        ArrayList<MediaItem> media = new ArrayList<>();
+        Uri allImagesuri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         String[] projection = { MediaStore.Images.ImageColumns.DATA ,MediaStore.Images.Media.DISPLAY_NAME,
                 MediaStore.Images.Media.SIZE};
-        Cursor cursor = MediaDisplayActivity.this.getContentResolver().query( allVideosuri, projection, MediaStore.Images.Media.DATA + " like ? ", new String[] {"%"+path+"%"}, null);
+        Cursor cursor = MediaDisplayActivity.this.getContentResolver().query( allImagesuri, projection, MediaStore.Images.Media.DATA + " like ? ", new String[] {"%"+path+"%"}, null);
         try {
             cursor.moveToFirst();
             do{
@@ -175,18 +185,45 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
 
                 pic.setSize(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)));
 
-                images.add(pic);
+                media.add(pic);
             }while(cursor.moveToNext());
             cursor.close();
             ArrayList<MediaItem> reSelection = new ArrayList<>();
-            for(int i = images.size()-1;i > -1;i--){
-                reSelection.add(images.get(i));
+            for(int i = media.size()-1;i > -1;i--){
+                reSelection.add(media.get(i));
             }
-            images = reSelection;
+            media = reSelection;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return images;
+
+        Uri allVideosuri = android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        String[] vidProjection = { MediaStore.Video.VideoColumns.DATA , MediaStore.Video.Media.DISPLAY_NAME,
+                MediaStore.Video.Media.SIZE};
+        Cursor vidCursor = MediaDisplayActivity.this.getContentResolver().query( allVideosuri, projection, MediaStore.Images.Media.DATA + " like ? ", new String[] {"%"+path+"%"}, null);
+        try {
+            vidCursor.moveToFirst();
+            do{
+                MediaItem pic = new MediaItem();
+
+                pic.setName(vidCursor.getString(vidCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)));
+
+                pic.setPath(vidCursor.getString(vidCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)));
+
+                pic.setSize(vidCursor.getString(vidCursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)));
+
+                media.add(pic);
+            }while(vidCursor.moveToNext());
+            vidCursor.close();
+            ArrayList<MediaItem> reSelection = new ArrayList<>();
+            for(int i = media.size()-1;i > -1;i--){
+                reSelection.add(media.get(i));
+            }
+            media = reSelection;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return media;
     }
 
 }

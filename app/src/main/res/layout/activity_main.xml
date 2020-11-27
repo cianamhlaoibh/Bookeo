@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,63 +11,84 @@
 
 
     <RelativeLayout
-        android:background="@color/colorPrimaryDark"
+        android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimaryDark">
 
 
         <androidx.cardview.widget.CardView
             android:id="@+id/head"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            app:cardBackgroundColor="@color/black">
+            android:layout_height="50dp"
+            app:cardBackgroundColor="@color/colorPrimary">
 
             <TextView
+                android:id="@+id/foldername"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center|start"
-                android:text="@string/photos_name"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
+                android:text="Albums"
                 android:textColor="@color/white"
-                android:textSize="35sp"
-                android:textStyle="bold"
-                android:layout_marginLeft="20dp"
-                android:layout_marginStart="10dp" />
-
-
-            <ImageButton
-                android:id="@+id/menu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_action_menu"
-                android:tint="@color/white" />
-
-            <ImageButton
-                android:id="@+id/ibPhotos"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:srcCompat="@drawable/common_google_signin_btn_icon_dark_normal" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
 
         </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/buttons"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_below="@id/head"
+            app:cardBackgroundColor="@color/colorAccent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageButton
+                    android:id="@+id/ibAlbums"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|start"
+                    android:background="@color/colorAccent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/ibPhotos"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_album" />
+
+                <ImageButton
+                    android:id="@+id/ibPhotos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|start"
+
+                    android:background="@color/colorAccent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/ibAlbums"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_photo" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        </androidx.cardview.widget.CardView>
+
 
         <ie.bookeo.utils.CustomRecyclerView
             android:id="@+id/folderRecycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/black"
-            android:columnWidth="@dimen/folder_column_width"
+            android:layout_below="@id/buttons"
+            android:background="@color/white"
             android:clipToPadding="false"
-            android:layout_below="@id/head">
-
-            <!--app:fastScrollEnabled="true"
-       app:fastScrollHorizontalThumbDrawable="@drawable/thumb_drawable"
-       app:fastScrollHorizontalTrackDrawable="@drawable/line_drawable"
-       app:fastScrollVerticalThumbDrawable="@drawable/thumb_drawable"
-       app:fastScrollVerticalTrackDrawable="@drawable/line_drawable"-->
+            android:columnWidth="@dimen/folder_column_width">
 
         </ie.bookeo.utils.CustomRecyclerView>
 
@@ -78,9 +100,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginBottom="731dp"
         android:text="@string/empty"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:visibility="gone" />
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/relativeLayout"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,6 +9,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -61,6 +64,11 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_main);
 
         if(ContextCompat.checkSelfPermission(FolderViewActivity.this,
@@ -145,6 +153,45 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        Uri allVideouri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        String[] vidProjection = { MediaStore.Video.VideoColumns.DATA , MediaStore.Video.Media.DISPLAY_NAME,
+                MediaStore.Video.Media.BUCKET_DISPLAY_NAME, MediaStore.Video.Media.BUCKET_ID};
+        Cursor vidCursor = this.getContentResolver().query(allVideouri, vidProjection, null, null, null);
+        try {
+            if (vidCursor != null) {
+                vidCursor.moveToFirst();
+            }
+            do{
+                AlbumFolder folds = new AlbumFolder();
+                String name = vidCursor.getString(vidCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME));
+                String folder = vidCursor.getString(vidCursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME));
+                String datapath = vidCursor.getString(vidCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+
+                //String folderpaths =  datapath.replace(name,"");
+                String folderpaths = datapath.substring(0, datapath.lastIndexOf(folder+"/"));
+                folderpaths = folderpaths+folder+"/";
+                if (!imgPaths.contains(folderpaths)) {
+                    imgPaths.add(folderpaths);
+
+                    folds.setPath(folderpaths);
+                    folds.setName(folder);
+                    folds.setFirstItem(datapath);//if the folder has only one picture this line helps to set it as first so as to avoid blank image in itemview
+                    folds.add();
+                    imgFolders.add(folds);
+                }else{
+                    for(int i = 0;i<imgFolders.size();i++){
+                        if(imgFolders.get(i).getPath().equals(folderpaths)){
+                            imgFolders.get(i).setFirstItem(datapath);
+                            imgFolders.get(i).add();
+                        }
+                    }
+                }
+            }while(vidCursor.moveToNext());
+            vidCursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return imgFolders;
     }
 
@@ -183,6 +230,23 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(ContextCompat.getColor(getApplicationContext(),R.color.black));
 
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+        return true;
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.Licenses:
+                startActivity(new Intent(this, LicenseActivity.class));
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 }

@@ -31,6 +31,9 @@
         <activity android:name=".activity.GalleryViewActivity"
             android:screenOrientation="portrait"></activity>
 
+        <activity android:name=".activity.LicenseActivity"
+            android:screenOrientation="portrait"></activity>
+
     </application>
 
 </manifest>
