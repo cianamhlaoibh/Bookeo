@@ -25,6 +25,20 @@
                 android:scaleType="centerCrop"
                 tools:ignore="ContentDescription" />
 
+            <ImageView
+                android:id="@+id/tick_image"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignLeft="@+id/image_view"
+                android:layout_alignStart="@+id/image_view"
+                android:layout_alignTop="@+id/image_view"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/ticked_image"
+                android:src="@drawable/ic_check_white"
+                android:visibility="invisible"/>
+
         </FrameLayout>
 
     </androidx.cardview.widget.CardView>

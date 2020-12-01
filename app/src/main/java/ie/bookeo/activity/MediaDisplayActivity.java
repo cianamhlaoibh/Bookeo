@@ -12,6 +12,7 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -117,6 +118,11 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     @Override
     public void onPicClicked(String pictureFolderPath, String folderName) {
 
+    }
+
+    @Override
+    public void onLongPress(View view, MediaItem item, int position) {
+        Toast.makeText(this, "long click " + position, Toast.LENGTH_SHORT).show();
     }
 
     /**

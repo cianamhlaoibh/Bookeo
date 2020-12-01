@@ -15,6 +15,7 @@ public class MediaItem {
     private String size;
     private String uri;
     private Boolean selected = false;
+    private Boolean isSelected;
 
     public MediaItem(){
 

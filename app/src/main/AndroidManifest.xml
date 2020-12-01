@@ -32,6 +32,7 @@
         <activity android:name=".activity.GalleryViewActivity"
             android:screenOrientation="portrait"></activity>
 
+        <!--https://stackoverflow.com/questions/58838548/styling-osslicensesmenuactivity-->
         <activity android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar"></activity>

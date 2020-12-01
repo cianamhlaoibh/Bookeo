@@ -208,6 +208,7 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
 
     }
 
+
     /**
      * Each time an item in the RecyclerView is clicked this method from the implementation of the transitListerner
      * in this activity is executed, this is possible because this class is passed as a parameter in the creation
@@ -222,6 +223,11 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
 
         //move.putExtra("recyclerItemSize",getCardsOptimalWidth(4));
         startActivity(move);
+    }
+
+    @Override
+    public void onLongPress(View view, MediaItem item, int position) {
+
     }
 
 
@@ -249,6 +255,7 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
 
         switch (item.getItemId()) {
             case R.id.Licenses:
+                //https://developers.google.com/android/guides/opensource
                 OssLicensesMenuActivity.setActivityTitle(getString(R.string.custom_license_title));
                 startActivity(new Intent(this, OssLicensesMenuActivity.class));
             default:

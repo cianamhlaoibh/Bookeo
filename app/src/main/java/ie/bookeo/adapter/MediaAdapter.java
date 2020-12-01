@@ -71,6 +71,13 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
                 mediaDisplayItemListener.onPicClicked(holder,position, arMediaList,null);
             }
         });
+        holder.picture.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                    mediaDisplayItemListener.onLongPress(view, arMediaList.get(position), position);
+                    return true;
+            }
+        });
 
     }
 

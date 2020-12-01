@@ -1,6 +1,7 @@
 package ie.bookeo.utils;
 
 import android.content.Context;
+import android.view.View;
 
 import java.util.ArrayList;
 
@@ -23,4 +24,5 @@ public interface MediaDisplayItemClickListener {
      */
     void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<MediaItem> pics, Context contx);
     void onPicClicked(String pictureFolderPath, String folderName);
+    void onLongPress(View view, MediaItem item, int position);
 }

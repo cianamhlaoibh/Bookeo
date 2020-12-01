@@ -20,10 +20,12 @@ import ie.bookeo.R;
 public class MediaAdapterHolder extends RecyclerView.ViewHolder{
 
     public ImageView picture;
+    public ImageView ivCheck;
 
     MediaAdapterHolder(@NonNull View itemView) {
         super(itemView);
 
         picture = itemView.findViewById(R.id.image);
+        ivCheck = itemView.findViewById(R.id.tick_image);
     }
 }
