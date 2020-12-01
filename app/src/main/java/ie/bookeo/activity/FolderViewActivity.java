@@ -20,9 +20,12 @@ import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 
 import ie.bookeo.R;
 import ie.bookeo.adapter.MediaAdapterHolder;
@@ -71,6 +74,9 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
 
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         if(ContextCompat.checkSelfPermission(FolderViewActivity.this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED)
@@ -81,7 +87,7 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
 
         tvEmpty =findViewById(R.id.empty);
 
-        rvFolder = findViewById(R.id.folderRecycler);
+        rvFolder = findViewById(R.id.recycler);
         rvFolder.addItemDecoration(new MarginItemDecoration(this));
         rvFolder.hasFixedSize();
         ArrayList<AlbumFolder> folds = getPicturePaths();
@@ -243,10 +249,23 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
 
         switch (item.getItemId()) {
             case R.id.Licenses:
-                startActivity(new Intent(this, LicenseActivity.class));
+                OssLicensesMenuActivity.setActivityTitle(getString(R.string.custom_license_title));
+                startActivity(new Intent(this, OssLicensesMenuActivity.class));
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ArrayList<AlbumFolder> folds = getPicturePaths();
+
+        if(folds.isEmpty()){
+            tvEmpty.setVisibility(View.VISIBLE);
+        }else{
+            RecyclerView.Adapter folderAdapter = new MediaFolderAdapter(folds, FolderViewActivity.this,this);
+            rvFolder.setAdapter(folderAdapter);
+        }
+    }
 }

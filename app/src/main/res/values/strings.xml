@@ -5,4 +5,6 @@
     <string name="empty">No Images on this device</string>
 
     <string name="photos_name">Photos</string>
+    <string name="custom_license_title">Open Source Licenses</string>
+
 </resources>

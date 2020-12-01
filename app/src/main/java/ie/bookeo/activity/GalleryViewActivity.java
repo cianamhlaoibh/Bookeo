@@ -76,7 +76,6 @@ public class GalleryViewActivity extends AppCompatActivity {
         ivClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("Close", "Close clicked");
                 finish();
             }
         });

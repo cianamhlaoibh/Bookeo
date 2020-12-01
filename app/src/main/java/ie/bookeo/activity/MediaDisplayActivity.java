@@ -1,6 +1,7 @@
 package ie.bookeo.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,12 +9,16 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
+import ie.bookeo.adapter.MediaFolderAdapter;
+import ie.bookeo.model.AlbumFolder;
 import ie.bookeo.utils.ShowGallery;
 import ie.bookeo.R;
 import ie.bookeo.adapter.MediaAdapterHolder;
@@ -39,7 +44,8 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     ArrayList<MediaItem> arAllMedia;
     ProgressBar pbLoader;
     String folderPath;
-    TextView tvFolderName;
+    Toolbar tvFolderName;
+    ImageButton ibAlbum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,14 +57,18 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
 
         setContentView(R.layout.activity_image_display);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         if(!getIntent().getStringExtra("folderName").contains("all")){
-            tvFolderName = findViewById(R.id.foldername);
-            tvFolderName.setText(getIntent().getStringExtra("folderName"));
+            tvFolderName = findViewById(R.id.toolbar);
+            tvFolderName.setTitle(getIntent().getStringExtra("folderName"));
             folderPath =  getIntent().getStringExtra("folderPath");
         }else{
-            tvFolderName = findViewById(R.id.foldername);
-            tvFolderName.setText("All Media");
+            tvFolderName = findViewById(R.id.toolbar);
+            tvFolderName.setTitle("All Media");
         }
 
         arAllMedia = new ArrayList<>();
@@ -66,7 +76,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         rvImage.addItemDecoration(new MarginItemDecoration(this));
         rvImage.hasFixedSize();
         pbLoader = findViewById(R.id.loader);
-
+        ibAlbum = findViewById(R.id.ibAlbums);
 
         if(arAllMedia.isEmpty() && !getIntent().getStringExtra("folderName").contains("all")){
             pbLoader.setVisibility(View.VISIBLE);
@@ -79,6 +89,14 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
             rvImage.setAdapter(new MediaAdapter(arAllMedia, MediaDisplayActivity.this,this));
             pbLoader.setVisibility(View.GONE);
         }
+
+        ibAlbum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MediaDisplayActivity.this, FolderViewActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     /**
@@ -226,5 +244,16 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         return media;
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(folderPath != null){
+            pbLoader.setVisibility(View.VISIBLE);
+            arAllMedia = getAllImagesByFolder(folderPath);
+            rvImage.setAdapter(new MediaAdapter(arAllMedia, MediaDisplayActivity.this,this));
+            pbLoader.setVisibility(View.GONE);
+        }
+    }
 }
 
