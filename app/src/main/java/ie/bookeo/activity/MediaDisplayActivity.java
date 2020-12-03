@@ -1,11 +1,14 @@
 package ie.bookeo.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -15,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,6 +40,10 @@ import java.util.ArrayList;
  *  - Creator - CodeBoy 722
  *  - Modified by Cian O Sullivan
  *
+ *  - URL - https://medium.com/better-programming/gmail-like-list-67bc51adc68a
+ *  - Creator - Mustufa Ansari
+ *  - Modified by Cian O Sullivan
+ *
  * This Activity loads all images to images associated with a particular folder into a recyclerview with grid manager
  */
 
@@ -47,6 +55,11 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     String folderPath;
     Toolbar tvFolderName;
     ImageButton ibAlbum;
+
+    MediaAdapter adapter;
+
+    ActionMode actionMode;
+    ActionCallback actionCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,15 +92,20 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         pbLoader = findViewById(R.id.loader);
         ibAlbum = findViewById(R.id.ibAlbums);
 
+        actionCallback = new ActionCallback();
+
+
         if(arAllMedia.isEmpty() && !getIntent().getStringExtra("folderName").contains("all")){
             pbLoader.setVisibility(View.VISIBLE);
             arAllMedia = getAllImagesByFolder(folderPath);
-            rvImage.setAdapter(new MediaAdapter(arAllMedia, MediaDisplayActivity.this,this));
+            adapter = new MediaAdapter(arAllMedia, MediaDisplayActivity.this,this);
+            rvImage.setAdapter(adapter);
             pbLoader.setVisibility(View.GONE);
         }else{
             pbLoader.setVisibility(View.VISIBLE);
             arAllMedia = getAllImages();
-            rvImage.setAdapter(new MediaAdapter(arAllMedia, MediaDisplayActivity.this,this));
+            adapter = new MediaAdapter(arAllMedia, MediaDisplayActivity.this,this);
+            rvImage.setAdapter(adapter);
             pbLoader.setVisibility(View.GONE);
         }
 
@@ -108,11 +126,16 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
      */
     @Override
     public void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<MediaItem> pics, Context contx) {
-        ArrayList<String> paths = new ArrayList<>();
-        for (MediaItem p : pics) {
-            paths.add(p.getPath());
+        if (adapter.selectedItemCount() > 0) {
+            toggleActionBar(position);
+            adapter.toggleIcon(holder, position);
+        } else {
+            ArrayList<String> paths = new ArrayList<>();
+            for (MediaItem p : pics) {
+                paths.add(p.getPath());
+            }
+            ShowGallery.show(this, paths, position);
         }
-        ShowGallery.show(this, paths, position);
     }
 
     @Override
@@ -121,8 +144,10 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     }
 
     @Override
-    public void onLongPress(View view, MediaItem item, int position) {
+    public void onLongPress(MediaAdapterHolder view, MediaItem item, int position) {
         Toast.makeText(this, "long click " + position, Toast.LENGTH_SHORT).show();
+        toggleActionBar(position);
+        adapter.toggleIcon(view, position);
     }
 
     /**
@@ -250,6 +275,32 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         return media;
     }
 
+    /*
+       toggling action bar that will change the color and option
+     */
+
+    private void toggleActionBar(int position) {
+        if (actionMode == null) {
+            actionMode = startSupportActionMode(actionCallback);
+        }
+        toggleSelection(position);
+    }
+
+    /*
+       toggle selection of items and show the count of selected items on the action bar
+     */
+
+    private void toggleSelection(int position) {
+        adapter.toggleSelection(position);
+        int count = adapter.selectedItemCount();
+        if (count == 0) {
+            actionMode.finish();
+        } else {
+            actionMode.setTitle(String.valueOf(count));
+            actionMode.invalidate();
+        }
+    }
+
 
     @Override
     protected void onResume() {
@@ -260,6 +311,47 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
             rvImage.setAdapter(new MediaAdapter(arAllMedia, MediaDisplayActivity.this,this));
             pbLoader.setVisibility(View.GONE);
         }
+    }
+
+    private class ActionCallback implements ActionMode.Callback {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            toggleStatusBarColor(MediaDisplayActivity.this, R.color.blue_grey_700);
+            mode.getMenuInflater().inflate(R.menu.menu, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.delteItem:
+                    //deleteInbox();
+                    mode.finish();
+                    return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            adapter.clearSelection();
+            actionMode = null;
+            toggleStatusBarColor(MediaDisplayActivity.this, R.color.colorPrimary);
+        }
+    }
+    /*
+      this will toggle or action bar color
+     */
+    public static void toggleStatusBarColor(Activity activity, int color) {
+        Window window = activity.getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.setStatusBarColor(activity.getResources().getColor(R.color.colorPrimary));
     }
 }
 

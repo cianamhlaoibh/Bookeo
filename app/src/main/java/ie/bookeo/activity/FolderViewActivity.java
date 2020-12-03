@@ -226,7 +226,7 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
     }
 
     @Override
-    public void onLongPress(View view, MediaItem item, int position) {
+    public void onLongPress(MediaAdapterHolder view, MediaItem item, int position) {
 
     }
 

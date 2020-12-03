@@ -14,6 +14,10 @@ import ie.bookeo.model.MediaItem;
  *  - URL - https://github.com/CodeBoy722/Android-Simple-Image-Gallery
  *  - Creator - CodeBoy 722
  *
+ *  - URL - https://medium.com/better-programming/gmail-like-list-67bc51adc68a
+ *  - Creator - Mustufa Ansari
+ *  - Modified by Cian O Sullivan
+ *
  */
 public interface MediaDisplayItemClickListener {
 
@@ -24,5 +28,5 @@ public interface MediaDisplayItemClickListener {
      */
     void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<MediaItem> pics, Context contx);
     void onPicClicked(String pictureFolderPath, String folderName);
-    void onLongPress(View view, MediaItem item, int position);
+    void onLongPress(MediaAdapterHolder holder, MediaItem item, int position);
 }

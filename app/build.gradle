@@ -55,7 +55,10 @@ dependencies {
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.5.0'
     implementation 'com.google.android.gms:play-services-oss-licenses:17.0.0'
 
+    //https://developer.android.com/jetpack/androidx/releases/recyclerview
     implementation "androidx.recyclerview:recyclerview:1.1.0"
+
+    implementation 'com.balysv:material-ripple:1.0.2'
 
 
 }
