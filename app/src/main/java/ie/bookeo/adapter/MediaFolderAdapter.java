@@ -12,7 +12,7 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import ie.bookeo.R;
-import ie.bookeo.model.AlbumFolder;
+import ie.bookeo.model.gallery_model.AlbumFolder;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -52,7 +52,6 @@ public class MediaFolderAdapter extends RecyclerView.Adapter<MediaFolderAdapter.
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View cell = inflater.inflate(R.layout.picture_folder_item, parent, false);
         return new FolderHolder(cell);
-
     }
 
     @Override

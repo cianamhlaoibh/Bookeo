@@ -1,4 +1,4 @@
-package ie.bookeo.model;
+package ie.bookeo.model.gallery_model;
 
 
 /**
@@ -14,6 +14,7 @@ public class MediaItem {
     private String path;
     private String size;
     private String uri;
+    private String date;
     private Boolean selected = false;
     private Boolean isSelected;
 
@@ -68,4 +69,13 @@ public class MediaItem {
     public void setSelected(Boolean selected) {
         this.selected = selected;
     }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
 }

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "77984560108",
+    "project_id": "bookeo-6a2fc",
+    "storage_bucket": "bookeo-6a2fc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:77984560108:android:7228eba6ee8a58ae1b06c9",
+        "android_client_info": {
+          "package_name": "ie.bookeo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "77984560108-pcuveoc3odqdr80vhrda4rip4g6qvlop.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ie.bookeo",
+            "certificate_hash": "6047ab2e225cc8e85dd1ba3f21b548e8a1643157"
+          }
+        },
+        {
+          "client_id": "77984560108-douaep2tfn3ales9u7i1jrjvlutd035j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9wC_d5GQlCI08E4EDDHCQy1IcbYh24iM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "77984560108-douaep2tfn3ales9u7i1jrjvlutd035j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

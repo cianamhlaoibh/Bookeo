@@ -30,8 +30,8 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 import ie.bookeo.R;
 import ie.bookeo.adapter.MediaAdapterHolder;
 import ie.bookeo.adapter.MediaFolderAdapter;
-import ie.bookeo.model.AlbumFolder;
-import ie.bookeo.model.MediaItem;
+import ie.bookeo.model.gallery_model.AlbumFolder;
+import ie.bookeo.model.gallery_model.MediaItem;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 
@@ -87,7 +87,7 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
 
         tvEmpty =findViewById(R.id.empty);
 
-        rvFolder = findViewById(R.id.recycler);
+        rvFolder = findViewById(R.id.rvBookeoAlbums);
         rvFolder.addItemDecoration(new MarginItemDecoration(this));
         rvFolder.hasFixedSize();
         ArrayList<AlbumFolder> folds = getPicturePaths();

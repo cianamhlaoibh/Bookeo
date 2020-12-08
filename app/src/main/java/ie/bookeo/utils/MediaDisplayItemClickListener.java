@@ -1,12 +1,11 @@
 package ie.bookeo.utils;
 
 import android.content.Context;
-import android.view.View;
 
 import java.util.ArrayList;
 
 import ie.bookeo.adapter.MediaAdapterHolder;
-import ie.bookeo.model.MediaItem;
+import ie.bookeo.model.gallery_model.MediaItem;
 
 /**
  *

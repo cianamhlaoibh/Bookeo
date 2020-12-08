@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import ie.bookeo.R;
-import ie.bookeo.model.MediaItem;
+import ie.bookeo.model.gallery_model.MediaItem;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 
 import com.bumptech.glide.Glide;
@@ -38,6 +38,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
     private ArrayList<MediaItem> arMediaList;
     private Context contx;
     private final MediaDisplayItemClickListener mediaDisplayItemListener;
+    private MediaAdapterHolder mediaAdapterHolder;
 
     private SparseBooleanArray selectedItems;
     private ArrayList<MediaItem> arSelectedItems;
@@ -118,6 +119,10 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
         }
     }
 
+    public void removeIcons() {
+
+    }
+
     /*
        This method helps you to get all selected items from the list
      */
@@ -128,6 +133,10 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
             items.add(selectedItems.keyAt(i));
         }
         return items;
+    }
+
+    public List<MediaItem> getUploadItems() {
+        return arSelectedItems;
     }
 
     /*
@@ -145,6 +154,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
 
     public void clearSelection() {
         selectedItems.clear();
+
         notifyDataSetChanged();
     }
 

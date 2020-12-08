@@ -1,4 +1,4 @@
-package ie.bookeo.model;
+package ie.bookeo.model.gallery_model;
 
 import com.google.type.DateTime;
 
