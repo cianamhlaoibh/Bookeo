@@ -38,11 +38,12 @@ import ie.bookeo.adapter.BookeoMainFolderAdapter;
 import ie.bookeo.adapter.MediaAdapterHolder;
 import ie.bookeo.adapter.MediaFolderAdapter;
 import ie.bookeo.model.BookeoAlbum;
-import ie.bookeo.model.BookeoMediaItem;
 import ie.bookeo.model.gallery_model.AlbumFolder;
 import ie.bookeo.model.gallery_model.MediaItem;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
+
+import cat.ereza.customactivityoncrash.config.CaocConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,6 +98,9 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
             ActivityCompat.requestPermissions(FolderViewActivity.this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+
+        //____________________________________________________________________________________
+
         //____________________________________________________________________________________
 
         tvEmpty =findViewById(R.id.empty);

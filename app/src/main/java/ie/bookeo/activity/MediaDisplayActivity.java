@@ -78,6 +78,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     Toolbar tvFolderName;
     ImageButton ibAlbum;
     MediaAdapter adapter;
+    Toolbar toolbar;
 
     ActionMode actionMode;
     ActionCallback actionCallback;
@@ -99,7 +100,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
 
         setContentView(R.layout.activity_image_display);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -223,11 +224,12 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
 
     @Override
     public void onLongPress(MediaAdapterHolder view, MediaItem item, int position) {
-        Toast.makeText(this, "long click " + position, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "long click " + position, Toast.LENGTH_SHORT).show();
+        toolbar.setVisibility(View.GONE);
         toggleActionBar(position);
         adapter.toggleIcon(view, position);
-
         rvAlbums.setVisibility(View.VISIBLE);
+
     }
 
     /**
@@ -489,6 +491,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             toggleStatusBarColor(MediaDisplayActivity.this, R.color.blue_grey_700);
+
             mode.getMenuInflater().inflate(R.menu.menu, menu);
             return true;
         }
@@ -515,8 +518,9 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
             adapter.clearSelection();
             actionMode = null;
             toggleStatusBarColor(MediaDisplayActivity.this, R.color.colorPrimary);
-            //
+            toolbar.setVisibility(View.VISIBLE);
             rvAlbums.setVisibility(View.GONE);
+            adapter.notifyDataSetChanged();
         }
     }
     /*
