@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/white"
     tools:context=".activity.FolderViewActivity">
 
 
@@ -72,16 +72,15 @@
 
 
     <ie.bookeo.utils.CustomRecyclerView
-        android:id="@+id/rvBookeoAlbums"
+        android:id="@+id/rvFolders"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="250dp"
         android:layout_below="@id/buttons"
         android:background="@color/white"
         android:clipToPadding="false"
         android:columnWidth="@dimen/folder_column_width"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttons"
-        tools:layout_editor_absoluteX="0dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView">
 
     </ie.bookeo.utils.CustomRecyclerView>
 
@@ -100,5 +99,43 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.499" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Device Albums"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttons" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Bookeo Albums"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rvFolders" />
+
+    <ie.bookeo.utils.CustomRecyclerView
+        android:id="@+id/rvBookeoAlbums"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_below="@id/buttons"
+        android:background="@color/white"
+        android:clipToPadding="false"
+        android:columnWidth="@dimen/folder_column_width"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2">
+
+    </ie.bookeo.utils.CustomRecyclerView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,9 @@
 package ie.bookeo.model;
 
-public class BookeoMediaItem {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class BookeoMediaItem  {
 
     private String uuid;
     private String url;
@@ -12,6 +15,16 @@ public class BookeoMediaItem {
     public BookeoMediaItem() {
     }
 
+
+
+    public BookeoMediaItem(String uuid, String url, String name, String date, String albumUuid) {
+        this.uuid = uuid;
+        this.url = url;
+        this.name = name;
+        this.date = date;
+        this.albumUuid = albumUuid;
+    }
+
     public BookeoMediaItem(String uuid, String url, String name, String caption, String date, String albumUuid) {
         this.uuid = uuid;
         this.url = url;
@@ -20,6 +33,16 @@ public class BookeoMediaItem {
         this.date = date;
         this.albumUuid = albumUuid;
     }
+
+    protected BookeoMediaItem(Parcel in) {
+        uuid = in.readString();
+        url = in.readString();
+        name = in.readString();
+        caption = in.readString();
+        date = in.readString();
+        albumUuid = in.readString();
+    }
+
 
     public String getUuid() {
         return uuid;
@@ -68,4 +91,5 @@ public class BookeoMediaItem {
     public void setAlbumUuid(String albumUuid) {
         this.albumUuid = albumUuid;
     }
+
 }

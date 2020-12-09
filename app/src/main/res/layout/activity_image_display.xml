@@ -71,7 +71,7 @@
 
 
     <ie.bookeo.utils.CustomRecyclerView
-        android:id="@+id/rvBookeoAlbums"
+        android:id="@+id/rvFolders"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_below="@id/buttons"
@@ -103,8 +103,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="gone" />
-
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

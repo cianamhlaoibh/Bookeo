@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,16 +27,25 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import ie.bookeo.R;
+import ie.bookeo.adapter.BookeoMainFolderAdapter;
 import ie.bookeo.adapter.MediaAdapterHolder;
 import ie.bookeo.adapter.MediaFolderAdapter;
+import ie.bookeo.model.BookeoAlbum;
+import ie.bookeo.model.BookeoMediaItem;
 import ie.bookeo.model.gallery_model.AlbumFolder;
 import ie.bookeo.model.gallery_model.MediaItem;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -49,9 +59,13 @@ import java.util.ArrayList;
 
 public class FolderViewActivity extends AppCompatActivity implements MediaDisplayItemClickListener {
 
-    RecyclerView rvFolder;
+    RecyclerView rvFolder, rvAlbums;
     TextView tvEmpty;
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
+
+    private BookeoMainFolderAdapter bookeoMainFolderAdapter;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference albumsRef = db.collection("albums");
 
     /**
      * Request the user for permission to access media files and read images on the device
@@ -87,7 +101,7 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
 
         tvEmpty =findViewById(R.id.empty);
 
-        rvFolder = findViewById(R.id.rvBookeoAlbums);
+        rvFolder = findViewById(R.id.rvFolders);
         rvFolder.addItemDecoration(new MarginItemDecoration(this));
         rvFolder.hasFixedSize();
         ArrayList<AlbumFolder> folds = getPicturePaths();
@@ -111,6 +125,13 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
                 startActivity(intent);
             }
         });
+
+        //-------------------------------------------------------------------
+        rvAlbums = findViewById(R.id.rvBookeoAlbums);
+        rvAlbums.addItemDecoration(new MarginItemDecoration(this));
+        rvAlbums.hasFixedSize();
+
+
     }
 
     /**1
@@ -204,10 +225,14 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
 
 
     @Override
-    public void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<MediaItem> pics, Context contx) {
+    public void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> paths, Context contx) {
 
     }
 
+    @Override
+    public void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls) {
+
+    }
 
     /**
      * Each time an item in the RecyclerView is clicked this method from the implementation of the transitListerner
@@ -222,6 +247,14 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
         move.putExtra("folderName",folderName);
 
         //move.putExtra("recyclerItemSize",getCardsOptimalWidth(4));
+        startActivity(move);
+    }
+
+    @Override
+    public void onBPicClicked(String albumUuid, String AlbumName) {
+        Intent move = new Intent(FolderViewActivity.this, BookeoMediaDisplay.class);
+        move.putExtra("folderUuid",albumUuid);
+        move.putExtra("folderName",AlbumName);
         startActivity(move);
     }
 
@@ -274,5 +307,43 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
             RecyclerView.Adapter folderAdapter = new MediaFolderAdapter(folds, FolderViewActivity.this,this);
             rvFolder.setAdapter(folderAdapter);
         }
+
+        ArrayList<BookeoAlbum> albums = getAlbums();
+        bookeoMainFolderAdapter = new BookeoMainFolderAdapter(albums, FolderViewActivity.this,this);
+        rvAlbums.setAdapter(bookeoMainFolderAdapter);
+    }
+
+    public ArrayList<BookeoAlbum> getAlbums() {
+        final ArrayList<BookeoAlbum> dbAlbums = new ArrayList<>();
+        db.collection("albums").get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+
+                    String data = "";
+
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+
+                        if (!queryDocumentSnapshots.isEmpty()) {
+
+                            List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+
+                            for (DocumentSnapshot documentSnapshot : list) {
+                                BookeoAlbum album = new BookeoAlbum();
+                                album = documentSnapshot.toObject(BookeoAlbum.class);
+
+                                final BookeoAlbum arAlbum = new BookeoAlbum(album.getUuid(), album.getName(), album.getCreateDate());
+                                arAlbum.setFirstItem(album.getFirstItem());
+
+
+                                dbAlbums.add(arAlbum);
+
+                                //data = albums.get(0).getUuid() + " " + albums.get(0).getName() + " " + album.getCreateDate();
+                                Log.d("OUTPUT", "onSuccess create: " + arAlbum.getName());
+                            }
+                        }
+                        bookeoMainFolderAdapter.notifyDataSetChanged();
+                    }
+                });
+        return dbAlbums;
     }
 }

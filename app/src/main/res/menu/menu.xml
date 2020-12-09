@@ -9,13 +9,4 @@
         android:title="Delete"
         app:showAsAction="always">
     </item>
-
-    <item
-        android:id="@+id/upload"
-        android:icon="@drawable/ic_baseline_cloud_upload_24"
-        android:orderInCategory="100"
-        android:title="Delete"
-        app:showAsAction="always">
-    </item>
-
 </menu>

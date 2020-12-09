@@ -5,6 +5,7 @@ import android.content.Context;
 import java.util.ArrayList;
 
 import ie.bookeo.adapter.MediaAdapterHolder;
+import ie.bookeo.model.BookeoMediaItem;
 import ie.bookeo.model.gallery_model.MediaItem;
 
 /**
@@ -25,7 +26,9 @@ public interface MediaDisplayItemClickListener {
      * @param holder The ViewHolder for the clicked picture
      * @param position The position in the grid of the picture that was clicked
      */
-    void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<MediaItem> pics, Context contx);
+    void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> path, Context contx);
+    void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls);
     void onPicClicked(String pictureFolderPath, String folderName);
+    void onBPicClicked(String albumUuid, String AlbumName);
     void onLongPress(MediaAdapterHolder holder, MediaItem item, int position);
 }

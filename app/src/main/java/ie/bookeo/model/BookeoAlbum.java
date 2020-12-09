@@ -7,6 +7,8 @@ public class BookeoAlbum {
     private String uuid;
     private String name;
     private String createDate;
+    private int count = 0;
+    private String firstItem;
 
     public BookeoAlbum() {
 
@@ -40,5 +42,21 @@ public class BookeoAlbum {
 
     public void setCreateDate(String createDate) {
         this.createDate = createDate;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public String getFirstItem() {
+        return firstItem;
+    }
+
+    public void setFirstItem(String firstItem) {
+        this.firstItem = firstItem;
     }
 }

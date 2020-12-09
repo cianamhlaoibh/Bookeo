@@ -71,6 +71,11 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
 
         final MediaItem image = arMediaList.get(position);
 
+        final ArrayList<String> paths = new ArrayList<>();
+        for (MediaItem p : arMediaList) {
+            paths.add(p.getPath());
+        }
+
         Glide.with(contx)
                 .load(image.getPath())
                 .apply(new RequestOptions().centerCrop())
@@ -85,7 +90,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
             @Override
             public void onClick(View v) {
                 if (mediaDisplayItemListener == null)return;
-                    mediaDisplayItemListener.onPicClicked(holder, position, arMediaList, null);
+                    mediaDisplayItemListener.onPicClicked(holder, position, paths, null);
             }
         });
         holder.picture.setOnLongClickListener(new View.OnLongClickListener() {

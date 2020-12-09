@@ -37,6 +37,7 @@ public class AddAlbumFragment extends DialogFragment {
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference albumsRef = db.collection("albums");
+
     public AddAlbumFragment() {
 
     }

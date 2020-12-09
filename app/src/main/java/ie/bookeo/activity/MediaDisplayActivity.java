@@ -26,8 +26,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -37,6 +35,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import ie.bookeo.adapter.BookeoFolderAdapter;
+import ie.bookeo.adapter.BookeoMediaItemAdapter;
 import ie.bookeo.model.BookeoAlbum;
 import ie.bookeo.model.BookeoMediaItem;
 import ie.bookeo.utils.AlbumUploadListener;
@@ -51,7 +50,6 @@ import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 
 import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -116,7 +114,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         }
 
         arAllMedia = new ArrayList<>();
-        rvImage = findViewById(R.id.rvBookeoAlbums);
+        rvImage = findViewById(R.id.rvFolders);
         rvImage.addItemDecoration(new MarginItemDecoration(this));
         rvImage.hasFixedSize();
         pbLoader = findViewById(R.id.loader);
@@ -131,7 +129,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
             adapter = new MediaAdapter(arAllMedia, MediaDisplayActivity.this, this);
             rvImage.setAdapter(adapter);
             pbLoader.setVisibility(View.GONE);
-        } else {
+        }else {
             pbLoader.setVisibility(View.VISIBLE);
             arAllMedia = getAllImages();
             adapter = new MediaAdapter(arAllMedia, MediaDisplayActivity.this, this);
@@ -153,6 +151,8 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
 
         rvAlbums = findViewById(R.id.rvBookeoAlbumIcons);
         bookeoFolderAdapter = new BookeoFolderAdapter(albums, getApplicationContext(), this);
+        rvAlbums.addItemDecoration(new MarginItemDecoration(this));
+        rvAlbums.hasFixedSize();
         rvAlbums.setAdapter(bookeoFolderAdapter);
         // rvAlbums.setVisibility(View.GONE);
 
@@ -187,12 +187,6 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
                         bookeoFolderAdapter.notifyDataSetChanged();
                     }
                 });
-        // BookeoAlbum album = new BookeoAlbum("1234", "TEST", "12/12/20");
-        // BookeoAlbum album1 = new BookeoAlbum("2343", "TEST3", "12/12/20");
-        // BookeoAlbum album2= new BookeoAlbum("3432", "TEST4", "12/12/20");
-        //dbAlbums.add(album);
-        // dbAlbums.add(album1);
-        //dbAlbums.add(album2);
         Log.d("SIZE", "getAlbums: added" + dbAlbums.size());
         return dbAlbums;
     }
@@ -200,24 +194,30 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     /**
      * @param holder   The ViewHolder for the clicked picture
      * @param position The position in the grid of the picture that was clicked
-     * @param pics     An ArrayList of all the items in the Adapter
+     * @param paths     An ArrayList of all the items in the Adapter
      */
     @Override
-    public void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<MediaItem> pics, Context contx) {
+    public void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> paths, Context contx) {
         if (adapter.selectedItemCount() > 0) {
             toggleActionBar(position);
             adapter.toggleIcon(holder, position);
         } else {
-            ArrayList<String> paths = new ArrayList<>();
-            for (MediaItem p : pics) {
-                paths.add(p.getPath());
-            }
             ShowGallery.show(this, paths, position);
         }
     }
 
     @Override
+    public void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls) {
+
+    }
+
+    @Override
     public void onPicClicked(String pictureFolderPath, String folderName) {
+
+    }
+
+    @Override
+    public void onBPicClicked(String albumUuid, String AlbumName) {
 
     }
 
@@ -249,7 +249,8 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
                 pic.setPath(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)));
                 //pic.setUri(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString())));
                 pic.setSize(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)));
-                pic.setDate(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)));
+                String date = getDate(cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)));
+                pic.setDate(date);
 
                 images.add(pic);
             } while (cursor.moveToNext());
@@ -265,7 +266,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
 
         Uri allVideosuri = android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         String[] vidProjection = {MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME,
-                MediaStore.Video.Media.SIZE};
+                MediaStore.Video.Media.SIZE, MediaStore.Video.Media.DATE_TAKEN};
         Cursor vidCursor = MediaDisplayActivity.this.getContentResolver().query(allVideosuri, vidProjection, null, null, null);
         try {
             vidCursor.moveToFirst();
@@ -273,10 +274,10 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
                 MediaItem pic = new MediaItem();
 
                 pic.setName(vidCursor.getString(vidCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)));
-
                 pic.setPath(vidCursor.getString(vidCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)));
-
                 pic.setSize(vidCursor.getString(vidCursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)));
+                String date = getDate(cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)));
+                pic.setDate(date);
 
                 images.add(pic);
             } while (vidCursor.moveToNext());
@@ -292,6 +293,11 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         return images;
     }
 
+    //https://stackoverflow.com/questions/40193567/get-the-added-modified-taken-date-of-the-video-from-mediastore
+    public String getDate(long val){
+        val*=1000L;
+        return new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date(val));
+    }
     /**
      * This Method gets all the images in the folder paths passed as a String to the method and returns
      * and ArrayList of pictureFacer a custom object that holds data of a given image
@@ -312,7 +318,8 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
                 pic.setName(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)));
                 pic.setPath(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)));
                 pic.setSize(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)));
-                pic.setDate(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)));
+                String date = getDate(cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)));
+                pic.setDate(date);
 
                 media.add(pic);
             } while (cursor.moveToNext());
@@ -328,7 +335,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
 
         Uri allVideosuri = android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         String[] vidProjection = {MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME,
-                MediaStore.Video.Media.SIZE};
+                MediaStore.Video.Media.SIZE, MediaStore.Video.Media.DATE_TAKEN};
         Cursor vidCursor = MediaDisplayActivity.this.getContentResolver().query(allVideosuri, projection, MediaStore.Images.Media.DATA + " like ? ", new String[]{"%" + path + "%"}, null);
         try {
             vidCursor.moveToFirst();
@@ -336,10 +343,10 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
                 MediaItem pic = new MediaItem();
 
                 pic.setName(vidCursor.getString(vidCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)));
-
                 pic.setPath(vidCursor.getString(vidCursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)));
-
                 pic.setSize(vidCursor.getString(vidCursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)));
+                String date = getDate(cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)));
+                pic.setDate(date);
 
                 media.add(pic);
             } while (vidCursor.moveToNext());
@@ -453,6 +460,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
                                           String url = uri.toString();
                                           //upload.setUrl(url);
                                           db.collection("albums").document(albumUuid).collection("media_items").document(uuid).update("url", url);
+                                          db.collection("albums").document(albumUuid).update("firstItem", url);
                                           Log.d("URL", "onSuccess: " + uri.toString());
                                       }
                                   });
