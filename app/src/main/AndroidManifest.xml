@@ -39,9 +39,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar"></activity>
 
-        <activity android:name=".activity.BookeoAlbumActivity" >
-        </activity>
-
         <activity android:name=".activity.BookeoMediaDisplay" >
         </activity>
 

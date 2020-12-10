@@ -97,6 +97,14 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
        // viewVisibility();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        items = getDbMedia(uuid);
+        adapter = new BookeoMediaItemAdapter(items, BookeoMediaDisplay.this, this);
+        rvMediaItems.setAdapter(adapter);
+    }
+
     public void viewVisibility(ArrayList<BookeoMediaItem> items) {
         if(items.isEmpty())
             tvNoMedia.setVisibility(View.VISIBLE);

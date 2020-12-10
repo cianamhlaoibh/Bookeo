@@ -106,7 +106,6 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
         });
 
         toggleIcon(holder, position);
-
     }
 
     /*
@@ -148,9 +147,10 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
        this will be used when we want to delete items from our list
      */
     public void removeItems(int position) {
-        arMediaList.remove(position);
+        arSelectedItems.remove(position);
+        arSelectedItems = null;
+        selectedItems.delete(position);
         selectedIndex = -1;
-
     }
 
     /*
@@ -159,7 +159,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
 
     public void clearSelection() {
         selectedItems.clear();
-
+        arSelectedItems.clear();
         notifyDataSetChanged();
     }
 
@@ -170,8 +170,13 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
     public void toggleSelection(int position) {
         selectedIndex = position;
         if (selectedItems.get(position, false)) {
-            arSelectedItems.remove(position);
-            selectedItems.delete(position);
+                if(arSelectedItems.size()==1){
+                    arSelectedItems.clear();
+                    selectedItems.clear();
+                }else {
+                    arSelectedItems.remove(selectedIndex);
+                    selectedItems.delete(position);
+                }
         } else {
             selectedItems.put(position, true);
             arSelectedItems.add(arMediaList.get(position));

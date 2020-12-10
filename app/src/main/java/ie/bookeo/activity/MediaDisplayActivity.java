@@ -16,6 +16,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -24,8 +25,10 @@ import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -79,6 +82,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     ImageButton ibAlbum;
     MediaAdapter adapter;
     Toolbar toolbar;
+    TextView tvUploading;
 
     ActionMode actionMode;
     ActionCallback actionCallback;
@@ -120,6 +124,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         rvImage.addItemDecoration(new MarginItemDecoration(this));
         rvImage.hasFixedSize();
         pbLoader = findViewById(R.id.loader);
+        tvUploading = findViewById(R.id.tvUploading);
         ibAlbum = findViewById(R.id.ibAlbums);
 
         actionCallback = new ActionCallback();
@@ -207,9 +212,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     }
 
     @Override
-    public void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls, ArrayList<String> uuid, String albumUuid) {
-
-    }
+    public void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls, ArrayList<String> uuid, String albumUuid) {}
 
     @Override
     public void onPicClicked(String pictureFolderPath, String folderName) {
@@ -403,10 +406,10 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
 
     @Override
     public void onUploadAlbumClicked(final String albumUuid) {
-
         StorageReference storageReference = FirebaseStorage.getInstance().getReference("media_items");
         List<MediaItem> uploadItems;
         uploadItems = adapter.getUploadItems();
+
         for (final MediaItem uploadItem : uploadItems) {
             final String uuid = UUID.randomUUID().toString();
 
@@ -436,18 +439,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            Handler handler = new Handler();
-                            handler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    pbLoader.setProgress(0);
-                                }
-                            }, 5000);
-
-                            Toast.makeText(MediaDisplayActivity.this, "Upload Successful", Toast.LENGTH_SHORT).show();
-
-
-                          //  https://stackoverflow.com/questions/57183427/download-url-is-getting-as-com-google-android-gms-tasks-zzu441922b-while-using/57183557
+                           //  https://stackoverflow.com/questions/57183427/download-url-is-getting-as-com-google-android-gms-tasks-zzu441922b-while-using/57183557
                           fileRef.getDownloadUrl()
                                   .addOnSuccessListener(new OnSuccessListener<Uri>() {
                                       @Override
@@ -470,11 +462,13 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
                     .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
-                            double progress = (100.0 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount());
-                            pbLoader.setProgress((int) progress);
+                            tvUploading.setVisibility(View.VISIBLE);
+                            pbLoader.setVisibility(View.VISIBLE);
                         }
                     });
         }
+        Toast.makeText(MediaDisplayActivity.this, "Upload Successful", Toast.LENGTH_SHORT).show();
+        MediaDisplayActivity.this.recreate();
     }
 
     private class ActionCallback implements ActionMode.Callback {
@@ -510,7 +504,8 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
             toggleStatusBarColor(MediaDisplayActivity.this, R.color.colorPrimary);
             toolbar.setVisibility(View.VISIBLE);
             rvAlbums.setVisibility(View.GONE);
-            adapter.notifyDataSetChanged();
+            MediaDisplayActivity.this.recreate();
+          //  adapter.notifyDataSetChanged();
         }
     }
     /*
@@ -528,8 +523,6 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                // todo: goto back activity from here
-
                 Intent intent = new Intent(MediaDisplayActivity.this, FolderViewActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
