@@ -2,6 +2,7 @@ package ie.bookeo.activity;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,14 +71,14 @@ public class AddAlbumFragment extends DialogFragment {
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-              // BookeoAlbum bookeoAlbum = new BookeoAlbum(uuid, name, date);
-
-               // AlbumDao musicClassDao = new AlbumDao();
-
-                 //    createListener.onCreated(musicClass);
                 addAlbum(view);
-                  //  getDialog().dismiss();
+                //https://stackoverflow.com/questions/41664409/wait-for-5-seconds/41664445https://stackoverflow.com/questions/41664409/wait-for-5-seconds/41664445
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        getDialog().dismiss();;
+                    }
+                }, 1000);//wait a second to add album to database before dismissing activity
 
             }
         });
@@ -106,7 +107,7 @@ public class AddAlbumFragment extends DialogFragment {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(getContext(), "Album saved", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Album " + name + "Added", Toast.LENGTH_SHORT).show();
                         mylistener.onCreated(bookeoAlbum);
                     }
                 })

@@ -234,7 +234,7 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
     }
 
     @Override
-    public void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls) {
+    public void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls, ArrayList<String> uuid, String albumUuid) {
 
     }
 

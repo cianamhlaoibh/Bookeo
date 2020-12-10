@@ -29,11 +29,13 @@ public class ShowGallery {
         context.startActivity(intent);
     }
 
-    public static void bShow(Context context, ArrayList<String> names, ArrayList<String> urls, int position){
+    public static void bShow(Context context, ArrayList<String> names, ArrayList<String> urls, int position, ArrayList<String> uuids, String albumUuid){
         Intent intent = new Intent(context, BookeoGalleryView.class);
         intent.putExtra("names", names);
         intent.putExtra("urls", urls);
         intent.putExtra("position", position);
+        intent.putExtra("albumUuid", albumUuid);
+        intent.putExtra("uuids", uuids);
         context.startActivity(intent);
     }
 }

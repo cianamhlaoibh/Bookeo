@@ -44,7 +44,7 @@
         app:tint="#FFFFFF" />
 
     <ImageView
-        android:id="@+id/btn_action"
+        android:id="@+id/ivDelete"
         android:src="@drawable/ic_delete"
         android:layout_width="48dp"
         android:layout_height="48dp"

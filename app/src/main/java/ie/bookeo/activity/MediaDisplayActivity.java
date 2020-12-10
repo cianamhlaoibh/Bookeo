@@ -103,6 +103,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 
         if (!getIntent().getStringExtra("folderName").contains("all")) {
@@ -146,7 +147,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
             }
         });
 
-        //DB
+        //DB - albums for user to upload to when long press
         albums = new ArrayList<>();
         albums = getAlbums();
 
@@ -155,8 +156,6 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         rvAlbums.addItemDecoration(new MarginItemDecoration(this));
         rvAlbums.hasFixedSize();
         rvAlbums.setAdapter(bookeoFolderAdapter);
-        // rvAlbums.setVisibility(View.GONE);
-
     }
 
     public ArrayList<BookeoAlbum> getAlbums() {
@@ -208,7 +207,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     }
 
     @Override
-    public void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls) {
+    public void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls, ArrayList<String> uuid, String albumUuid) {
 
     }
 
@@ -218,9 +217,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     }
 
     @Override
-    public void onBPicClicked(String albumUuid, String AlbumName) {
-
-    }
+    public void onBPicClicked(String albumUuid, String AlbumName) {}
 
     @Override
     public void onLongPress(MediaAdapterHolder view, MediaItem item, int position) {
@@ -229,7 +226,6 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         toggleActionBar(position);
         adapter.toggleIcon(view, position);
         rvAlbums.setVisibility(View.VISIBLE);
-
     }
 
     /**
@@ -240,7 +236,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         ArrayList<MediaItem> images = new ArrayList<>();
         Uri allImagesuri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         String[] projection = {MediaStore.Images.ImageColumns.DATA, MediaStore.Images.Media.DISPLAY_NAME,
-                MediaStore.Images.Media.SIZE, MediaStore.Images.Media.DATE_ADDED};
+                MediaStore.Images.Media.SIZE, MediaStore.Images.Media.DATE_TAKEN};
         Cursor cursor = MediaDisplayActivity.this.getContentResolver().query(allImagesuri, projection, null, null, null);
         try {
             cursor.moveToFirst();
@@ -310,7 +306,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         ArrayList<MediaItem> media = new ArrayList<>();
         Uri allImagesuri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         String[] projection = {MediaStore.Images.ImageColumns.DATA, MediaStore.Images.Media.DISPLAY_NAME,
-                MediaStore.Images.Media.SIZE, MediaStore.Images.Media.DATE_ADDED};
+                MediaStore.Images.Media.SIZE, MediaStore.Images.Media.DATE_TAKEN};
         Cursor cursor = MediaDisplayActivity.this.getContentResolver().query(allImagesuri, projection, MediaStore.Images.Media.DATA + " like ? ", new String[]{"%" + path + "%"}, null);
         try {
             cursor.moveToFirst();
@@ -320,7 +316,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
                 pic.setName(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)));
                 pic.setPath(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)));
                 pic.setSize(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)));
-                String date = getDate(cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)));
+                String date = getDate(cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)));
                 pic.setDate(date);
 
                 media.add(pic);
@@ -367,7 +363,6 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     /*
        toggling action bar that will change the color and option
      */
-
     private void toggleActionBar(int position) {
         if (actionMode == null) {
             actionMode = startSupportActionMode(actionCallback);
@@ -378,7 +373,6 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     /*
        toggle selection of items and show the count of selected items on the action bar
      */
-
     private void toggleSelection(int position) {
         adapter.toggleSelection(position);
         int count = adapter.selectedItemCount();
@@ -389,7 +383,6 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
             actionMode.invalidate();
         }
     }
-
 
     @Override
     protected void onResume() {
@@ -484,9 +477,6 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         }
     }
 
-
-
-
     private class ActionCallback implements ActionMode.Callback {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -531,6 +521,24 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.setStatusBarColor(activity.getResources().getColor(R.color.colorPrimary));
+    }
+
+    @Override
+    //https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // todo: goto back activity from here
+
+                Intent intent = new Intent(MediaDisplayActivity.this, FolderViewActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
 

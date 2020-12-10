@@ -55,6 +55,11 @@ public class BookeoMediaItemAdapter extends  RecyclerView.Adapter<MediaAdapterHo
             names.add(p.getName());
         }
 
+        final ArrayList<String> uuids = new ArrayList<>();
+        for (BookeoMediaItem p : arMediaList) {
+            uuids.add(p.getUuid());
+        }
+
         Glide.with(contx)
                 .load(image.getUrl())
                 .apply(new RequestOptions().centerCrop())
@@ -65,7 +70,7 @@ public class BookeoMediaItemAdapter extends  RecyclerView.Adapter<MediaAdapterHo
             @Override
             public void onClick(View v) {
                 if (mediaDisplayItemListener == null)return;
-                mediaDisplayItemListener.onBPicClicked(holder, position, names, urls);
+                mediaDisplayItemListener.onBPicClicked(holder, position, names, urls, uuids, image.getAlbumUuid());
             }
         });
     }

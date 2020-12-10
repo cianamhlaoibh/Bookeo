@@ -81,7 +81,7 @@ public class GalleryViewActivity extends AppCompatActivity {
         });
 
 
-        final ImageView _btn_action = (ImageView) findViewById(R.id.btn_action);
+        final ImageView _btn_action = (ImageView) findViewById(R.id.ivDelete);
         if(callback==1){
             _btn_action.setOnClickListener(new View.OnClickListener() {
                 @Override

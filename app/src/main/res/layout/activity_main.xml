@@ -132,6 +132,7 @@
         android:background="@color/white"
         android:clipToPadding="false"
         android:columnWidth="@dimen/folder_column_width"
+        android:paddingBottom="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2">

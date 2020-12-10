@@ -1,22 +1,31 @@
 package ie.bookeo.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -45,12 +54,12 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     Toolbar tvFolderName;
     ImageButton ibAlbum;
     BookeoMediaItemAdapter adapter;
+    TextView tvNoMedia;
 
     //DB
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    ArrayList<BookeoMediaItem> albums;
+    ArrayList<BookeoMediaItem> items;
     String name, uuid;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,14 +84,24 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         rvMediaItems.addItemDecoration(new MarginItemDecoration(this));
         rvMediaItems.hasFixedSize();
 
+        tvNoMedia = findViewById(R.id.tvNoMedia);
         //DB
-        albums = new ArrayList<>();
-        albums = getDbMedia(uuid);
+        items = new ArrayList<>();
+        items = getDbMedia(uuid);
 
-        adapter = new BookeoMediaItemAdapter(albums, BookeoMediaDisplay.this, this);
+        adapter = new BookeoMediaItemAdapter(items, BookeoMediaDisplay.this, this);
         rvMediaItems.setAdapter(adapter);
         pbLoader = findViewById(R.id.loader);
         pbLoader.setVisibility(View.GONE);
+
+       // viewVisibility();
+    }
+
+    public void viewVisibility(ArrayList<BookeoMediaItem> items) {
+        if(items.isEmpty())
+            tvNoMedia.setVisibility(View.VISIBLE);
+        else
+            tvNoMedia.setVisibility(View.GONE);
     }
 
     public ArrayList<BookeoMediaItem> getDbMedia(String albumUuid) {
@@ -111,6 +130,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
                                 Log.d("SIZE--", "onSuccess create: " + mediaItems.size());
                             }
                             }
+                        viewVisibility(mediaItems);
                         adapter.notifyDataSetChanged();
                         }
                 });
@@ -118,14 +138,50 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         return mediaItems;
     }
 
-    @Override
-    public void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> path, Context contx) {
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_album_menu, menu);
+        return true;
+    }
 
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.Delete:
+                deleteAlbum(uuid);
+                return super.onOptionsItemSelected(item);
+            case R.id.Licenses:
+                //https://developers.google.com/android/guides/opensource
+                OssLicensesMenuActivity.setActivityTitle(getString(R.string.custom_license_title));
+                startActivity(new Intent(this, OssLicensesMenuActivity.class));
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void deleteAlbum(String uuid) {
+        db.collection("albums").document(uuid).delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(getApplicationContext(), "Album " + name + " Deleted", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(BookeoMediaDisplay.this, FolderViewActivity.class);
+                        startActivity(intent);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getApplicationContext(), "Error Trying to Delete Album " + name , Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     @Override
-    public void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls) {
-        ShowGallery.bShow(this, names, urls, position);
+    public void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> path, Context contx) {}
+
+    @Override
+    public void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls, ArrayList<String> uuids, String albumUuid) {
+        ShowGallery.bShow(this, names, urls, position, uuids, albumUuid);
     }
 
     @Override

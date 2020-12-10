@@ -27,7 +27,7 @@ public interface MediaDisplayItemClickListener {
      * @param position The position in the grid of the picture that was clicked
      */
     void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> path, Context contx);
-    void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls);
+    void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls, ArrayList<String> uuid, String albumUuid);
     void onPicClicked(String pictureFolderPath, String folderName);
     void onBPicClicked(String albumUuid, String AlbumName);
     void onLongPress(MediaAdapterHolder holder, MediaItem item, int position);
