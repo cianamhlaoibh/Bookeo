@@ -2,10 +2,7 @@ package ie.bookeo.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,16 +32,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ie.bookeo.R;
-import ie.bookeo.adapter.BookeoFolderAdapter;
 import ie.bookeo.adapter.BookeoMediaItemAdapter;
-import ie.bookeo.adapter.MediaAdapter;
 import ie.bookeo.adapter.MediaAdapterHolder;
-import ie.bookeo.model.BookeoAlbum;
 import ie.bookeo.model.BookeoMediaItem;
 import ie.bookeo.model.gallery_model.MediaItem;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 import ie.bookeo.utils.ShowGallery;
+
+/**
+ * Reference
+ *  - URL - https://github.com/CodeBoy722/Android-Simple-Image-Gallery
+ *  - Creator - CodeBoy 722
+ *  - Modified by Cian O Sullivan
+ *
+ *  - URL - https://medium.com/better-programming/gmail-like-list-67bc51adc68a
+ *  - Github - https://github.com/Mustufa786/MultiSelectionList
+ *  - Creator - Mustufa Ansari
+ *  - Modified by Cian O Sullivan
+ *
+ *  - To display license activity
+ *  - URL - https://developers.google.com/android/guides/opensource
+ *
+ *   - To program toolbar back button
+ *   -URL https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
+ *
+ *   - To retireve items from firestore
+ *   - URL - https://www.youtube.com/watch?v=Bh0h_ZhX-Qg
+ *
+ * This Activity loads all images to images associated with a particular folder into a recyclerview with grid manager from cloud storage
+ */
 
 public class BookeoMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener {
 
@@ -112,6 +129,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
             tvNoMedia.setVisibility(View.GONE);
     }
 
+    //https://www.youtube.com/watch?v=Bh0h_ZhX-Qg
     public ArrayList<BookeoMediaItem> getDbMedia(String albumUuid) {
         final ArrayList<BookeoMediaItem> mediaItems = new ArrayList<>();
 
@@ -156,11 +174,18 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         switch (item.getItemId()) {
             case R.id.Delete:
                 deleteAlbum(uuid);
-                return super.onOptionsItemSelected(item);
+                return true;
             case R.id.Licenses:
                 //https://developers.google.com/android/guides/opensource
                 OssLicensesMenuActivity.setActivityTitle(getString(R.string.custom_license_title));
                 startActivity(new Intent(this, OssLicensesMenuActivity.class));
+            //https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
+            case android.R.id.home:
+                Intent intent = new Intent(BookeoMediaDisplay.this, FolderViewActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

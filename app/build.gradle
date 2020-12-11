@@ -59,7 +59,7 @@ dependencies {
 
     //https://developer.android.com/jetpack/androidx/releases/recyclerview
     implementation "androidx.recyclerview:recyclerview:1.1.0"
-
+    //URL - https://medium.com/better-programming/gmail-like-list-67bc51adc68a
     implementation 'com.balysv:material-ripple:1.0.2'
     //https://github.com/Ereza/CustomActivityOnCrash
     implementation 'cat.ereza:customactivityoncrash:2.3.0'

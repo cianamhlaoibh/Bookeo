@@ -35,8 +35,6 @@ import java.util.ArrayList;
 import cn.jzvd.JZVideoPlayerStandard;
 import ie.bookeo.R;
 import ie.bookeo.adapter.BookeoMainFolderAdapter;
-import ie.bookeo.model.BookeoMediaItem;
-import ie.bookeo.utils.ShowGallery;
 
 /**
  * Reference

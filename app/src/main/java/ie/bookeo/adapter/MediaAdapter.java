@@ -1,6 +1,7 @@
 package ie.bookeo.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import ie.bookeo.utils.MediaDisplayItemClickListener;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.api.LogDescriptor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,7 @@ import static androidx.core.view.ViewCompat.setTransitionName;
  *  - Modified by Cian O Sullivan
  *
  * This is the adapter class for  the MediaDisplayActivty Recycler View that populates a RecyclerView with images.
+ * Also allows some of the functionality so user can select and upload media items.
  */
 
 public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
@@ -176,10 +179,12 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
                 }else {
                     arSelectedItems.remove(selectedIndex);
                     selectedItems.delete(position);
+                    Log.d("ITEM DESELECTED", "Removed from arraylist");
                 }
         } else {
             selectedItems.put(position, true);
             arSelectedItems.add(arMediaList.get(position));
+            Log.d("ITEM SELECTED", "Added to arraylist");
         }
         notifyItemChanged(position);
     }

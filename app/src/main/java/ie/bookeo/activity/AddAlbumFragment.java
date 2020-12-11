@@ -20,7 +20,6 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 
@@ -29,12 +28,25 @@ import ie.bookeo.model.BookeoAlbum;
 import ie.bookeo.utils.Config;
 import ie.bookeo.utils.MyCreateListener;
 
+
+/**
+ * Reference
+ *  - Project Name - IS4447 SQLite 2 Table App
+ *  - Creator - Michael Gleeson
+ *  - Modified by Cian O Sullivan
+ *
+ *  - To add items from firestore
+ *  - URL - https://www.youtube.com/watch?v=Bh0h_ZhX-Qg
+ *  - Creator - Coding in Flow
+ *
+ */
+
 public class AddAlbumFragment extends DialogFragment {
 
     private static MyCreateListener mylistener;
     private EditText etAlbumName;
     private Button btnAdd, btnCancel;
-    String name, date;
+    String name;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference albumsRef = db.collection("albums");
@@ -93,6 +105,7 @@ public class AddAlbumFragment extends DialogFragment {
         return view;
     }
 
+    //https://www.youtube.com/watch?v=Bh0h_ZhX-Qg
     public void addAlbum(View view) {
         name = etAlbumName.getText().toString();
         Date today = new Date();

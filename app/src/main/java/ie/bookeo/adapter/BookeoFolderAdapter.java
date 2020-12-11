@@ -15,6 +15,16 @@ import ie.bookeo.R;
 import ie.bookeo.model.BookeoAlbum;
 import ie.bookeo.utils.AlbumUploadListener;
 
+/**
+ * Reference
+ *  - URL - https://github.com/CodeBoy722/Android-Simple-Image-Gallery
+ *  - Creator - CodeBoy 722
+ *  - Modified by Cian O Sullivan
+ *
+ * This is the adapter class for the FolderViewActivity Bookeo Album Recycler View that populates a RecyclerView with folders from firestore.
+ * This class also contain the Folder View Holder which represent a folder on the screen
+ */
+
 public class BookeoFolderAdapter extends RecyclerView.Adapter<BookeoFolderHolder> {
 
     private List<BookeoAlbum> arAlbums;

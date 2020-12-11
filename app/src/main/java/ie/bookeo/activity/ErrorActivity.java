@@ -11,7 +11,13 @@ import cat.ereza.customactivityoncrash.CustomActivityOnCrash;
 import cat.ereza.customactivityoncrash.config.CaocConfig;
 import ie.bookeo.R;
 
-//https://github.com/Ereza/CustomActivityOnCrash/blob/master/sample/src/main/java/cat/ereza/customactivityoncrash/sample/activity/CustomErrorActivity.java
+/**
+ * Reference
+ *  - URL - //https://github.com/Ereza/CustomActivityOnCrash/blob/master/sample/src/main/java/cat/ereza/customactivityoncrash/sample/activity/CustomErrorActivity.java | https://github.com/Ereza/CustomActivityOnCrash
+ *  - Creator - Eduard Ereza Martínez
+ *  - Modified by Cian O Sullivan
+ *
+ */
 
 public class ErrorActivity extends AppCompatActivity {
 
@@ -19,9 +25,6 @@ public class ErrorActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.custom_error);
-
-       // TextView errorDetailsText = findViewById(R.id.error_details);
-       // errorDetailsText.setText(CustomActivityOnCrash.getStackTraceFromIntent(getIntent()));
 
         Button restartButton = findViewById(R.id.restartApp);
 

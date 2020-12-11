@@ -43,8 +43,6 @@ import ie.bookeo.model.gallery_model.MediaItem;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 
-import cat.ereza.customactivityoncrash.config.CaocConfig;
-
 import java.util.ArrayList;
 import java.util.List;
 

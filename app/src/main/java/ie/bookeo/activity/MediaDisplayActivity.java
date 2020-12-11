@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -25,10 +24,10 @@ import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -38,7 +37,6 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import ie.bookeo.adapter.BookeoFolderAdapter;
-import ie.bookeo.adapter.BookeoMediaItemAdapter;
 import ie.bookeo.model.BookeoAlbum;
 import ie.bookeo.model.BookeoMediaItem;
 import ie.bookeo.utils.AlbumUploadListener;
@@ -57,17 +55,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.google.android.gms.common.util.CollectionUtils.mapOf;
-
 /**
- * Reference
+ * References
  *  - URL - https://github.com/CodeBoy722/Android-Simple-Image-Gallery
  *  - Creator - CodeBoy 722
  *  - Modified by Cian O Sullivan
  *
  *  - URL - https://medium.com/better-programming/gmail-like-list-67bc51adc68a
+ *  - Github - https://github.com/Mustufa786/MultiSelectionList
  *  - Creator - Mustufa Ansari
  *  - Modified by Cian O Sullivan
+ *
+ *  - To program toolbar back button
+ *  - URL https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
+ *
+ *  - To retireve items from firestore
+ *  - URL - https://www.youtube.com/watch?v=Bh0h_ZhX-Qg
+ *  - Creator - Coding in Flow
+ *
+ *  - To add media to firebase storage
+ *  - URL - https://www.youtube.com/watch?v=lPfQN-Sfnjw&t=1013s
+ *  - Creator - Coding in Flow
+ *
+ *  - To update document in firestore
+ *  - URL - https://www.youtube.com/watch?v=TBr_5QH1EvQ
+ *  - Creator - Coding in Flow
  *
  * This Activity loads all images to images associated with a particular folder into a recyclerview with grid manager
  */
@@ -418,6 +430,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
             upload.setName(uploadItem.getName());
             upload.setDate(uploadItem.getDate());
             upload.setAlbumUuid(albumUuid);
+            //https://www.youtube.com/watch?v=Bh0h_ZhX-Qghttps://www.youtube.com/watch?v=Bh0h_ZhX-Qg - add and retireve documents
             db.collection("albums").document(albumUuid).collection("media_items").document(uuid)
                     .set(upload)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -432,7 +445,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
                             Log.w("ERROR", "Error adding document", e);
                         }
                     });
-
+            //https://www.youtube.com/watch?v=lPfQN-Sfnjw&t=1013s - Firebase Storage - Upload Images
             final StorageReference fileRef = storageReference.child(uuid);
             Uri uri = Uri.fromFile(new File(uploadItem.getPath()));
             fileRef.putFile(uri)
@@ -446,6 +459,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
                                       public void onSuccess(Uri uri) {
                                           String url = uri.toString();
                                           //upload.setUrl(url);
+                                          //https://www.youtube.com/watch?v=TBr_5QH1EvQ - update firstore
                                           db.collection("albums").document(albumUuid).collection("media_items").document(uuid).update("url", url);
                                           db.collection("albums").document(albumUuid).update("firstItem", url);
                                           Log.d("URL", "onSuccess: " + uri.toString());
@@ -528,7 +542,6 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
                 startActivity(intent);
                 finish();
                 return true;
-
             default:
                 return super.onOptionsItemSelected(item);
         }
