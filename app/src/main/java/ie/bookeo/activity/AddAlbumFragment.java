@@ -55,6 +55,7 @@ public class AddAlbumFragment extends DialogFragment {
 
     }
 
+
     public static AddAlbumFragment newInstance(String title, MyCreateListener listener){
         mylistener = listener;
         AddAlbumFragment albumCreateDialogFragment = new AddAlbumFragment();

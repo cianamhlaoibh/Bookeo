@@ -18,7 +18,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -26,8 +28,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -35,6 +42,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import ie.bookeo.R;
 import ie.bookeo.adapter.BookeoMainFolderAdapter;
+import ie.bookeo.adapter.LoginAdapter;
 import ie.bookeo.adapter.MediaAdapterHolder;
 import ie.bookeo.adapter.MediaFolderAdapter;
 import ie.bookeo.model.BookeoAlbum;
@@ -52,6 +60,8 @@ import java.util.List;
  *  - URL - https://github.com/CodeBoy722/Android-Simple-Image-Gallery
  *  - Creator - CodeBoy 722
  *  - Modified by Cian O Sullivan
+ *
+ *  -URL - https://www.youtube.com/watch?v=TwHmrZxiPA8
  *
  * This Activity loads all folders containing images int a RecyclerView
  */
@@ -292,6 +302,34 @@ public class FolderViewActivity extends AppCompatActivity implements MediaDispla
                 //https://developers.google.com/android/guides/opensource
                 OssLicensesMenuActivity.setActivityTitle(getString(R.string.custom_license_title));
                 startActivity(new Intent(this, OssLicensesMenuActivity.class));
+            case R.id.Logout:
+                //log out for user who signed in with google
+                GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
+                if(signInAccount != null) {
+                    GoogleSignIn.getClient(this, new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()).signOut()
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                                startActivity(intent);
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getApplicationContext(), "Logout Failure", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    //also sign out of firebase auth
+                    FirebaseAuth.getInstance().signOut();
+                }else{
+                    //logout for email/password
+                    //https://www.youtube.com/watch?v=TwHmrZxiPA8
+                    FirebaseAuth.getInstance().signOut();
+                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
             default:
                 return super.onOptionsItemSelected(item);
         }
