@@ -1,30 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".activity.MainActivity">
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/toolbarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimaryDark"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
-            tools:title="Album Name" />
-    </com.google.android.material.appbar.AppBarLayout>
+    xmlns:tools="http://schemas.android.com/tools">
 
     <ie.bookeo.utils.CustomRecyclerView
         android:id="@+id/rvFolders"
@@ -32,10 +11,7 @@
         android:layout_height="0dp"
         android:background="@color/white"
         android:clipToPadding="false"
-        android:columnWidth="@dimen/picture_column_width"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbarLayout" />
+        android:columnWidth="@dimen/picture_column_width"/>
 
     <ie.bookeo.utils.CustomRecyclerView
         android:id="@+id/rvBookeoAlbumIcons"
@@ -48,6 +24,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:visibility="visible" />
 
     <ProgressBar
@@ -60,6 +37,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
+
     <TextView
         android:id="@+id/tvUploading"
         android:layout_width="wrap_content"

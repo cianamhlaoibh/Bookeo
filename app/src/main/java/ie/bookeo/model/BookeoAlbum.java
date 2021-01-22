@@ -9,15 +9,21 @@ public class BookeoAlbum {
     private String createDate;
     private int count = 0;
     private String firstItem;
+    private String fk_user;
 
     public BookeoAlbum() {
 
     }
-
     public BookeoAlbum(String uuid, String name, String date) {
         this.uuid = uuid;
         this.name = name;
         this.createDate = date;
+    }
+    public BookeoAlbum(String uuid, String name, String date, String fk_user) {
+        this.uuid = uuid;
+        this.name = name;
+        this.createDate = date;
+        this.fk_user = fk_user;
     }
 
     public String getUuid() {
@@ -58,5 +64,13 @@ public class BookeoAlbum {
 
     public void setFirstItem(String firstItem) {
         this.firstItem = firstItem;
+    }
+
+    public String getFk_user() {
+        return fk_user;
+    }
+
+    public void setFk_user(String fk_user) {
+        this.fk_user = fk_user;
     }
 }

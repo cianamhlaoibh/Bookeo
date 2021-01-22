@@ -14,8 +14,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -114,8 +117,10 @@ public class AddAlbumFragment extends DialogFragment {
         String date = DATE_FORMAT.format(today);
         //Read more: https://www.java67.com/2013/01/how-to-format-date-in-java-simpledateformat-example.html#ixzz6fppjpeYL
         final String uuid = UUID.randomUUID().toString();
-
-        final BookeoAlbum bookeoAlbum = new BookeoAlbum(uuid, name, date);
+        //assign to user
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        String userId = firebaseAuth.getCurrentUser().getUid();
+        final BookeoAlbum bookeoAlbum = new BookeoAlbum(uuid, name, date, userId);
 
         albumsRef.document(uuid).set(bookeoAlbum)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -132,7 +137,6 @@ public class AddAlbumFragment extends DialogFragment {
                         Log.d("ERROR", e.toString());
                     }
                 });
-
     }
     @Override
     public void onStart() {

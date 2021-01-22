@@ -181,7 +181,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
                 startActivity(new Intent(this, OssLicensesMenuActivity.class));
             //https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
             case android.R.id.home:
-                Intent intent = new Intent(BookeoMediaDisplay.this, FolderViewActivity.class);
+                Intent intent = new Intent(BookeoMediaDisplay.this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();
@@ -197,7 +197,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
                     @Override
                     public void onSuccess(Void aVoid) {
                         Toast.makeText(getApplicationContext(), "Album " + name + " Deleted", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(BookeoMediaDisplay.this, FolderViewActivity.class);
+                        Intent intent = new Intent(BookeoMediaDisplay.this, MainActivity.class);
                         startActivity(intent);
                     }
                 })

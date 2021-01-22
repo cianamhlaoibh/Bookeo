@@ -24,7 +24,7 @@ import java.util.ArrayList;
  *  - Creator - CodeBoy 722
  *  - Modified by Cian O Sullivan
  *
- * This is the adapter class for the FolderViewActivity Recycler View that populates a RecyclerView with folder from device.
+ * This is the adapter class for the MainActivity Recycler View that populates a RecyclerView with folder from device.
  * This class also contain the Folder View Holder which represent a folder on the screen
  */
 

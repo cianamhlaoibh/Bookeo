@@ -9,20 +9,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.UUID;
 
 import ie.bookeo.R;
-import ie.bookeo.activity.FolderViewActivity;
+import ie.bookeo.activity.MainActivity;
+import ie.bookeo.model.User;
 
 /*
  *
@@ -36,6 +41,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener{
     String name, email, password, confirmPass;
     float a = 0;
     FirebaseAuth firebaseAuth;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -111,8 +117,9 @@ public class RegisterFragment extends Fragment implements View.OnClickListener{
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
+                            addUserToDb(email, name);
                             Toast.makeText(getContext(), "User Created", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(getContext(), FolderViewActivity.class);
+                            Intent intent = new Intent(getContext(), MainActivity.class);
                             startActivity(intent);
                         }else{
                             Toast.makeText(getContext(), "Error Occurred: " + task.getException(), Toast.LENGTH_SHORT).show();
@@ -121,5 +128,25 @@ public class RegisterFragment extends Fragment implements View.OnClickListener{
                     }
                 });
         }
+    }
+    private void addUserToDb(String email, String name) {
+        //Read more: https://www.java67.com/2013/01/how-to-format-date-in-java-simpledateformat-example.html#ixzz6fppjpeYL
+        final String userId = UUID.randomUUID().toString();
+        final User user = new User(userId, email, name);
+
+        db.collection("user").document(userId).set(user)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(getContext(), "User Added", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getContext(), "Error adding User!", Toast.LENGTH_SHORT).show();
+                        Log.d("ERROR", e.toString());
+                    }
+                });
     }
 }

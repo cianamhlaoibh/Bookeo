@@ -3,10 +3,16 @@ package ie.bookeo.activity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -17,6 +23,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -24,9 +31,17 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.UUID;
 
 import ie.bookeo.R;
 import ie.bookeo.adapter.LoginAdapter;
+import ie.bookeo.model.BookeoAlbum;
+import ie.bookeo.model.User;
+
 /*
 *
 *https://www.youtube.com/watch?v=ayKMfVt2Sg4
@@ -35,6 +50,7 @@ import ie.bookeo.adapter.LoginAdapter;
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final int GOOGLE_SIGNIN_CODE = 1000;
+
     TabLayout tabLayout;
     ViewPager viewPager;
     FloatingActionButton fabGoogle, fabFb, fabMicrosoft;
@@ -42,6 +58,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     FirebaseAuth firebaseAuth;
     GoogleSignInOptions googleSignInOptions;
     GoogleSignInClient googleSignInClient;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +106,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         firebaseAuth = FirebaseAuth.getInstance();
         GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
         if (signInAccount != null || firebaseAuth.getCurrentUser() != null) {
-            Intent intent = new Intent(getApplicationContext(), FolderViewActivity.class);
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
             finish();
         }
@@ -143,7 +160,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         if (requestCode == GOOGLE_SIGNIN_CODE) {
             Task<GoogleSignInAccount> signInAccountTask = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
-                GoogleSignInAccount signInAccount = signInAccountTask.getResult(ApiException.class);
+                final GoogleSignInAccount signInAccount = signInAccountTask.getResult(ApiException.class);
                 AuthCredential authCredential = GoogleAuthProvider.getCredential(signInAccount.getIdToken(), null);
                 firebaseAuth = FirebaseAuth.getInstance();
                 firebaseAuth.signInWithCredential(authCredential)
@@ -151,7 +168,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 //Add to firebase
-                                Intent intent = new Intent(getApplicationContext(), FolderViewActivity.class);
+                                addUserToDb(signInAccount);
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                 startActivity(intent);
                                 finish();
                                 Toast.makeText(getApplicationContext(), "Signed in with Google", Toast.LENGTH_SHORT).show();
@@ -167,5 +185,27 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 e.printStackTrace();
             }
         }
+    }
+
+    private void addUserToDb(GoogleSignInAccount signInAccount) {
+        String name = signInAccount.getDisplayName();
+        String email = signInAccount.getEmail();
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        final User user = new User(userId, email, name);
+
+        db.collection("user").document(userId).set(user)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(getApplicationContext(), "User Added", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getApplicationContext(), "Error adding User!", Toast.LENGTH_SHORT).show();
+                        Log.d("ERROR", e.toString());
+                    }
+                });
     }
 }
