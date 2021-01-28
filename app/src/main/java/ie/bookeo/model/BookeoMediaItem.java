@@ -12,10 +12,18 @@ public class BookeoMediaItem  {
     private String date;
     private String albumUuid;
 
-    public BookeoMediaItem() {
+    public byte[] getDownload() {
+        return download;
     }
 
+    public void setDownload(byte[] download) {
+        this.download = download;
+    }
 
+    private byte[] download;
+
+    public BookeoMediaItem() {
+    }
 
     public BookeoMediaItem(String uuid, String url, String name, String date, String albumUuid) {
         this.uuid = uuid;

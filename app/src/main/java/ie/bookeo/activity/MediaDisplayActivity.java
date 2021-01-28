@@ -1,6 +1,7 @@
 package ie.bookeo.activity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -236,6 +237,11 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         rvAlbums.setVisibility(View.VISIBLE);
     }
 
+    @Override
+    public void onLongPress(MediaAdapterHolder holder, BookeoMediaItem item, int position) {
+
+    }
+
     /**
      * This Method gets all the images in the folder paths passed as a String to the method and returns
      * and ArrayList of pictureFacer a custom object that holds data of a given image
@@ -414,6 +420,10 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         StorageReference storageReference = FirebaseStorage.getInstance().getReference("media_items");
         List<MediaItem> uploadItems;
         uploadItems = adapter.getUploadItems();
+        ProgressDialog progressDialog = new ProgressDialog(getApplicationContext());
+        progressDialog.setTitle("Uploading to Bookeo");
+        progressDialog.setMessage("Please wait...");
+        progressDialog.show();
 
         for (final MediaItem uploadItem : uploadItems) {
             final String uuid = UUID.randomUUID().toString();
@@ -465,15 +475,9 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
                         public void onFailure(@NonNull Exception e) {
                             Toast.makeText(MediaDisplayActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
-                    })
-                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
-                            tvUploading.setVisibility(View.VISIBLE);
-                            pbLoader.setVisibility(View.VISIBLE);
-                        }
                     });
         }
+        progressDialog.dismiss();
         Toast.makeText(MediaDisplayActivity.this, "Upload Successful", Toast.LENGTH_SHORT).show();
         MediaDisplayActivity.this.recreate();
     }

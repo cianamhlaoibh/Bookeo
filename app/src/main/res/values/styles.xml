@@ -20,4 +20,8 @@
         <!--https://stackoverflow.com/questions/33437398/how-to-change-textcolor-in-alertdialog-->
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+<!--    https://stackoverflow.com/questions/31471177/text-size-of-android-design-tablayout-tabs-->
+    <style name="CustomTabText" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">10sp</item>
+    </style>
 </resources>

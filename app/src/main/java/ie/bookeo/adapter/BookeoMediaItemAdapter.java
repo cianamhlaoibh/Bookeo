@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
@@ -65,12 +66,11 @@ public class BookeoMediaItemAdapter extends  RecyclerView.Adapter<MediaAdapterHo
                 .apply(new RequestOptions().centerCrop())
                 .into(holder.picture);
 
-
         holder.picture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mediaDisplayItemListener == null)return;
-                mediaDisplayItemListener.onBPicClicked(holder, position, names, urls, uuids, image.getAlbumUuid());
+               // mediaDisplayItemListener.onBPicClicked(holder, position, names, urls, uuids, image.getAlbumUuid());
             }
         });
     }

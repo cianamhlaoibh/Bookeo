@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import ie.bookeo.R;
 import ie.bookeo.adapter.MediaAdapterHolder;
 import ie.bookeo.adapter.MediaFolderAdapter;
+import ie.bookeo.model.BookeoMediaItem;
 import ie.bookeo.model.gallery_model.AlbumFolder;
 import ie.bookeo.model.gallery_model.MediaItem;
 import ie.bookeo.utils.MarginItemDecoration;
@@ -191,6 +192,12 @@ public class FolderViewFragment extends Fragment implements MediaDisplayItemClic
     public void onLongPress(MediaAdapterHolder view, MediaItem item, int position) {
 
     }
+
+    @Override
+    public void onLongPress(MediaAdapterHolder holder, BookeoMediaItem item, int position) {
+
+    }
+
     /**
      * Default status bar height 24dp,with code API level 24
      */

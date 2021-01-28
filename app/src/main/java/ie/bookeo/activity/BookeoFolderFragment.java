@@ -33,6 +33,7 @@ import ie.bookeo.R;
 import ie.bookeo.adapter.BookeoMainFolderAdapter;
 import ie.bookeo.adapter.MediaAdapterHolder;
 import ie.bookeo.model.BookeoAlbum;
+import ie.bookeo.model.BookeoMediaItem;
 import ie.bookeo.model.gallery_model.MediaItem;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
@@ -133,6 +134,12 @@ public class BookeoFolderFragment extends Fragment implements MediaDisplayItemCl
     public void onLongPress(MediaAdapterHolder view, MediaItem item, int position) {
 
     }
+
+    @Override
+    public void onLongPress(MediaAdapterHolder holder, BookeoMediaItem item, int position) {
+
+    }
+
     /**
      * Default status bar height 24dp,with code API level 24
      */

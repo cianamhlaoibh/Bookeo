@@ -84,12 +84,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         viewPager = findViewById(R.id.view_pager);
-        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        viewPager.setAdapter(viewPagerAdapter);
+        //viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        //viewPager.setAdapter(viewPagerAdapter);
         tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
         tabLayout.addOnTabSelectedListener(onTabSelectedListener);
         viewPager.addOnPageChangeListener(onPageChangeListener);
+        setTabs();
+    }
+
+    public void setTabs() {
+        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        viewPagerAdapter.addFragment(0, new FolderViewFragment(), "DEVICE");
+        viewPagerAdapter.addFragment(1, new BookeoFolderFragment(), "BOOKEO");
+        viewPagerAdapter.addFragment(2, new DeviceImagesFragement(), "IMAGES");
+        viewPagerAdapter.addFragment(3, new GoogleDriveFragment(), "DRIVE");
+        viewPager.setAdapter(viewPagerAdapter);
+        tabLayout.getTabAt(0).setIcon(R.drawable.ic_camera);
+        tabLayout.getTabAt(1).setIcon(R.drawable.logo_white);
+        tabLayout.getTabAt(2).setIcon(R.drawable.ic_photo_library);
+        tabLayout.getTabAt(3).setIcon(R.drawable.ic_google_drive);
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {

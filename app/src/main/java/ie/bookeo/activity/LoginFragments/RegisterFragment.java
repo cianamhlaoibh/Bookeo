@@ -131,7 +131,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener{
     }
     private void addUserToDb(String email, String name) {
         //Read more: https://www.java67.com/2013/01/how-to-format-date-in-java-simpledateformat-example.html#ixzz6fppjpeYL
-        final String userId = UUID.randomUUID().toString();
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         final User user = new User(userId, email, name);
 
         db.collection("user").document(userId).set(user)

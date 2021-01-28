@@ -7,6 +7,16 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
+
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,64 +26,84 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.ActionMode;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.tabs.TabLayout;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.FileList;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import ie.bookeo.R;
 import ie.bookeo.adapter.BookeoFolderAdapter;
+import ie.bookeo.adapter.BookeoMediaItemAdapter;
+import ie.bookeo.adapter.GoogleDriveMediaItemAdapter;
 import ie.bookeo.adapter.MediaAdapter;
 import ie.bookeo.adapter.MediaAdapterHolder;
+import ie.bookeo.adapter.ViewPagerAdapter;
+import ie.bookeo.dao.DriveServiceHelper;
 import ie.bookeo.model.BookeoAlbum;
 import ie.bookeo.model.BookeoMediaItem;
 import ie.bookeo.model.gallery_model.MediaItem;
 import ie.bookeo.utils.AlbumUploadListener;
 import ie.bookeo.utils.Config;
+import ie.bookeo.utils.GoogleDriveDownload;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 import ie.bookeo.utils.MyCreateListener;
 import ie.bookeo.utils.ShowGallery;
 
-public class DeviceImagesFragement extends Fragment implements MediaDisplayItemClickListener,  AlbumUploadListener {
-    RecyclerView rvImage;
-    ArrayList<MediaItem> arAllMedia;
-    ProgressBar pbLoader;
-    String folderPath;
-    Toolbar tvFolderName;
-    MediaAdapter adapter;
+import static android.app.Activity.RESULT_OK;
+
+/**
+ *
+ */
+public class GoogleDriveFragment extends Fragment implements MediaDisplayItemClickListener, AlbumUploadListener {
+
+    DriveServiceHelper driveServiceHelper;
+    Button btnDriveSignIn;
+    Button btnDriveUpload;
+    Button btnListFiles;
+    ArrayList<BookeoMediaItem> driveMedia = new ArrayList<>();
+
+    RecyclerView rvMediaItems;
+    GoogleDriveMediaItemAdapter adapter;
+    GoogleDriveDownload googleDriveDownloadInterface;
+    ArrayList<String> ids;
+
+    //select functionality
     Toolbar toolbar;
     TabLayout tabLayout;
-    //AppBarLayout appBarLayout;
-    TextView tvUploading;
-
     ActionMode actionMode;
     ActionCallback actionCallback;
 
@@ -82,29 +112,61 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
     private BookeoFolderAdapter bookeoFolderAdapter;
     private RecyclerView rvAlbums;
     private List<BookeoAlbum> albums;
-    @Nullable
+    TextView tvUploading;
+    ProgressBar pbLoader;
+
+    public GoogleDriveFragment() {
+        // Required empty public constructor
+    }
+
+        @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
+
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_images, container, false);
-        arAllMedia = new ArrayList<>();
-        rvImage = root.findViewById(R.id.rvFolders);
-        rvImage.addItemDecoration(new MarginItemDecoration(getContext()));
-        rvImage.hasFixedSize();
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_google_drive, container, false);
+        btnDriveSignIn = root.findViewById(R.id.btnDriveSignIn);
+        btnDriveSignIn.setOnClickListener(new View.OnClickListener() {
+                                              @Override
+                                              public void onClick(View v) {
+                                                  requestSignIn();
+                                              }
+                                          });
+        btnDriveUpload = root.findViewById(R.id.btnDriveUpload);
+        btnDriveUpload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                uploadFile(v);
+            }
+        });
+        btnListFiles = root.findViewById(R.id.btnListFiles);
+        btnListFiles.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listFiles();
+            }
+        });
+        rvMediaItems = root.findViewById(R.id.rvMediaItems);
+        rvMediaItems.addItemDecoration(new MarginItemDecoration(getContext()));
+        rvMediaItems.hasFixedSize();
+        if(driveServiceHelper == null){
+            btnDriveSignIn.setVisibility(View.VISIBLE);
+        }else{
+            btnDriveSignIn.setVisibility(View.GONE);
+        }
+
+        //
+        toolbar = getActivity().findViewById(R.id.toolbar);
+        tabLayout = getActivity().findViewById(R.id.tabs);
         pbLoader = root.findViewById(R.id.loader);
         tvUploading = root.findViewById(R.id.tvUploading);
 
-        //appBarLayout = getActivity().findViewById(R.id.toolbarLayout);
-        toolbar = getActivity().findViewById(R.id.toolbar);
-        tabLayout = getActivity().findViewById(R.id.tabs);
-
         actionCallback = new ActionCallback();
-
-
-            pbLoader.setVisibility(View.VISIBLE);
-            arAllMedia = getAllImages();
-            adapter = new MediaAdapter(arAllMedia, getContext(), this);
-            rvImage.setAdapter(adapter);
-            pbLoader.setVisibility(View.GONE);
 
         //DB - albums for user to upload to when long press
         albums = new ArrayList<>();
@@ -117,6 +179,128 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
         rvAlbums.setAdapter(bookeoFolderAdapter);
         return root;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        adapter = new GoogleDriveMediaItemAdapter(driveMedia, getContext(), this);
+        rvMediaItems.setAdapter(adapter);
+    }
+
+    public void listFiles(){
+        ProgressDialog progressDialog = new ProgressDialog(getContext());
+        progressDialog.setTitle("Retrieving Images From Google Drive");
+        progressDialog.setMessage("Please wait...");
+        progressDialog.show();
+        driveServiceHelper.getListImages()
+            .addOnSuccessListener(new OnSuccessListener<ArrayList<BookeoMediaItem>>() {
+                @Override
+                public void onSuccess(ArrayList<BookeoMediaItem> bookeoMediaItems) {
+                    progressDialog.dismiss();
+                    driveMedia.addAll(bookeoMediaItems) ;
+                    adapter.notifyDataSetChanged();
+                }
+
+                //@Override
+              //  public void onSuccess(byte list) {
+                  //  progressDialog.dismiss();
+                   // driveMedia = list;
+                   // Log.d("SIZE", "onSuccess: " + list.size());
+               // }
+            })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    progressDialog.dismiss();
+                    Toast.makeText(getContext(), "Check your google drive api key", Toast.LENGTH_SHORT).show();
+                }
+            });
+        btnDriveSignIn.setVisibility(View.GONE);
+    }
+
+    public void uploadFile(View view) {
+        ProgressDialog progressDialog = new ProgressDialog(getContext());
+        progressDialog.setTitle("Uploading to Google Drive");
+        progressDialog.setMessage("Please wait...");
+        progressDialog.show();
+
+        String filePath = "/storage/emulated/0/BIS4_S2.pdf";
+        driveServiceHelper.createPDFFile(filePath)
+            .addOnSuccessListener(new OnSuccessListener<String>() {
+                @Override
+                public void onSuccess(String s) {
+                    progressDialog.dismiss();
+                    Toast.makeText(getContext(), "Uplaod Successfully", Toast.LENGTH_SHORT).show();
+                }
+            })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    progressDialog.dismiss();
+                    Toast.makeText(getContext(), "Check your google drive api key", Toast.LENGTH_SHORT).show();
+                }
+            });
+    }
+
+    public void requestSignIn() {
+        GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestScopes(new Scope(DriveScopes.DRIVE))
+                .build();
+        GoogleSignInClient client = GoogleSignIn.getClient(getContext(), signInOptions);
+        startActivityForResult(client.getSignInIntent(), 400);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 400:
+                    handleSignInIntent(data);
+                break;
+        }
+    }
+
+    private void handleSignInIntent(Intent data) {
+        GoogleSignIn.getSignedInAccountFromIntent(data)
+                .addOnSuccessListener(new OnSuccessListener<GoogleSignInAccount>() {
+                    @Override
+                    public void onSuccess(GoogleSignInAccount googleSignInAccount) {
+                        GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(getContext(), Collections.singleton(DriveScopes.DRIVE_FILE));
+                        credential.setSelectedAccount(googleSignInAccount.getAccount());
+                        Drive googleDriveService = new Drive.Builder(
+                                AndroidHttp.newCompatibleTransport(),
+                                new GsonFactory(),
+                                credential)
+                                .setApplicationName("My Drive Tutorial")
+                                .build();
+                        btnDriveSignIn.setVisibility(View.INVISIBLE);
+                        driveServiceHelper = new DriveServiceHelper(googleDriveService);
+                        //driveServiceHelper.getDriveIds()
+                                //.addOnSuccessListener(new OnSuccessListener<ArrayList<String>>() {
+                                  //  @Override
+                                 //   public void onSuccess(ArrayList<String> strings) {
+                                 //       ids = strings;
+                                //    }
+                               // });
+                        //googleDriveDownloadInterface.getDriveMediaItem(driveServiceHelper, ids);
+                        ViewPager viewPager = getActivity().findViewById(R.id.view_pager);
+                        ViewPagerAdapter viewPagerAdapter = (ViewPagerAdapter) viewPager.getAdapter();
+                        //viewPagerAdapter.dropFragment(3);
+                        //viewPagerAdapter.addFragment(3,new BookeoFolderFragment(), "TEST");
+                        //viewPager.notify();
+                        adapter.setDriveServiceHelper(driveServiceHelper);
+                        listFiles();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+    }
+
     public ArrayList<BookeoAlbum> getAlbums() {
         final ArrayList<BookeoAlbum> dbAlbums = new ArrayList<>();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
@@ -181,16 +365,16 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
     @Override
     public void onLongPress(MediaAdapterHolder view, MediaItem item, int position) {
         //Toast.makeText(this, "long click " + position, Toast.LENGTH_SHORT).show();
-        toolbar.setVisibility(View.GONE);
-        tabLayout.setVisibility(View.GONE);
-        toggleActionBar(position);
-        adapter.toggleIcon(view, position);
-        rvAlbums.setVisibility(View.VISIBLE);
+
     }
 
     @Override
     public void onLongPress(MediaAdapterHolder holder, BookeoMediaItem item, int position) {
-
+        toolbar.setVisibility(View.GONE);
+        tabLayout.setVisibility(View.GONE);
+        toggleActionBar(position);
+        adapter.toggleIcon(holder, position);
+        rvAlbums.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -350,29 +534,16 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (folderPath != null) {
-            pbLoader.setVisibility(View.VISIBLE);
-            arAllMedia = getAllImagesByFolder(folderPath);
-            rvImage.setAdapter(new MediaAdapter(arAllMedia, getContext(), this));
-            pbLoader.setVisibility(View.GONE);
-        }
-    }
-
-
-
-    @Override
     public void onUploadAlbumClicked(final String albumUuid) {
         StorageReference storageReference = FirebaseStorage.getInstance().getReference("media_items");
-        List<MediaItem> uploadItems;
+        List<BookeoMediaItem> uploadItems;
         uploadItems = adapter.getUploadItems();
         ProgressDialog progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle("Uploading to Google Drive");
         progressDialog.setMessage("Please wait...");
         progressDialog.show();
 
-        for (final MediaItem uploadItem : uploadItems) {
+        for (final BookeoMediaItem uploadItem : uploadItems) {
             final String uuid = UUID.randomUUID().toString();
 
             BookeoMediaItem upload = new BookeoMediaItem();
@@ -398,8 +569,10 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
                     });
             //https://www.youtube.com/watch?v=lPfQN-Sfnjw&t=1013s - Firebase Storage - Upload Images
             final StorageReference fileRef = storageReference.child(uuid);
-            Uri uri = Uri.fromFile(new File(uploadItem.getPath()));
-            fileRef.putFile(uri)
+            //https://stackoverflow.com/questions/9897458/how-to-convert-byte-to-inputstream
+            byte[] data = uploadItem.getDownload();
+            InputStream myInputStream = new ByteArrayInputStream(data);
+            fileRef.putStream(myInputStream)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -430,13 +603,13 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
         //https://stackoverflow.com/questions/39296873/how-can-i-recreate-a-fragment
         getFragmentManager()
                 .beginTransaction()
-                .detach(DeviceImagesFragement.this)
-                .attach(DeviceImagesFragement.this)
+                .detach(GoogleDriveFragment.this)
+                .attach(GoogleDriveFragment.this)
                 .commit();
         actionMode.finish();
     }
 
-    class ActionCallback implements ActionMode.Callback, MyCreateListener{
+    class ActionCallback implements ActionMode.Callback, MyCreateListener {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             toggleStatusBarColor(getActivity(), R.color.blue_grey_700);
@@ -472,8 +645,8 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
             rvAlbums.setVisibility(View.GONE);
             getFragmentManager()
                     .beginTransaction()
-                    .detach(DeviceImagesFragement.this)
-                    .attach(DeviceImagesFragement.this)
+                    .detach(GoogleDriveFragment.this)
+                    .attach(GoogleDriveFragment.this)
                     .commit();
             //  adapter.notifyDataSetChanged();
         }
@@ -507,5 +680,4 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
                 return super.onOptionsItemSelected(item);
         }
     }
-
 }

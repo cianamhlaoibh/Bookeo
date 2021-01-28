@@ -1,4 +1,10 @@
-package ie.bookeo.activity;
+package ie.bookeo;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,12 +21,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -31,7 +31,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-import ie.bookeo.R;
+import ie.bookeo.activity.MainActivity;
 import ie.bookeo.adapter.BookeoMediaItemAdapter;
 import ie.bookeo.adapter.MediaAdapterHolder;
 import ie.bookeo.model.BookeoMediaItem;
@@ -40,36 +40,11 @@ import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 import ie.bookeo.utils.ShowGallery;
 
-/**
- * Reference
- *  - URL - https://github.com/CodeBoy722/Android-Simple-Image-Gallery
- *  - Creator - CodeBoy 722
- *  - Modified by Cian O Sullivan
- *
- *  - URL - https://medium.com/better-programming/gmail-like-list-67bc51adc68a
- *  - Github - https://github.com/Mustufa786/MultiSelectionList
- *  - Creator - Mustufa Ansari
- *  - Modified by Cian O Sullivan
- *
- *  - To display license activity
- *  - URL - https://developers.google.com/android/guides/opensource
- *
- *   - To program toolbar back button
- *   -URL https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
- *
- *   - To retireve items from firestore
- *   - URL - https://www.youtube.com/watch?v=Bh0h_ZhX-Qg
- *
- * This Activity loads all images to images associated with a particular folder into a recyclerview with grid manager from cloud storage
- */
-
-public class BookeoMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener {
+public class DriveMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener {
 
     RecyclerView rvMediaItems;
     ArrayList<BookeoMediaItem> mediaItems;
     ProgressBar pbLoader;
-    Toolbar tvFolderName;
-    ImageButton ibAlbum;
     BookeoMediaItemAdapter adapter;
     TextView tvNoMedia;
 
@@ -86,14 +61,12 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setContentView(R.layout.activity_bookeo_media_display);
+        setContentView(R.layout.activity_drive_media_display);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        name = getIntent().getStringExtra("folderName");
-        uuid = getIntent().getStringExtra("folderUuid");
         toolbar.setTitle(name);
 
         mediaItems = new ArrayList<>();
@@ -106,24 +79,24 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         items = new ArrayList<>();
         items = getDbMedia(uuid);
 
-        adapter = new BookeoMediaItemAdapter(items, BookeoMediaDisplay.this, this);
+        adapter = new BookeoMediaItemAdapter(items, this, this);
         rvMediaItems.setAdapter(adapter);
         pbLoader = findViewById(R.id.loader);
         pbLoader.setVisibility(View.GONE);
 
-       // viewVisibility();
+        // viewVisibility();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         items = getDbMedia(uuid);
-        adapter = new BookeoMediaItemAdapter(items, BookeoMediaDisplay.this, this);
+        adapter = new BookeoMediaItemAdapter(items, this, this);
         rvMediaItems.setAdapter(adapter);
     }
 
     public void viewVisibility(ArrayList<BookeoMediaItem> items) {
-        if(items.isEmpty())
+        if (items.isEmpty())
             tvNoMedia.setVisibility(View.VISIBLE);
         else
             tvNoMedia.setVisibility(View.GONE);
@@ -144,7 +117,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
 
                             for (DocumentSnapshot documentSnapshot : list) {
                                 BookeoMediaItem item = new BookeoMediaItem();
-                                    item = documentSnapshot.toObject(BookeoMediaItem.class);
+                                item = documentSnapshot.toObject(BookeoMediaItem.class);
 
                                 BookeoMediaItem arItem = new BookeoMediaItem(item.getUuid(), item.getUrl(), item.getName(), item.getDate(), item.getAlbumUuid());
 
@@ -155,10 +128,10 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
                                 Log.d("OUTPUT--", "onSuccess create: " + mediaItems.get(0).getUrl());
                                 Log.d("SIZE--", "onSuccess create: " + mediaItems.size());
                             }
-                            }
+                        }
                         viewVisibility(mediaItems);
                         adapter.notifyDataSetChanged();
-                        }
+                    }
                 });
         Log.d("SIZE", "onSuccess create: " + mediaItems.size());
         return mediaItems;
@@ -179,9 +152,9 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
                 //https://developers.google.com/android/guides/opensource
                 OssLicensesMenuActivity.setActivityTitle(getString(R.string.custom_license_title));
                 startActivity(new Intent(this, OssLicensesMenuActivity.class));
-            //https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
+                //https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
             case android.R.id.home:
-                Intent intent = new Intent(BookeoMediaDisplay.this, MainActivity.class);
+                Intent intent = new Intent(this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();
@@ -197,20 +170,21 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
                     @Override
                     public void onSuccess(Void aVoid) {
                         Toast.makeText(getApplicationContext(), "Album " + name + " Deleted", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(BookeoMediaDisplay.this, MainActivity.class);
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(intent);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error Trying to Delete Album " + name , Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Error Trying to Delete Album " + name, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
     @Override
-    public void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> path, Context contx) {}
+    public void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> path, Context contx) {
+    }
 
     @Override
     public void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls, ArrayList<String> uuids, String albumUuid) {

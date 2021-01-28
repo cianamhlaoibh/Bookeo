@@ -38,22 +38,13 @@ public class SplashScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash_screen);
         checkPermissions();
     }
+
     @Override
-    protected void onStart() {
-        super.onStart();
-        if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    Intent intent = new Intent(SplashScreenActivity.this, LoginActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
-            }, SPLASH_TIME_OUT);
-        }else{
-            finish();
-        }
+    protected void onResume() {
+        super.onResume();
+        runSplashScreen();
     }
+
     private void checkPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                 && ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -61,5 +52,35 @@ public class SplashScreenActivity extends AppCompatActivity {
                     REQUEST_PERMISSION);
             return;
         }
+    }
+//https://stackoverflow.com/questions/42762308/how-to-check-if-permission-is-granted-by-user-at-runtime-on-android
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case 1001: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //If user presses allow
+                    runSplashScreen();
+                } else {
+                    //If user presses deny
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                break;
+            }
+        }
+    }
+
+    public void runSplashScreen(){
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(SplashScreenActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        }, SPLASH_TIME_OUT);
     }
 }

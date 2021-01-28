@@ -31,4 +31,5 @@ public interface MediaDisplayItemClickListener {
     void onPicClicked(String pictureFolderPath, String folderName);
     void onBPicClicked(String albumUuid, String AlbumName);
     void onLongPress(MediaAdapterHolder holder, MediaItem item, int position);
+    void onLongPress(MediaAdapterHolder holder, BookeoMediaItem item, int position);
 }
