@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".activity.MainActivity">
+    tools:context=".view.mediaExplorer.MainActivity">
 
 
     <com.google.android.material.appbar.AppBarLayout
@@ -32,7 +32,6 @@
         android:id="@+id/rvMediaItems"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/white"
         android:clipToPadding="false"
         android:columnWidth="@dimen/picture_column_width"
         app:layout_constraintEnd_toEndOf="parent"
@@ -54,11 +53,36 @@
         android:id="@+id/tvNoMedia"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="There is no media in the folder. \n Add images from your device"
+        android:text="There is no media in this folder. \n Add images from your device"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/toolbarLayout" />
+    <TextView
+        android:id="@+id/tvUploading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Uploading..."
+        android:textColor="@color/colorPrimaryDark"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loader"
+        tools:visibility="visible" />
+    <ie.bookeo.utils.CustomRecyclerView
+        android:id="@+id/rvBookeoAlbumIcons"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/white"
+        android:backgroundTint="@android:color/secondary_text_light"
+        android:clipToPadding="false"
+        android:columnWidth="@dimen/picture_column_width"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

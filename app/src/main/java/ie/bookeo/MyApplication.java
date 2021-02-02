@@ -3,7 +3,7 @@ package ie.bookeo;
 import android.app.Application;
 
 import cat.ereza.customactivityoncrash.config.CaocConfig;
-import ie.bookeo.activity.ErrorActivity;
+import ie.bookeo.view.ErrorActivity;
 
 /**
  * Reference

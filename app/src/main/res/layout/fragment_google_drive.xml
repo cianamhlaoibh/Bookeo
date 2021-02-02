@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.GoogleDriveFragment">
+    tools:context=".view.drive.GoogleDriveFragment">
 
     <Button
         android:id="@+id/btnDriveSignIn"
@@ -43,16 +43,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnDriveUpload" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvFolders"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarLayout" />
+
     <ie.bookeo.utils.CustomRecyclerView
         android:id="@+id/rvMediaItems"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/white"
         android:clipToPadding="false"
         android:columnWidth="@dimen/picture_column_width"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbarLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/rvFolders" />
 
     <ie.bookeo.utils.CustomRecyclerView
         android:id="@+id/rvBookeoAlbumIcons"
@@ -67,6 +76,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/tvNoMedia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="There is no media in the folder"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/toolbarLayout" />
 
     <ProgressBar
         android:id="@+id/loader"

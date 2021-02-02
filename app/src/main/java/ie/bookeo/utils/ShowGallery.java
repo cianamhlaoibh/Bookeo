@@ -2,12 +2,15 @@ package ie.bookeo.utils;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
+import android.os.Parcelable;
 
 import java.util.ArrayList;
 
-import ie.bookeo.activity.BookeoGalleryView;
-import ie.bookeo.activity.GalleryViewActivity;
-import ie.bookeo.model.BookeoMediaItem;
+import ie.bookeo.model.drive.GoogleDriveMediaItem;
+import ie.bookeo.view.bookeo.BookeoGalleryView;
+import ie.bookeo.view.drive.DriveGalleryView;
+import ie.bookeo.view.mediaExplorer.GalleryViewActivity;
 
 /**
  * Reference
@@ -37,5 +40,19 @@ public class ShowGallery {
         intent.putExtra("albumUuid", albumUuid);
         intent.putExtra("uuids", uuids);
         context.startActivity(intent);
+    }
+
+    public static void dShow(Context contx, String names, String urls, String ids, int position) {
+        Intent intent = new Intent(contx, DriveGalleryView.class);
+        intent.putExtra("position", position);
+        intent.putExtra("names", names);
+        intent.putExtra("urls", urls);
+        intent.putExtra("ids", ids);
+//        Bundle data = new Bundle();
+//        data.putParcelableArrayList("driveItems", (ArrayList<? extends Parcelable>) items);
+        //ArrayList<> byteList = new ArrayList<Byte>();
+       //intent.putCharSequenceArrayListExtra("driveItems", byteList);
+//        intent.putExtra("bundle", data);
+        contx.startActivity(intent);
     }
 }

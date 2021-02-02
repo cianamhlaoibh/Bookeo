@@ -26,7 +26,7 @@ public class MediaAdapterHolder extends RecyclerView.ViewHolder{
 
     //ListItemBinding bi;
 
-    MediaAdapterHolder(@NonNull View itemView) {
+    public MediaAdapterHolder(@NonNull View itemView) {
         super(itemView);
 
         picture = itemView.findViewById(R.id.image);
