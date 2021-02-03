@@ -18,8 +18,14 @@ import ie.bookeo.utils.MediaDisplayItemClickListener;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static androidx.core.view.ViewCompat.setTransitionName;
 /**
@@ -46,6 +52,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
     private SparseBooleanArray selectedItems;
     private ArrayList<DeviceMediaItem> arSelectedItems;
     private int selectedIndex = -1;
+    Map<Integer, DeviceMediaItem> map = new HashMap<>();
 
     /**
      *
@@ -108,12 +115,15 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
             }
         });
 
+        //convert arraylist to hashmap
+
+
         toggleIcon(holder, position);
     }
 
     /*
-       This method will trigger when we we long press the item and it will change the icon of the item to check icon.
-     */
+           This method will trigger when we we long press the item and it will change the icon of the item to check icon.
+         */
     public void toggleIcon(MediaAdapterHolder holder, int position) {
         if (selectedItems.get(position, false)) {
             //bi.lytImage.setVisibility(View.GONE);

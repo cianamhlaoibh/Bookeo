@@ -134,36 +134,37 @@ public class DriveServiceHelper {
         });
     }
 
-        public Task<ArrayList<GoogleDriveMediaItem>> getMediaByFolder(String id) {
-            ArrayList<GoogleDriveMediaItem> driveMedia = new ArrayList<>();
-            return Tasks.call(mExecutor, () -> {
-                String pageToken = null;
-                do {
-                    FileList result = null;
-                    try {
-                        result = mDriveService.files().list()
-                                .setQ("(mimeType contains 'image/' or mimeType contains 'video/') and '" + id + "' in parents")
-                                //.setSpaces("drive")
-                                .setFields("nextPageToken, files(id, name, createdTime, thumbnailLink)")
-                                .setPageToken(pageToken)
-                                .execute();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    for (File file : result.getFiles()) {
-//                        OutputStream outputStream = new ByteArrayOutputStream();
-//                        mDriveService.files().get(file.getId()).executeMediaAndDownloadTo(outputStream);
-//                        GenericUrl url = mDriveService.files().get(file.getId()).buildHttpRequestUrl();
-//                        Log.d("GenericUrl", "getMediaByFolder: " + url);
-//                        Log.d("GenericUrl.toURL", "getMediaByFolder: " + url.toURL());
-//                        Log.d("GenericUrl.toString", "getMediaByFolder: " + url.toString());
-//                        data = ((ByteArrayOutputStream) outputStream).toByteArray();
-                        GoogleDriveMediaItem item = new GoogleDriveMediaItem(file.getName(), file.getCreatedTime().toString(),file.getId(), file.getThumbnailLink());
-                        driveMedia.add(item);
-                    }
-                    pageToken = result.getNextPageToken();
-                } while (pageToken != null);
-                return driveMedia;
-            });
+    public void deleteFile(String fileId) {
+        Tasks.call(mExecutor, () -> {
+            byte[] data;
+            mDriveService.files().delete(fileId).execute();
+            return null;
+        });
+    }
+
+    public Task<ArrayList<GoogleDriveMediaItem>> getMediaByFolder(String id) {
+        ArrayList<GoogleDriveMediaItem> driveMedia = new ArrayList<>();
+        return Tasks.call(mExecutor, () -> {
+            String pageToken = null;
+            do {
+                FileList result = null;
+                try {
+                    result = mDriveService.files().list()
+                            .setQ("(mimeType contains 'image/' or mimeType contains 'video/') and '" + id + "' in parents")
+                            //.setSpaces("drive")
+                            .setFields("nextPageToken, files(id, name, createdTime, thumbnailLink)")
+                            .setPageToken(pageToken)
+                            .execute();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                for (File file : result.getFiles()) {
+                    GoogleDriveMediaItem item = new GoogleDriveMediaItem(file.getName(), file.getCreatedTime().toString(),file.getId(), file.getThumbnailLink());
+                    driveMedia.add(item);
+                }
+                pageToken = result.getNextPageToken();
+            } while (pageToken != null);
+            return driveMedia;
+        });
     }
 }

@@ -92,4 +92,8 @@ public class BookeoMediaItemDao {
         fileRef.delete();
     }
 
+    public void addDriveMediaItem() {
+
+    }
+
 }

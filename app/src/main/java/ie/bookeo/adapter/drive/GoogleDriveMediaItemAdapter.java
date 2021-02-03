@@ -136,7 +136,7 @@ public class GoogleDriveMediaItemAdapter extends  RecyclerView.Adapter<MediaAdap
     }
 
     @Override
-    public void OnComplete(Object obj) {
+    public void OnComplete(String url) {
 
     }
 

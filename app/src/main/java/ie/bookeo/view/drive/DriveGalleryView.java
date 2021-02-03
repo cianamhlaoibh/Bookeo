@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,9 +15,12 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
@@ -26,11 +30,20 @@ import com.bumptech.glide.request.transition.Transition;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import cn.jzvd.JZVideoPlayerStandard;
 import ie.bookeo.R;
@@ -43,8 +56,7 @@ import ie.bookeo.view.bookeo.BookeoGalleryView;
 
 public class DriveGalleryView extends AppCompatActivity implements LoadListener{
 
-    private BookeoMainFolderAdapter bookeoMainFolderAdapter;
-    private BookeoMediaItemDao bookeoMediaItemDao;
+    DriveServiceHelper driveServiceHelper;
 
     public static final int PERMISSION_REQUEST = 111;
 
@@ -52,6 +64,7 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
     private GalleryPagerAdapter gallaryAdapter;
     ViewPager vpager;
     ImageView ivClose, ivDelete;
+    ProgressBar progressBar;
 
 //    ArrayList<String> names =new ArrayList<>();
 //    ArrayList<String> urls =new ArrayList<>();
@@ -60,7 +73,13 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
     String names;
     String urls;
     String ids;
+    String extension;
+    String temp_url;
     byte[] data;
+
+    StorageReference storageReference;
+
+    StorageReference fileRef = null;
 
     int callback;
     public String TAG = DriveGalleryView.this.getClass().getSimpleName();
@@ -77,20 +96,36 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
         setContentView(R.layout.activity_gallery_view);
         Bundle b=getIntent().getExtras();
 
-        vpager= (ViewPager) findViewById(R.id.pager);
-        ivClose = (ImageView) findViewById(R.id.btn_close);
-        ivDelete = (ImageView) findViewById(R.id.ivDelete);
+        vpager= findViewById(R.id.pager);
+        ivClose =  findViewById(R.id.btn_close);
+        ivDelete = findViewById(R.id.ivDelete);
+        progressBar = findViewById(R.id.loader);
 
         position=b.getInt("position",0);
-//        names=b.getStringArrayList("names");
-//        urls=b.getStringArrayList("urls");
-//        ids=b.getStringArrayList("ids");
         names=b.getString("names");
         urls=b.getString("urls");
         ids=b.getString("ids");
 
+        extension = names.substring(names.lastIndexOf("."));
+        storageReference = FirebaseStorage.getInstance().getReference("temp_items");
+        fileRef = storageReference.child(ids);
 
-        data = getMediaBytes();
+        driveServiceHelper = new DriveServiceHelper();
+
+        // Create an executor that executes tasks in a background thread.
+        ScheduledExecutorService backgroundExecutor = Executors.newSingleThreadScheduledExecutor();
+        // Execute a task in the background thread.
+        backgroundExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                if(extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".avi") || extension.equalsIgnoreCase(".mkv")){
+                    data = getMediaBytes();
+                    getTempUrl();
+                }else {
+                    data = getMediaBytes();
+                }
+            }
+        });
 
 
 
@@ -98,48 +133,100 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
             @Override
             public void onClick(View v) {
                 finish();
+                fileRef.delete();
             }
         });
 
         ivDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteBookeoItem();
+                driveServiceHelper.deleteFile(ids);
                 gallaryAdapter.notifyDataSetChanged();
+                finish();
             }
         });
-            }
 
-    public byte[] getMediaBytes(){
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void getTempUrl() {
+        LoadListener listener = this;
+        final Executor mExecutor = Executors.newSingleThreadExecutor();
+        driveServiceHelper.downloadFile(ids)
+                .addOnCompleteListener(mExecutor, new OnCompleteListener<byte[]>() {
+                    @Override
+                    public void onComplete(@NonNull Task<byte[]> task) {
+                        byte[] data = task.getResult();
+                        //https://stackoverflow.com/questions/9897458/how-to-convert-byte-to-inputstream
+                        InputStream myInputStream = new ByteArrayInputStream(data);
+                        fileRef.putStream(myInputStream)
+                                .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                        //  https://stackoverflow.com/questions/57183427/download-url-is-getting-as-com-google-android-gms-tasks-zzu441922b-while-using/57183557
+                                        fileRef.getDownloadUrl()
+                                                .addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Uri> task) {
+                                                        listener.OnComplete(task.getResult().toString());
+                                                        gallaryAdapter.notifyDataSetChanged();
+                                                        progressBar.setVisibility(View.GONE);
+                                                        Log.d("URL", "onSuccess: " + task.getResult().toString());
+                                                    }
+                                                });
+//                                                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                                                    @Override
+//                                                    public void onSuccess(Uri uri) {
+//                                                        temp_url[0] = uri.toString();
+//                                                        //gallaryAdapter.notifyDataSetChanged();
+//                                                        Log.d("URL", "onSuccess: " + uri.toString());
+//                                                    }
+//                                                });
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    }
+                });
+    }
+
+    public byte[] getMediaBytes() {
         try {
             DriveServiceHelper driveServiceHelper = new DriveServiceHelper();
             final Task<byte[]> appUpdateInfoTask = driveServiceHelper.downloadFile(ids)
                     .addOnCompleteListener(new OnCompleteListener<byte[]>() {
                         @Override
                         public void onComplete(@NonNull Task<byte[]> task) {
-                            //loadListener.OnSuccess(task.getResult());
+                            gallaryAdapter.notifyDataSetChanged();
+                            if(!extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".avi") || extension.equalsIgnoreCase(".mkv")){
+                                progressBar.setVisibility(View.GONE);
+                            }
                         }
                     });
             try {
-                Tasks.await(appUpdateInfoTask);
-                byte[] data = appUpdateInfoTask.getResult();
-                return data;
+                return Tasks.await(appUpdateInfoTask);
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
-        }catch (Exception e){
-                e.printStackTrace();
-                return null;
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
+//
+
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(checkWriteExternalPermission())
+        if(checkWriteExternalPermission()) {
             _init();
-        else
+        }else
             grantPermission();
     }
 
@@ -211,16 +298,22 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
 
     @Override
     public void OnSuccess(byte[] data) {
-        this.data = data;
+       // this.data = data;
     }
 
     @Override
-    public void OnComplete(Object obj) {
-
+    public void OnComplete(String url) {
+        this.temp_url = url;
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //data = null;
+        //temp_url = null;
+    }
 
-    class GalleryPagerAdapter extends PagerAdapter implements LoadListener {
+    class GalleryPagerAdapter extends PagerAdapter {
 
         Context _context;
         LayoutInflater _inflater;
@@ -254,59 +347,55 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
             String id = ids;
             String url  = urls;
             String name = names;
-            String extension = name.substring(name.lastIndexOf("."));
+            extension = name.substring(name.lastIndexOf("."));
 
-            LoadListener loadListener = this;
+            View itemView = null;
 
+                            if(extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".avi") || extension.equalsIgnoreCase(".mkv")) {
+                                   if (temp_url != null) {
+                                       itemView = _inflater.inflate(R.layout.pager_video_item, container, false);
+                                       container.addView(itemView);
+                                        final JZVideoPlayerStandard jzVideoPlayerStandard = (JZVideoPlayerStandard) itemView.findViewById(R.id.videoplayer);
+                                        jzVideoPlayerStandard.setVisibility(View.VISIBLE);
+                                        jzVideoPlayerStandard.setUp(temp_url,
+                                                JZVideoPlayerStandard.SCREEN_WINDOW_LIST,
+                                                "");
+                                        Glide.with(_context).load(temp_url)
+                                                .into(jzVideoPlayerStandard.thumbImageView);
+                                    }
+                                }else{
+                                    itemView = _inflater.inflate(R.layout.pager_gallery_item, container, false);
+                                    container.addView(itemView);
+                                    final SubsamplingScaleImageView imageView =
+                                            (SubsamplingScaleImageView) itemView.findViewById(R.id.image);
+                                    Glide.with(getApplicationContext())
+                                            .asBitmap()
+                                            .load(data)
+                                            .into(new SimpleTarget<Bitmap>() {
+                                                @Override
+                                                public void onResourceReady(Bitmap image,
+                                                                            Transition<? super Bitmap> transition) {
 
-                            View itemView = null;
-                            if(extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".avi") || extension.equalsIgnoreCase(".mkv")){
-                                itemView = _inflater.inflate(R.layout.pager_video_item, container, false);
-                                container.addView(itemView);
-
-
-
-                                final JZVideoPlayerStandard jzVideoPlayerStandard = (JZVideoPlayerStandard) itemView.findViewById(R.id.videoplayer);
-                                jzVideoPlayerStandard.setUp(data.toString(),
-                                        JZVideoPlayerStandard.SCREEN_WINDOW_LIST,
-                                        "");
-                                Glide.with(_context).load(data)
-                                        .into(jzVideoPlayerStandard.thumbImageView);
-
-
-
-                            }else{
-                                itemView = _inflater.inflate(R.layout.pager_gallery_item, container, false);
-                                container.addView(itemView);
-                                final SubsamplingScaleImageView imageView =
-                                        (SubsamplingScaleImageView) itemView.findViewById(R.id.image);
-                                Glide.with(getApplicationContext())
-                                        .asBitmap()
-                                        .load(data)
-                                        .into(new SimpleTarget<Bitmap>() {
-                                            @Override
-                                            public void onResourceReady(Bitmap image,
-                                                                        Transition<? super Bitmap> transition) {
-
-                                                int xDim=image.getWidth();
-                                                int yDim=image.getHeight();
-                                                if(xDim<=4096 && yDim <=4096){
-                                                    imageView.setImage(ImageSource.bitmap(image));
-                                                }else{
-                                                    if(xDim>yDim){
-                                                        int nh = (int) ( image.getHeight() * (4096f / image.getWidth()) );
-                                                        Bitmap scaled = Bitmap.createScaledBitmap(image, 4096, nh, true);
-                                                        imageView.setImage(ImageSource.bitmap(scaled));
-                                                    }else{
-                                                        int nh = (int) ( image.getWidth() * (4096f / image.getHeight()) );
-                                                        Bitmap scaled = Bitmap.createScaledBitmap(image, nh,4096 , true);
-                                                        imageView.setImage(ImageSource.bitmap(scaled));
+                                                    int xDim = image.getWidth();
+                                                    int yDim = image.getHeight();
+                                                    if (xDim <= 4096 && yDim <= 4096) {
+                                                        imageView.setImage(ImageSource.bitmap(image));
+                                                    } else {
+                                                        if (xDim > yDim) {
+                                                            int nh = (int) (image.getHeight() * (4096f / image.getWidth()));
+                                                            Bitmap scaled = Bitmap.createScaledBitmap(image, 4096, nh, true);
+                                                            imageView.setImage(ImageSource.bitmap(scaled));
+                                                        } else {
+                                                            int nh = (int) (image.getWidth() * (4096f / image.getHeight()));
+                                                            Bitmap scaled = Bitmap.createScaledBitmap(image, nh, 4096, true);
+                                                            imageView.setImage(ImageSource.bitmap(scaled));
+                                                        }
                                                     }
-                                                }
 
-                                            }
-                                        });
-                            }
+                                                }
+                                            });
+                                }
+
             Log.e("Extension",extension);
            return itemView;
         }
@@ -314,16 +403,6 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
             container.removeView((LinearLayout) object);
-        }
-
-        @Override
-        public void OnSuccess(byte[] data) {
-            //this.data = data;
-        }
-
-        @Override
-        public void OnComplete(Object obj) {
-            this.object = obj;
         }
     }
 }

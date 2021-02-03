@@ -116,17 +116,11 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-
-        if (!getIntent().getStringExtra("folderName").contains("all")) {
-            tvFolderName = findViewById(R.id.toolbar);
-            tvFolderName.setTitle(getIntent().getStringExtra("folderName"));
-            folderPath = getIntent().getStringExtra("folderPath");
-        } else {
-            tvFolderName = findViewById(R.id.toolbar);
-            tvFolderName.setTitle("All Media");
-        }
+        //tvFolderName = findViewById(R.id.toolbar);
+        String name = getIntent().getStringExtra("folderName");
+        toolbar.setTitle(name);
+        folderPath = getIntent().getStringExtra("folderPath");
 
         arAllMedia = new ArrayList<>();
         rvImage = findViewById(R.id.rvFolders);

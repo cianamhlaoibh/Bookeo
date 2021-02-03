@@ -1,11 +1,16 @@
 package ie.bookeo.view.mediaExplorer;
 
 import android.Manifest;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import ie.bookeo.dao.DeviceMediaDao;
 import ie.bookeo.utils.ShowGallery;
 import ie.bookeo.R;
 import com.bumptech.glide.Glide;
@@ -28,6 +34,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import cn.jzvd.JZVideoPlayerStandard;
@@ -48,6 +55,7 @@ public class GalleryViewActivity extends AppCompatActivity {
     ArrayList<String> paths = new ArrayList<>();
     int position=0;
     private GalleryPagerAdapter gallaryAdapter;
+    private DeviceMediaDao deviceMediaDao;
     ViewPager vpager;
     ImageView ivClose;
 
@@ -72,6 +80,7 @@ public class GalleryViewActivity extends AppCompatActivity {
         position=b.getInt("position",0);
         callback=b.getInt("callback",0);
         paths=  b.getStringArrayList("items");
+        deviceMediaDao = new DeviceMediaDao();
 
         ivClose.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,24 +91,20 @@ public class GalleryViewActivity extends AppCompatActivity {
 
 
         final ImageView _btn_action = (ImageView) findViewById(R.id.ivDelete);
-        if(callback==1){
+
             _btn_action.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ShowGallery.actionCallback.onAction( paths.get(position),position);
-                    paths.remove(position);
-                    gallaryAdapter.notifyDataSetChanged();
-                    if(paths.size()==0){
-                        _btn_action.setVisibility(View.GONE);
+                    if (paths.size() > 1) {
+                        deleteImage();
+                        gallaryAdapter.notifyDataSetChanged();
+                    }else if(paths.size() == 1){
+                        deleteImage();
+                        finish();
                     }
                 }
             });
-        }else {
-            _btn_action.setVisibility(View.GONE);
-        }
-        if(paths.size()==0){
-            _btn_action.setVisibility(View.GONE);
-        }
+
 
         if(checkWriteExternalPermission())
             _init();
@@ -107,6 +112,12 @@ public class GalleryViewActivity extends AppCompatActivity {
             grantPermission();
 
 
+    }
+
+    private void deleteImage(){
+        int position = vpager.getCurrentItem();
+        deviceMediaDao.deleteMedia(paths.get(position), this);
+        paths.remove(position);
     }
 
 

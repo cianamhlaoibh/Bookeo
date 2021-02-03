@@ -35,8 +35,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
@@ -57,6 +59,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import ie.bookeo.R;
 import ie.bookeo.adapter.bookeo.BookeoFolderAdapter;
@@ -90,8 +94,6 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
 
     DriveServiceHelper driveServiceHelper;
     Button btnDriveSignIn;
-    Button btnDriveUpload;
-    Button btnListFiles;
     ArrayList<DriveFolder> driveFolders = new ArrayList<>();
     ArrayList<GoogleDriveMediaItem> driveMedia = new ArrayList<>();
 
@@ -112,6 +114,7 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
     private List<BookeoAlbum> albums;
     TextView tvUploading;
     ProgressBar pbLoader;
+
 
     public GoogleDriveFragment() {
         // Required empty public constructor
@@ -135,20 +138,6 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
                                                   requestSignIn();
                                               }
                                           });
-        btnDriveUpload = root.findViewById(R.id.btnDriveUpload);
-        btnDriveUpload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                uploadFile(v);
-            }
-        });
-        btnListFiles = root.findViewById(R.id.btnListFiles);
-        btnListFiles.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                listFiles();
-            }
-        });
         rvFolders = root.findViewById(R.id.rvFolders);
         rvFolders.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         if(driveServiceHelper == null){
@@ -346,12 +335,6 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
      */
     @Override
     public void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> paths, Context contx) {
-        if (mAdapter.selectedItemCount() > 0) {
-            toggleActionBar(position);
-            mAdapter.toggleIcon(holder, position);
-        } else {
-            ShowGallery.show(getContext(), paths, position);
-        }
     }
 
     @Override
@@ -364,7 +347,12 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
 
     @Override
     public void onDrivePicClicked(MediaAdapterHolder holder, String names, String urls, String ids, int position) {
-
+        if (mAdapter.selectedItemCount() > 0) {
+            toggleActionBar(position);
+            mAdapter.toggleIcon(holder, position);
+        } else {
+            ShowGallery.dShow(getContext(), names, urls, ids, position);
+        }
     }
 
     @Override
@@ -455,39 +443,45 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
                     });
             //https://www.youtube.com/watch?v=lPfQN-Sfnjw&t=1013s - Firebase Storage - Upload Images
             final StorageReference fileRef = storageReference.child(uuid);
-            //https://stackoverflow.com/questions/9897458/how-to-convert-byte-to-inputstream
-//  TODO          byte[] data = uploadItem.getDownload();
-//            InputStream myInputStream = new ByteArrayInputStream(data);
-//            fileRef.putStream(myInputStream)
-//                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//                        @Override
-//                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                            //  https://stackoverflow.com/questions/57183427/download-url-is-getting-as-com-google-android-gms-tasks-zzu441922b-while-using/57183557
-//                            fileRef.getDownloadUrl()
-//                                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                                        @Override
-//                                        public void onSuccess(Uri uri) {
-//                                            String url = uri.toString();
-//                                            //upload.setUrl(url);
-//                                            //https://www.youtube.com/watch?v=TBr_5QH1EvQ - update firstore
-//                                            db.collection("albums").document(albumUuid).collection("media_items").document(uuid).update("url", url);
-//                                            db.collection("albums").document(albumUuid).update("firstItem", url);
-//                                            Log.d("URL", "onSuccess: " + uri.toString());
-//                                        }
-//                                    });
-//                        }
-//                    })
-//                    .addOnFailureListener(new OnFailureListener() {
-//                        @Override
-//                        public void onFailure(@NonNull Exception e) {
-//                            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-//                        }
-//                    });
+            final Executor mExecutor = Executors.newSingleThreadExecutor();
+            DriveServiceHelper driveServiceHelper = new DriveServiceHelper();
+            driveServiceHelper.downloadFile(uploadItem.getFileId())
+                    .addOnCompleteListener(mExecutor, new OnCompleteListener<byte[]>() {
+                        @Override
+                        public void onComplete(@NonNull Task<byte[]> task) {
+                            byte[] data = task.getResult();
+                            //https://stackoverflow.com/questions/9897458/how-to-convert-byte-to-inputstream
+                            InputStream myInputStream = new ByteArrayInputStream(data);
+                            fileRef.putStream(myInputStream)
+                                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                        @Override
+                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                            //  https://stackoverflow.com/questions/57183427/download-url-is-getting-as-com-google-android-gms-tasks-zzu441922b-while-using/57183557
+                                            fileRef.getDownloadUrl()
+                                                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                        @Override
+                                                        public void onSuccess(Uri uri) {
+                                                            String url = uri.toString();
+                                                            //upload.setUrl(url);
+                                                            //https://www.youtube.com/watch?v=TBr_5QH1EvQ - update firstore
+                                                            db.collection("albums").document(albumUuid).collection("media_items").document(uuid).update("url", url);
+                                                            db.collection("albums").document(albumUuid).update("firstItem", url);
+                                                            Log.d("URL", "onSuccess: " + uri.toString());
+                                                        }
+                                                    });
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    });
         }
         progressDialog.dismiss();
         Toast.makeText(getContext(), "Upload Successful", Toast.LENGTH_SHORT).show();
-        //https://stackoverflow.com/questions/39296873/how-can-i-recreate-a-fragment
-        //TODO CREATE ACTIVITY
         actionMode.finish();
     }
 
@@ -525,8 +519,6 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
             toolbar.setVisibility(View.VISIBLE);
             tabLayout.setVisibility(View.VISIBLE);
             rvAlbums.setVisibility(View.GONE);
-            //TODO CREATE ACTIVITY
-            //  adapter.notifyDataSetChanged();
         }
         @Override
         public void onCreated(BookeoAlbum bookeoAlbum) {
