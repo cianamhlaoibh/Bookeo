@@ -52,7 +52,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
     private SparseBooleanArray selectedItems;
     private ArrayList<DeviceMediaItem> arSelectedItems;
     private int selectedIndex = -1;
-    Map<Integer, DeviceMediaItem> map = new HashMap<>();
+    Map<Integer, DeviceMediaItem> maps = new HashMap<>();
 
     /**
      *
