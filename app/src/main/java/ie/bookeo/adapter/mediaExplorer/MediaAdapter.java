@@ -50,9 +50,8 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
     private MediaAdapterHolder mediaAdapterHolder;
 
     private SparseBooleanArray selectedItems;
-    private ArrayList<DeviceMediaItem> arSelectedItems;
     private int selectedIndex = -1;
-    Map<Integer, DeviceMediaItem> maps = new HashMap<>();
+    Map<Integer, DeviceMediaItem> mapSelectedItems = new HashMap<>();
 
     /**
      *
@@ -65,7 +64,6 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
         this.contx = contx;
         this.mediaDisplayItemListener = mediaDisplayItemListener;
         selectedItems = new SparseBooleanArray();
-        arSelectedItems = new ArrayList<>();
     }
 
     @NonNull
@@ -125,13 +123,13 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
            This method will trigger when we we long press the item and it will change the icon of the item to check icon.
          */
     public void toggleIcon(MediaAdapterHolder holder, int position) {
-        if (selectedItems.get(position, false)) {
+        if (!mapSelectedItems.containsKey(position)) {
             //bi.lytImage.setVisibility(View.GONE);
-            holder.ivCheck.setVisibility(View.VISIBLE);
+            holder.ivCheck.setVisibility(View.GONE);
             if (selectedIndex == position) selectedIndex = -1;
         } else {
             //bi.lytImage.setVisibility(View.VISIBLE);
-            holder.ivCheck.setVisibility(View.GONE);
+            holder.ivCheck.setVisibility(View.VISIBLE);
             if (selectedIndex == position) selectedIndex = -1;
         }
     }
@@ -144,15 +142,21 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
        This method helps you to get all selected items from the list
      */
 
-    public List<Integer> getSelectedItems() {
-        List<Integer> items = new ArrayList<>(selectedItems.size());
-        for (int i = 0; i < selectedItems.size(); i++) {
-            items.add(selectedItems.keyAt(i));
-        }
-        return items;
-    }
+//    public List<Integer> getSelectedItems() {
+//        List<Integer> items = new ArrayList<>(selectedItems.size());
+//        for (int i = 0; i < selectedItems.size(); i++) {
+//            items.add(selectedItems.keyAt(i));
+//        }
+//        return items;
+//    }
 
     public List<DeviceMediaItem> getUploadItems() {
+        //https://www.geeksforgeeks.org/how-to-convert-hashmap-to-arraylist-in-java/
+        // Getting Collection of values from HashMap
+        Collection<DeviceMediaItem> values = mapSelectedItems.values();
+
+        // Creating an ArrayList of values
+        ArrayList<DeviceMediaItem> arSelectedItems = new ArrayList<>(values);
         return arSelectedItems;
     }
 
@@ -160,9 +164,8 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
        this will be used when we want to delete items from our list
      */
     public void removeItems(int position) {
-        arSelectedItems.remove(position);
-        arSelectedItems = null;
         selectedItems.delete(position);
+        mapSelectedItems.remove(position);
         selectedIndex = -1;
     }
 
@@ -172,7 +175,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
 
     public void clearSelection() {
         selectedItems.clear();
-        arSelectedItems.clear();
+        mapSelectedItems.clear();
         notifyDataSetChanged();
     }
 
@@ -183,17 +186,11 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
     public void toggleSelection(int position) {
         selectedIndex = position;
         if (selectedItems.get(position, false)) {
-                if(arSelectedItems.size()==1){
-                    arSelectedItems.clear();
-                    selectedItems.clear();
-                }else {
-                    arSelectedItems.remove(selectedIndex);
-                    selectedItems.delete(position);
-                    Log.d("ITEM DESELECTED", "Removed from arraylist");
-                }
+            selectedItems.delete(position);
+            mapSelectedItems.remove(position);
         } else {
             selectedItems.put(position, true);
-            arSelectedItems.add(arMediaList.get(position));
+            mapSelectedItems.put(position, arMediaList.get(position));
             Log.d("ITEM SELECTED", "Added to arraylist");
         }
         notifyItemChanged(position);
@@ -204,7 +201,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapterHolder> {
      */
 
     public int selectedItemCount() {
-        return selectedItems.size();
+        return mapSelectedItems.size();
     }
     @Override
     public int getItemCount() {

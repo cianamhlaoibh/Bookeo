@@ -23,7 +23,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ie.bookeo.R;
 import ie.bookeo.adapter.MediaAdapterHolder;
@@ -50,7 +53,7 @@ public class GoogleDriveMediaItemAdapter extends  RecyclerView.Adapter<MediaAdap
     ArrayList<String> fileIds;
 
     private SparseBooleanArray selectedItems;
-    private ArrayList<GoogleDriveMediaItem> arSelectedItems;
+    Map<Integer, GoogleDriveMediaItem> mapSelectedItems;
     private int selectedIndex = -1;
 
     byte[] data;
@@ -63,7 +66,7 @@ public class GoogleDriveMediaItemAdapter extends  RecyclerView.Adapter<MediaAdap
         this.contx = contx;
         this.mediaDisplayItemListener = mediaDisplayItemListener;
         selectedItems = new SparseBooleanArray();
-        arSelectedItems = new ArrayList<>();
+        mapSelectedItems = new HashMap<>();
     }
 
     @NonNull
@@ -168,13 +171,13 @@ public class GoogleDriveMediaItemAdapter extends  RecyclerView.Adapter<MediaAdap
      This method will trigger when we we long press the item and it will change the icon of the item to check icon.
    */
     public void toggleIcon(MediaAdapterHolder holder, int position) {
-        if (selectedItems.get(position, false)) {
+        if (!mapSelectedItems.containsKey(position)) {
             //bi.lytImage.setVisibility(View.GONE);
-            holder.ivCheck.setVisibility(View.VISIBLE);
+            holder.ivCheck.setVisibility(View.GONE);
             if (selectedIndex == position) selectedIndex = -1;
         } else {
             //bi.lytImage.setVisibility(View.VISIBLE);
-            holder.ivCheck.setVisibility(View.GONE);
+            holder.ivCheck.setVisibility(View.VISIBLE);
             if (selectedIndex == position) selectedIndex = -1;
         }
     }
@@ -196,6 +199,12 @@ public class GoogleDriveMediaItemAdapter extends  RecyclerView.Adapter<MediaAdap
     }
 
     public List<GoogleDriveMediaItem> getUploadItems() {
+        //https://www.geeksforgeeks.org/how-to-convert-hashmap-to-arraylist-in-java/
+        // Getting Collection of values from HashMap
+        Collection<GoogleDriveMediaItem> values = mapSelectedItems.values();
+
+        // Creating an ArrayList of values
+        ArrayList<GoogleDriveMediaItem> arSelectedItems = new ArrayList<>(values);
         return arSelectedItems;
     }
 
@@ -203,9 +212,8 @@ public class GoogleDriveMediaItemAdapter extends  RecyclerView.Adapter<MediaAdap
        this will be used when we want to delete items from our list
      */
     public void removeItems(int position) {
-        arSelectedItems.remove(position);
-        arSelectedItems = null;
         selectedItems.delete(position);
+        mapSelectedItems.remove(position);
         selectedIndex = -1;
     }
 
@@ -215,7 +223,7 @@ public class GoogleDriveMediaItemAdapter extends  RecyclerView.Adapter<MediaAdap
 
     public void clearSelection() {
         selectedItems.clear();
-        arSelectedItems.clear();
+        mapSelectedItems.clear();
         notifyDataSetChanged();
     }
 
@@ -226,17 +234,11 @@ public class GoogleDriveMediaItemAdapter extends  RecyclerView.Adapter<MediaAdap
     public void toggleSelection(int position) {
         selectedIndex = position;
         if (selectedItems.get(position, false)) {
-            if(arSelectedItems.size()==1){
-                arSelectedItems.clear();
-                selectedItems.clear();
-            }else {
-                arSelectedItems.remove(selectedIndex);
-                selectedItems.delete(position);
-                Log.d("ITEM DESELECTED", "Removed from arraylist");
-            }
+            selectedItems.delete(position);
+            mapSelectedItems.remove(position);
         } else {
             selectedItems.put(position, true);
-            arSelectedItems.add(arMediaList.get(position));
+            mapSelectedItems.put(position, arMediaList.get(position));
             Log.d("ITEM SELECTED", "Added to arraylist");
         }
         notifyItemChanged(position);
