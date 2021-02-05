@@ -115,7 +115,8 @@ public class DriveMediaDisplay extends AppCompatActivity implements MediaDisplay
 
         //
         toolbar = findViewById(R.id.toolbar);
-        //tabLayout = findViewById(R.id.tabs);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         pbLoader = findViewById(R.id.loader);
         tvUploading = findViewById(R.id.tvUploading);
 

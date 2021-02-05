@@ -26,11 +26,26 @@
                 android:layout_marginTop="48dp"
                 android:background="@drawable/custom_alt_btn"
                 android:drawableLeft="@drawable/ic_google_drive"
-                android:text=" Sign In to you Drive "
+                android:text=" Sign In to your Drive "
                 android:textColor="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/btnDriveResync"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:background="@drawable/custom_btn_alt_grey"
+                android:drawableLeft="@drawable/ic_google_drive"
+                android:text=" Resync with your Drive "
+                android:textColor="@color/white"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvFolders"

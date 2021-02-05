@@ -76,6 +76,7 @@ import ie.bookeo.model.drive.GoogleDriveMediaItem;
 import ie.bookeo.model.gallery_model.DeviceMediaItem;
 import ie.bookeo.utils.AlbumUploadListener;
 import ie.bookeo.utils.Config;
+import ie.bookeo.utils.DriveLogoutListener;
 import ie.bookeo.utils.GoogleDriveDownload;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
@@ -93,9 +94,10 @@ import static ie.bookeo.dao.drive.DriveServiceHelper.mDriveService;
 public class GoogleDriveFragment extends Fragment implements MediaDisplayItemClickListener, AlbumUploadListener {
 
     DriveServiceHelper driveServiceHelper;
-    Button btnDriveSignIn;
+    Button btnDriveSignIn, btnDriveResync;
     ArrayList<DriveFolder> driveFolders = new ArrayList<>();
     ArrayList<GoogleDriveMediaItem> driveMedia = new ArrayList<>();
+    GoogleSignInClient client;
 
     RecyclerView rvFolders, rvMediaItems;
     GoogleDriveFolderAdapter adapter;
@@ -114,10 +116,11 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
     private List<BookeoAlbum> albums;
     TextView tvUploading;
     ProgressBar pbLoader;
+    DriveLogoutListener driveLogoutListener;
 
 
-    public GoogleDriveFragment() {
-        // Required empty public constructor
+    public GoogleDriveFragment(DriveLogoutListener listener) {
+        this.driveLogoutListener = listener;
     }
 
         @Override
@@ -138,13 +141,27 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
                                                   requestSignIn();
                                               }
                                           });
+        btnDriveResync = root.findViewById(R.id.btnDriveResync);
+        btnDriveResync.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requestSignIn();
+            }
+        });
         rvFolders = root.findViewById(R.id.rvFolders);
         rvFolders.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        if(driveServiceHelper == null){
-            btnDriveSignIn.setVisibility(View.VISIBLE);
-        }else{
+        GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(getContext());
+        if(signInAccount != null){
+            btnDriveResync.setVisibility(View.VISIBLE);
             btnDriveSignIn.setVisibility(View.GONE);
+        }else if(driveServiceHelper == null){
+            btnDriveResync.setVisibility(View.GONE);
         }
+        else{
+            btnDriveSignIn.setVisibility(View.VISIBLE);
+            btnDriveResync.setVisibility(View.GONE);
+        }
+
 
         rvMediaItems = root.findViewById(R.id.rvMediaItems);
         rvMediaItems.addItemDecoration(new MarginItemDecoration(getContext()));
@@ -219,6 +236,7 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
         //progressDialog.dismiss();
 
         btnDriveSignIn.setVisibility(View.GONE);
+        btnDriveResync.setVisibility(View.GONE);
     }
 
     public void uploadFile(View view) {
@@ -250,7 +268,7 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
                 .requestEmail()
                 .requestScopes(new Scope(DriveScopes.DRIVE))
                 .build();
-        GoogleSignInClient client = GoogleSignIn.getClient(getContext(), signInOptions);
+        client = GoogleSignIn.getClient(getContext(), signInOptions);
         startActivityForResult(client.getSignInIntent(), 400);
     }
 
@@ -280,6 +298,7 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
                         btnDriveSignIn.setVisibility(View.INVISIBLE);
                         driveServiceHelper = new DriveServiceHelper(googleDriveService, credential);
                         listFiles();
+                        driveLogoutListener.DriveLogin(GoogleDriveFragment.this);
                         mAdapter.notifyDataSetChanged();
                     }
                 })
@@ -549,5 +568,13 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void Logout() {
+        btnDriveSignIn.setVisibility(View.VISIBLE);
+        driveMedia.clear();
+        driveFolders.clear();
+        adapter.notifyDataSetChanged();
+        mAdapter.notifyDataSetChanged();
     }
 }

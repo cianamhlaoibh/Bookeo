@@ -70,7 +70,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener{
                 return;
             }
             if(TextUtils.isEmpty(password)){
-                etEmail.setError("Please enter password address");
+                etPassword.setError("Please enter password");
                 return;
             }
             firebaseAuth.signInWithEmailAndPassword(email, password)
@@ -82,7 +82,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener{
                         Intent intent = new Intent(getContext(), LandingActivity.class);
                         startActivity(intent);
                     }else{
-                        Toast.makeText(getContext(), "Invalid Login: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "Login Unsuccessful! Try Again", Toast.LENGTH_LONG).show();
+                        etEmail.setText("");
+                        etPassword.setText("");
+                        etEmail.findFocus();
                     }
                 }
             });

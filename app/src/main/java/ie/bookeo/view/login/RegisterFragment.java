@@ -88,7 +88,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener{
                 return;
             }
             if(TextUtils.isEmpty(name)){
-                etName.setError("Please enter email address");
+                etName.setError("Please enter Name");
                 return;
             }
             if(TextUtils.isEmpty(password)){

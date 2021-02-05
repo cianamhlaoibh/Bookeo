@@ -1,16 +1,32 @@
 package ie.bookeo.view.mediaExplorer;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
 
 import ie.bookeo.R;
 import ie.bookeo.adapter.mediaExplorer.ViewPagerAdapter;
+import ie.bookeo.utils.DriveLogoutListener;
 import ie.bookeo.view.drive.GoogleDriveFragment;
+import ie.bookeo.view.login.LoginActivity;
 
 
 /**
@@ -24,12 +40,15 @@ import ie.bookeo.view.drive.GoogleDriveFragment;
  * This Activity loads all folders containing images int a RecyclerView
  */
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DriveLogoutListener {
 
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private ViewPagerAdapter viewPagerAdapter;
+    MenuInflater inflater;
+    Menu optionMenu;
+    GoogleDriveFragment googleDriveFragment;
 
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
 
@@ -74,14 +93,57 @@ public class MainActivity extends AppCompatActivity {
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         viewPagerAdapter.addFragment(0, new FolderViewFragment(), "DEVICE");
         viewPagerAdapter.addFragment(1, new DeviceImagesFragement(), "IMAGES");
-        viewPagerAdapter.addFragment(2, new GoogleDriveFragment(), "DRIVE");
+        viewPagerAdapter.addFragment(2, new GoogleDriveFragment(this), "DRIVE");
         viewPager.setAdapter(viewPagerAdapter);
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_camera);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_photo_library);
         tabLayout.getTabAt(2).setIcon(R.drawable.ic_google_drive);
     }
 
+    public boolean onCreateOptionsMenu(Menu menu) {
+        inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity_menu, menu);
+        optionMenu = menu;
+        GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
+        if(signInAccount != null) {
+            menu.findItem(R.id.DriveLogout).setVisible(true);
+        }else{
+            menu.findItem(R.id.DriveLogout).setVisible(false);
+        }
+        return true;
+    }
 
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.Licenses:
+                //https://developers.google.com/android/guides/opensource
+                OssLicensesMenuActivity.setActivityTitle(getString(R.string.custom_license_title));
+                startActivity(new Intent(this, OssLicensesMenuActivity.class));
+                return true;
+            case R.id.DriveLogout:
+                //log out for user who signed in with google
+                GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
+                if(signInAccount != null) {
+                    GoogleSignIn.getClient(this, new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()).signOut()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(getApplicationContext(), "Logout Failure", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                    item.setVisible(false);
+                    googleDriveFragment.Logout();
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     TabLayout.OnTabSelectedListener onTabSelectedListener = new TabLayout.OnTabSelectedListener() {
         @Override
@@ -117,4 +179,9 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    @Override
+    public void DriveLogin(GoogleDriveFragment fragment) {
+        optionMenu.findItem(R.id.DriveLogout).setVisible(true);
+        googleDriveFragment = fragment;
+    }
 }
