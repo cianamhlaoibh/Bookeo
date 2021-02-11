@@ -9,12 +9,16 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import ie.bookeo.model.bookeo.BookeoMediaItem;
 
@@ -92,8 +96,35 @@ public class BookeoMediaItemDao {
         fileRef.delete();
     }
 
-    public void addDriveMediaItem() {
+    public ArrayList<BookeoMediaItem> getMediaItems(String albumUuid) {
+        final ArrayList<BookeoMediaItem> mediaItems = new ArrayList<>();
+        db.collection("albums").document(albumUuid).collection("media_items").get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
 
+                        if (!queryDocumentSnapshots.isEmpty()) {
+
+                            List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+
+                            for (DocumentSnapshot documentSnapshot : list) {
+                                BookeoMediaItem item = new BookeoMediaItem();
+                                item = documentSnapshot.toObject(BookeoMediaItem.class);
+
+                                BookeoMediaItem arItem = new BookeoMediaItem(item.getUuid(), item.getUrl(), item.getName(), item.getDate(), item.getAlbumUuid());
+
+                                mediaItems.add(arItem);
+
+                                //data = albums.get(0).getUuid() + " " + albums.get(0).getName() + " " + album.getCreateDate();
+                                //Log.d("OUTPUT", "onSuccess create: " + arItem.getUrl());
+                                //Log.d("OUTPUT--", "onSuccess create: " + mediaItems.get(0).getUrl());
+                                //Log.d("SIZE--", "onSuccess create: " + mediaItems.size());
+                            }
+                        }
+                    }
+                });
+        //Log.d("SIZE", "onSuccess create: " + mediaItems.size());
+        return mediaItems;
     }
 
 }

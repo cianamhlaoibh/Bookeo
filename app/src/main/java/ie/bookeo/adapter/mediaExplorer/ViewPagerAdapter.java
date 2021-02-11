@@ -22,24 +22,6 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-//        Fragment fragment = null;
-//        if (position == 0)
-//        {
-//            fragment = new FolderViewFragment();
-//        }
-//        else if (position == 1)
-//        {
-//            fragment = new BookeoFolderFragment();
-//        }
-//        else if (position == 2)
-//        {
-//            fragment = new DeviceImagesFragement();
-//        }
-//        else if (position == 3)
-//        {
-//            fragment = new GoogleDriveFragment();
-//        }
-//        return fragment;
         return mFragmentList.get(position);
     }
 

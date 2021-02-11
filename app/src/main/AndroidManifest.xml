@@ -59,7 +59,10 @@
             android:name=".view.LandingActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".view.bookeo.BookeoAlbumsActivity"
+            android:name=".view.bookeo.BookeoMain"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".view.bookeo.BookeoBook"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".view.drive.DriveMediaDisplay"

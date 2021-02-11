@@ -40,7 +40,6 @@ import ie.bookeo.model.gallery_model.DeviceMediaItem;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 import ie.bookeo.utils.ShowGallery;
-import ie.bookeo.view.mediaExplorer.MainActivity;
 
 /**
  * Reference
@@ -183,7 +182,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
                 startActivity(new Intent(this, OssLicensesMenuActivity.class));
             //https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
             case android.R.id.home:
-                Intent intent = new Intent(BookeoMediaDisplay.this, BookeoAlbumsActivity.class);
+                Intent intent = new Intent(BookeoMediaDisplay.this, BookeoMain.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();
@@ -199,7 +198,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
                     @Override
                     public void onSuccess(Void aVoid) {
                         Toast.makeText(getApplicationContext(), "Album " + name + " Deleted", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(BookeoMediaDisplay.this, BookeoAlbumsActivity.class);
+                        Intent intent = new Intent(BookeoMediaDisplay.this, BookeoMain.class);
                         startActivity(intent);
                     }
                 })

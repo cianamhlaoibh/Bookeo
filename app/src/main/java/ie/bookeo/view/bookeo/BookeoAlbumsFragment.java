@@ -2,17 +2,16 @@ package ie.bookeo.view.bookeo;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -34,27 +33,28 @@ import ie.bookeo.model.gallery_model.DeviceMediaItem;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 
-public class BookeoAlbumsActivity extends AppCompatActivity implements MediaDisplayItemClickListener {
+public class BookeoAlbumsFragment extends Fragment implements MediaDisplayItemClickListener {
     RecyclerView rvAlbums;
     TextView tvEmpty;
     private BookeoMainFolderAdapter bookeoMainFolderAdapter;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference albumsRef = db.collection("albums");
 
+    @Nullable
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bookeo_albums);
-        rvAlbums = findViewById(R.id.rvBookeoAlbums);
-        rvAlbums.addItemDecoration(new MarginItemDecoration(this));
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_bookeo_albums, container, false);
+        rvAlbums = root.findViewById(R.id.rvBookeoAlbums);
+        rvAlbums.addItemDecoration(new MarginItemDecoration(getContext()));
         rvAlbums.hasFixedSize();
+        return root;
     }
 
     @Override
     public void onResume() {
         super.onResume();
         ArrayList<BookeoAlbum> albums = getAlbums();
-        bookeoMainFolderAdapter = new BookeoMainFolderAdapter(albums, this,this);
+        bookeoMainFolderAdapter = new BookeoMainFolderAdapter(albums, getContext(),this);
         rvAlbums.setAdapter(bookeoMainFolderAdapter);
     }
     public ArrayList<BookeoAlbum> getAlbums() {
@@ -119,7 +119,7 @@ public class BookeoAlbumsActivity extends AppCompatActivity implements MediaDisp
 
     @Override
     public void onBPicClicked(String albumUuid, String AlbumName) {
-        Intent move = new Intent(this, BookeoMediaDisplay.class);
+        Intent move = new Intent(getContext(), BookeoMediaDisplay.class);
         move.putExtra("folderUuid",albumUuid);
         move.putExtra("folderName",AlbumName);
         startActivity(move);
@@ -132,18 +132,6 @@ public class BookeoAlbumsActivity extends AppCompatActivity implements MediaDisp
 
     @Override
     public void onLongPress(MediaAdapterHolder holder, GoogleDriveMediaItem item, int position) {
-
-    }
-
-    /**
-     * Default status bar height 24dp,with code API level 24
-     */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void changeStatusBarColor() {
-        Window window = this.getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(ContextCompat.getColor(this, R.color.black));
 
     }
 }

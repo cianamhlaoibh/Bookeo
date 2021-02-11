@@ -10,7 +10,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import ie.bookeo.R;
-import ie.bookeo.view.bookeo.BookeoAlbumsActivity;
+import ie.bookeo.view.bookeo.BookeoAlbumsFragment;
+import ie.bookeo.view.bookeo.BookeoMain;
 import ie.bookeo.view.login.LoginActivity;
 import ie.bookeo.view.mediaExplorer.MainActivity;
 
@@ -50,7 +51,7 @@ public class LandingActivity extends AppCompatActivity implements View.OnClickLi
                 startActivity(startIntent);
                 break;
             case R.id.btnContinue:
-                Intent continueIntent = new Intent(this, BookeoAlbumsActivity.class);
+                Intent continueIntent = new Intent(this, BookeoMain.class);
                 startActivity(continueIntent);
         }
     }

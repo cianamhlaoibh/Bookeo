@@ -1,6 +1,9 @@
 package ie.bookeo.view.mediaExplorer;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -10,7 +13,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -20,13 +22,12 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.tabs.TabLayout;
-import com.google.firebase.auth.FirebaseAuth;
 
 import ie.bookeo.R;
 import ie.bookeo.adapter.mediaExplorer.ViewPagerAdapter;
-import ie.bookeo.utils.DriveLogoutListener;
+import ie.bookeo.dao.drive.DriveServiceHelper;
+import ie.bookeo.utils.DriveLoginListener;
 import ie.bookeo.view.drive.GoogleDriveFragment;
-import ie.bookeo.view.login.LoginActivity;
 
 
 /**
@@ -40,8 +41,9 @@ import ie.bookeo.view.login.LoginActivity;
  * This Activity loads all folders containing images int a RecyclerView
  */
 
-public class MainActivity extends AppCompatActivity implements DriveLogoutListener {
+public class MainActivity extends AppCompatActivity implements DriveLoginListener {
 
+    public static final int PERMISSION_REQUEST = 111;
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
@@ -68,26 +70,56 @@ public class MainActivity extends AppCompatActivity implements DriveLogoutListen
         super.onCreate(savedInstanceState);
 
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
-      // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
         //       WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        //check permissions
+        if(checkWriteExternalPermission())
+            _init();
+        else
+            grantPermission();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+    public void _init(){
         viewPager = findViewById(R.id.view_pager);
-        //viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        //viewPager.setAdapter(viewPagerAdapter);
         tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
         tabLayout.addOnTabSelectedListener(onTabSelectedListener);
         viewPager.addOnPageChangeListener(onPageChangeListener);
         setTabs();
     }
+
+    private boolean checkWriteExternalPermission()
+    {
+        String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+        int res = checkCallingOrSelfPermission(permission);
+        return (res == PackageManager.PERMISSION_GRANTED);
+    }
+
+    private void grantPermission(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    PERMISSION_REQUEST);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    _init();
+                }
+            }
+        }
+    }
+
 
     public void setTabs() {
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
@@ -105,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements DriveLogoutListen
         inflater.inflate(R.menu.main_activity_menu, menu);
         optionMenu = menu;
         GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
-        if(signInAccount != null) {
+        if(DriveServiceHelper.mDriveService != null) {
             menu.findItem(R.id.DriveLogout).setVisible(true);
         }else{
             menu.findItem(R.id.DriveLogout).setVisible(false);

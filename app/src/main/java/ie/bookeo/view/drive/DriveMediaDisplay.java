@@ -23,8 +23,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -55,10 +58,12 @@ import java.util.concurrent.Executors;
 import ie.bookeo.R;
 import ie.bookeo.adapter.MediaAdapterHolder;
 import ie.bookeo.adapter.bookeo.BookeoFolderAdapter;
+import ie.bookeo.adapter.drive.GoogleDriveFolderAdapter;
 import ie.bookeo.adapter.drive.GoogleDriveMediaItemAdapter;
 import ie.bookeo.dao.drive.DriveServiceHelper;
 import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
+import ie.bookeo.model.drive.DriveFolder;
 import ie.bookeo.model.drive.GoogleDriveMediaItem;
 import ie.bookeo.model.gallery_model.DeviceMediaItem;
 import ie.bookeo.utils.AlbumUploadListener;
@@ -75,15 +80,14 @@ public class DriveMediaDisplay extends AppCompatActivity implements MediaDisplay
 
     DriveServiceHelper driveServiceHelper;
     ArrayList<GoogleDriveMediaItem> driveMedia = new ArrayList<>();
+    ArrayList<DriveFolder> driveFolders = new ArrayList<>();
 
-    RecyclerView rvMediaItems;
+    RecyclerView rvMediaItems, rvFolders;
     GoogleDriveMediaItemAdapter adapter;
-    GoogleDriveDownload googleDriveDownloadInterface;
-    ArrayList<String> ids;
+    GoogleDriveFolderAdapter fAdapter;
 
     //select functionality
     Toolbar toolbar;
-    TabLayout tabLayout;
     ActionMode actionMode;
     ActionCallback actionCallback;
 
@@ -108,6 +112,13 @@ public class DriveMediaDisplay extends AppCompatActivity implements MediaDisplay
         id = i.getStringExtra("folderId");
         name = i.getStringExtra("folderName");
         driveServiceHelper = new DriveServiceHelper();
+
+        getSubFolders();
+        rvFolders = findViewById(R.id.rvFolders);
+        rvFolders.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
+        fAdapter = new GoogleDriveFolderAdapter(driveFolders, getApplicationContext());
+        rvFolders.setAdapter(fAdapter);
+
         getFolderImages();
         adapter = new GoogleDriveMediaItemAdapter(driveMedia, getApplicationContext(), this);
         rvMediaItems.setAdapter(adapter);
@@ -140,32 +151,26 @@ public class DriveMediaDisplay extends AppCompatActivity implements MediaDisplay
     @Override
     protected void onResume() {
         super.onResume();
+        fAdapter.notifyDataSetChanged();
         adapter.notifyDataSetChanged();
     }
 
     private void getFolderImages() {
-        ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Retrieving Images From Google Drive");
-        progressDialog.setMessage("Please wait...");
-        progressDialog.show();
         driveServiceHelper.getMediaByFolder(id)
                 .addOnCompleteListener(new OnCompleteListener<ArrayList<GoogleDriveMediaItem>>() {
                     @Override
                     public void onComplete(@NonNull Task<ArrayList<GoogleDriveMediaItem>> task) {
                         if(task.getResult().isEmpty()){
                             tvNoMedia.setVisibility(View.VISIBLE);
-                            progressDialog.dismiss();
                         }else {
                             driveMedia.addAll(task.getResult());
                             adapter.notifyDataSetChanged();
-                            progressDialog.dismiss();
                         }
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        progressDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Check your google drive api key", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -173,26 +178,18 @@ public class DriveMediaDisplay extends AppCompatActivity implements MediaDisplay
     }
 
 
-    public void listFiles(){
-        ProgressDialog progressDialog = new ProgressDialog(getApplicationContext());
-        progressDialog.setTitle("Retrieving Images From Google Drive");
-        progressDialog.setMessage("Please wait...");
-        progressDialog.show();
-        driveServiceHelper.getFolders();
-        driveServiceHelper.getMediaByFolder("1WhLE16j9dpOQGN2X3ytL4rUQPzu3ykrx");
-        driveServiceHelper.getListImages()
-                .addOnSuccessListener(new OnSuccessListener<ArrayList<GoogleDriveMediaItem>>() {
+    public void getSubFolders(){
+        driveServiceHelper.getSubFolders(id)
+                .addOnSuccessListener(new OnSuccessListener<ArrayList<DriveFolder>>() {
                     @Override
-                    public void onSuccess(ArrayList<GoogleDriveMediaItem> bookeoMediaItems) {
-                        progressDialog.dismiss();
-                        driveMedia.addAll(bookeoMediaItems) ;
-                        adapter.notifyDataSetChanged();
+                    public void onSuccess(ArrayList<DriveFolder> folders) {
+                        driveFolders.addAll(folders) ;
+                        fAdapter.notifyDataSetChanged();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        progressDialog.dismiss();
                         Toast.makeText(getApplicationContext(), "Check your google drive api key", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -448,9 +445,6 @@ public class DriveMediaDisplay extends AppCompatActivity implements MediaDisplay
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
                 finish();
                 return true;
             default:

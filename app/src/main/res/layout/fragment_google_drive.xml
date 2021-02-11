@@ -28,6 +28,7 @@
                 android:drawableLeft="@drawable/ic_google_drive"
                 android:text=" Sign In to your Drive "
                 android:textColor="@color/white"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

@@ -95,7 +95,7 @@ public class DriveServiceHelper {
         });
     }
 
-    public Task<ArrayList<DriveFolder>> getFolders() {
+    public Task<ArrayList<DriveFolder>> getRootFolders() {
         ArrayList<DriveFolder> driveFolders = new ArrayList<>();
         return Tasks.call(mExecutor, () -> {
             String pageToken = null;
@@ -103,7 +103,36 @@ public class DriveServiceHelper {
                 FileList result = null;
                 try {
                     result = mDriveService.files().list()
-                            .setQ("mimeType = 'application/vnd.google-apps.folder'")
+                            .setQ("mimeType = 'application/vnd.google-apps.folder' and 'root' in parents")
+                            .setSpaces("drive")
+                            .setFields("nextPageToken, files(id, name)")
+                            .setPageToken(pageToken)
+                            .execute();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                for (File file : result.getFiles()) {
+                    DriveFolder driveFolder = new DriveFolder();
+                    driveFolder.setId(file.getId());
+                    driveFolder.setName(file.getName());
+                    driveFolders.add(driveFolder);
+                    Log.d("Folder", "getFolders: " + file.getId() + " " + file.getName());
+                }
+                pageToken = result.getNextPageToken();
+            } while (pageToken != null);
+            return driveFolders;
+        });
+    }
+
+    public Task<ArrayList<DriveFolder>> getSubFolders(String id) {
+        ArrayList<DriveFolder> driveFolders = new ArrayList<>();
+        return Tasks.call(mExecutor, () -> {
+            String pageToken = null;
+            do {
+                FileList result = null;
+                try {
+                    result = mDriveService.files().list()
+                            .setQ("mimeType = 'application/vnd.google-apps.folder' and '" + id + "' in parents")
                             .setSpaces("drive")
                             .setFields("nextPageToken, files(id, name)")
                             .setPageToken(pageToken)

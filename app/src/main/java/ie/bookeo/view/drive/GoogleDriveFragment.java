@@ -15,7 +15,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -67,7 +66,6 @@ import ie.bookeo.adapter.bookeo.BookeoFolderAdapter;
 import ie.bookeo.adapter.drive.GoogleDriveFolderAdapter;
 import ie.bookeo.adapter.drive.GoogleDriveMediaItemAdapter;
 import ie.bookeo.adapter.MediaAdapterHolder;
-import ie.bookeo.adapter.mediaExplorer.ViewPagerAdapter;
 import ie.bookeo.dao.drive.DriveServiceHelper;
 import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
@@ -76,17 +74,13 @@ import ie.bookeo.model.drive.GoogleDriveMediaItem;
 import ie.bookeo.model.gallery_model.DeviceMediaItem;
 import ie.bookeo.utils.AlbumUploadListener;
 import ie.bookeo.utils.Config;
-import ie.bookeo.utils.DriveLogoutListener;
-import ie.bookeo.utils.GoogleDriveDownload;
+import ie.bookeo.utils.DriveLoginListener;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 import ie.bookeo.utils.MyCreateListener;
 import ie.bookeo.utils.ShowGallery;
 import ie.bookeo.view.mediaExplorer.AddAlbumFragment;
 import ie.bookeo.view.mediaExplorer.MainActivity;
-
-import static ie.bookeo.dao.drive.DriveServiceHelper.credential;
-import static ie.bookeo.dao.drive.DriveServiceHelper.mDriveService;
 
 /**
  *
@@ -97,7 +91,6 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
     Button btnDriveSignIn, btnDriveResync;
     ArrayList<DriveFolder> driveFolders = new ArrayList<>();
     ArrayList<GoogleDriveMediaItem> driveMedia = new ArrayList<>();
-    GoogleSignInClient client;
 
     RecyclerView rvFolders, rvMediaItems;
     GoogleDriveFolderAdapter adapter;
@@ -116,14 +109,17 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
     private List<BookeoAlbum> albums;
     TextView tvUploading;
     ProgressBar pbLoader;
-    DriveLogoutListener driveLogoutListener;
+    DriveLoginListener driveLogoutListener;
 
+    public GoogleDriveFragment() {
 
-    public GoogleDriveFragment(DriveLogoutListener listener) {
+    }
+
+    public GoogleDriveFragment(DriveLoginListener listener) {
         this.driveLogoutListener = listener;
     }
 
-        @Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -136,11 +132,11 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_google_drive, container, false);
         btnDriveSignIn = root.findViewById(R.id.btnDriveSignIn);
         btnDriveSignIn.setOnClickListener(new View.OnClickListener() {
-                                              @Override
-                                              public void onClick(View v) {
-                                                  requestSignIn();
-                                              }
-                                          });
+            @Override
+            public void onClick(View v) {
+                requestSignIn();
+            }
+        });
         btnDriveResync = root.findViewById(R.id.btnDriveResync);
         btnDriveResync.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,16 +144,17 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
                 requestSignIn();
             }
         });
+
         rvFolders = root.findViewById(R.id.rvFolders);
         rvFolders.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(getContext());
-        if(signInAccount != null){
+        if(signInAccount != null && driveServiceHelper == null){
             btnDriveResync.setVisibility(View.VISIBLE);
             btnDriveSignIn.setVisibility(View.GONE);
-        }else if(driveServiceHelper == null){
+        }else if(driveServiceHelper != null){
             btnDriveResync.setVisibility(View.GONE);
         }
-        else{
+        else if(signInAccount == null){
             btnDriveSignIn.setVisibility(View.VISIBLE);
             btnDriveResync.setVisibility(View.GONE);
         }
@@ -202,28 +199,28 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
         progressDialog.setTitle("Retrieving Media From Google Drive");
         progressDialog.setMessage("Please wait...");
         progressDialog.show();
-        driveServiceHelper.getFolders()
-            .addOnSuccessListener(new OnSuccessListener<ArrayList<DriveFolder>>() {
-                @Override
-                public void onSuccess(ArrayList<DriveFolder> folders) {
-                    driveFolders.addAll(folders) ;
-                    adapter.notifyDataSetChanged();
-                }
-            })
-            .addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    progressDialog.dismiss();
-                    Toast.makeText(getContext(), "Check your google drive api key", Toast.LENGTH_SHORT).show();
-                }
-            });
+        driveServiceHelper.getRootFolders()
+                .addOnSuccessListener(new OnSuccessListener<ArrayList<DriveFolder>>() {
+                    @Override
+                    public void onSuccess(ArrayList<DriveFolder> folders) {
+                        driveFolders.addAll(folders) ;
+                        adapter.notifyDataSetChanged();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        progressDialog.dismiss();
+                        Toast.makeText(getContext(), "Check your google drive api key", Toast.LENGTH_SHORT).show();
+                    }
+                });
         driveServiceHelper.getListImages()
                 .addOnSuccessListener(new OnSuccessListener<ArrayList<GoogleDriveMediaItem>>() {
                     @Override
                     public void onSuccess(ArrayList<GoogleDriveMediaItem> bookeoMediaItems) {
                         progressDialog.dismiss();
                         driveMedia.addAll(bookeoMediaItems) ;
-                       mAdapter.notifyDataSetChanged();
+                        mAdapter.notifyDataSetChanged();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -239,36 +236,12 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
         btnDriveResync.setVisibility(View.GONE);
     }
 
-    public void uploadFile(View view) {
-        ProgressDialog progressDialog = new ProgressDialog(getContext());
-        progressDialog.setTitle("Uploading to Google Drive");
-        progressDialog.setMessage("Please wait...");
-        progressDialog.show();
-
-        String filePath = "/storage/emulated/0/BIS4_S2.pdf";
-        driveServiceHelper.createPDFFile(filePath)
-            .addOnSuccessListener(new OnSuccessListener<String>() {
-                @Override
-                public void onSuccess(String s) {
-                    progressDialog.dismiss();
-                    Toast.makeText(getContext(), "Uplaod Successfully", Toast.LENGTH_SHORT).show();
-                }
-            })
-            .addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    progressDialog.dismiss();
-                    Toast.makeText(getContext(), "Check your google drive api key", Toast.LENGTH_SHORT).show();
-                }
-            });
-    }
-
     public void requestSignIn() {
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .requestScopes(new Scope(DriveScopes.DRIVE))
                 .build();
-        client = GoogleSignIn.getClient(getContext(), signInOptions);
+        GoogleSignInClient client = GoogleSignIn.getClient(getContext(), signInOptions);
         startActivityForResult(client.getSignInIntent(), 400);
     }
 
@@ -277,7 +250,7 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case 400:
-                    handleSignInIntent(data);
+                handleSignInIntent(data);
                 break;
         }
     }
@@ -297,6 +270,12 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
                                 .build();
                         btnDriveSignIn.setVisibility(View.INVISIBLE);
                         driveServiceHelper = new DriveServiceHelper(googleDriveService, credential);
+                    }
+                })
+                .addOnCompleteListener(new OnCompleteListener<GoogleSignInAccount>() {
+                    @Override
+                    public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
+                        btnDriveSignIn.setVisibility(View.INVISIBLE);
                         listFiles();
                         driveLogoutListener.DriveLogin(GoogleDriveFragment.this);
                         mAdapter.notifyDataSetChanged();
@@ -309,8 +288,6 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
                     }
                 });
     }
-
-
 
     public ArrayList<BookeoAlbum> getAlbums() {
         final ArrayList<BookeoAlbum> dbAlbums = new ArrayList<>();
@@ -391,20 +368,9 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
         rvAlbums.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * This Method gets all the images in the folder paths passed as a String to the method and returns
-     * and ArrayList of pictureFacer a custom object that holds data of a given image
-     */
-
-    //https://stackoverflow.com/questions/40193567/get-the-added-modified-taken-date-of-the-video-from-mediastore
-    public String getDate(long val){
-        val*=1000L;
-        return new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date(val));
-    }
-
     /*
-       toggling action bar that will change the color and option
-     */
+     toggling action bar that will change the color and option
+   */
     public void toggleActionBar(int position) {
         if (actionMode == null) {
             actionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(actionCallback);
