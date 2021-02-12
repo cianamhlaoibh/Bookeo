@@ -15,7 +15,7 @@ import ie.bookeo.R;
  *  - Creator - CodeBoy 722
  *  - Modified by Cian O Sullivan
  *
- * This is the viewholder for the MediaAdapter class. Each view holder stores can image
+ * This is the viewholder for the MediaAdapter class. Each view holder stores can image,
  */
 
 public class MediaAdapterHolder extends RecyclerView.ViewHolder{
