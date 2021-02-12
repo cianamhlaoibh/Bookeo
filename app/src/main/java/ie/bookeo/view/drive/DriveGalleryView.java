@@ -53,7 +53,12 @@ import ie.bookeo.dao.drive.DriveServiceHelper;
 import ie.bookeo.model.drive.GoogleDriveMediaItem;
 import ie.bookeo.utils.LoadListener;
 import ie.bookeo.view.bookeo.BookeoGalleryView;
-
+/**
+ * Reference
+ *  - URL - https://github.com/sheetalkumar105/androidimagevideogallery
+ *  - Creator - Sheetal Kumar Maurya
+ *  - Modified by Cian O Sullivan
+ */
 public class DriveGalleryView extends AppCompatActivity implements LoadListener{
 
     DriveServiceHelper driveServiceHelper;
@@ -65,10 +70,6 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
     ViewPager vpager;
     ImageView ivClose, ivDelete;
     ProgressBar progressBar;
-
-//    ArrayList<String> names =new ArrayList<>();
-//    ArrayList<String> urls =new ArrayList<>();
-//    ArrayList<String> ids =new ArrayList<>();
 
     String names;
     String urls;
@@ -109,9 +110,7 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
         extension = names.substring(names.lastIndexOf("."));
         storageReference = FirebaseStorage.getInstance().getReference("temp_items");
         fileRef = storageReference.child(ids);
-
         driveServiceHelper = new DriveServiceHelper();
-
         // Create an executor that executes tasks in a background thread.
         ScheduledExecutorService backgroundExecutor = Executors.newSingleThreadScheduledExecutor();
         // Execute a task in the background thread.
@@ -127,8 +126,6 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
             }
         });
 
-
-
         ivClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,7 +133,6 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
                 fileRef.delete();
             }
         });
-
         ivDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -145,7 +141,6 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
                 finish();
             }
         });
-
         progressBar.setVisibility(View.VISIBLE);
     }
 
@@ -174,14 +169,6 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
                                                         Log.d("URL", "onSuccess: " + task.getResult().toString());
                                                     }
                                                 });
-//                                                .addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                                                    @Override
-//                                                    public void onSuccess(Uri uri) {
-//                                                        temp_url[0] = uri.toString();
-//                                                        //gallaryAdapter.notifyDataSetChanged();
-//                                                        Log.d("URL", "onSuccess: " + uri.toString());
-//                                                    }
-//                                                });
                                     }
                                 })
                                 .addOnFailureListener(new OnFailureListener() {
@@ -218,8 +205,6 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
             return null;
         }
     }
-//
-
 
     @Override
     protected void onResume() {
@@ -229,17 +214,6 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
         }else
             grantPermission();
     }
-
-    private void deleteBookeoItem() {
-//        bookeoMediaItemDao = new BookeoMediaItemDao();
-//        int position = vpager.getCurrentItem();
-//        String currentUuid = uuids.get(position);
-//        names.remove(position);
-//        urls.remove(position);
-//        uuids.remove(position);
-//        bookeoMediaItemDao.deleteMediaItem(albumUuid, currentUuid, this);
-    }
-
 
     private boolean checkWriteExternalPermission()
     {
@@ -271,8 +245,6 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
 
 
     public void _init(){
-
-
         gallaryAdapter = new GalleryPagerAdapter(this);
         vpager.setAdapter(gallaryAdapter);
         vpager.setOffscreenPageLimit(3); // how many images to load into memoryvpager

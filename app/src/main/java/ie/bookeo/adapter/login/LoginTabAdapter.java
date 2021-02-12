@@ -9,9 +9,12 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import ie.bookeo.view.login.LoginFragment;
 import ie.bookeo.view.login.RegisterFragment;
-/*
+/**
+ * Reference
  *
- *https://www.youtube.com/watch?v=ayKMfVt2Sg4
+ *  - Modern Login and Sign up Animation using Fragments and Viewpager
+ *  - URL - https://www.youtube.com/watch?v=ayKMfVt2Sg4
+ *  - Creator - Coding With Tea
  *
  */
 public class LoginTabAdapter extends FragmentPagerAdapter {

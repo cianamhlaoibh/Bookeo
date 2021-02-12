@@ -22,9 +22,16 @@ import com.google.firebase.auth.FirebaseAuth;
 import ie.bookeo.R;
 import ie.bookeo.view.LandingActivity;
 
-/*
+/**
+ * References
  *
- *https://www.youtube.com/watch?v=ayKMfVt2Sg4
+ *  - Login & Register Android App Using Firebase Tutorial Series
+ *  - URL - https://www.youtube.com/watch?v=tbh9YaWPKKs&list=PLlGT4GXi8_8eVRzsP295cTiz7SbZBn58c
+ *  - Creator - SmallAcademy
+ *
+ *  - Modern Login and Sign up Animation using Fragments and Viewpager
+ *  - URL - https://www.youtube.com/watch?v=ayKMfVt2Sg4
+ *  - Creator - Coding With Tea
  *
  */
 public class LoginFragment extends Fragment implements View.OnClickListener{

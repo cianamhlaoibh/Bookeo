@@ -83,7 +83,32 @@ import ie.bookeo.view.mediaExplorer.AddAlbumFragment;
 import ie.bookeo.view.mediaExplorer.MainActivity;
 
 /**
+ * References
+ *  - URL - https://github.com/CodeBoy722/Android-Simple-Image-Gallery
+ *  - Creator - CodeBoy 722
+ *  - Modified by Cian O Sullivan
  *
+ *  - URL - https://medium.com/better-programming/gmail-like-list-67bc51adc68a
+ *  - Github - https://github.com/Mustufa786/MultiSelectionList
+ *  - Creator - Mustufa Ansari
+ *  - Modified by Cian O Sullivan
+ *
+ *  - To program toolbar back button
+ *  - URL https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
+ *
+ *  - To retireve items from firestore
+ *  - URL - https://www.youtube.com/watch?v=Bh0h_ZhX-Qg
+ *  - Creator - Coding in Flow
+ *
+ *  - To add media to firebase storage
+ *  - URL - https://www.youtube.com/watch?v=lPfQN-Sfnjw&t=1013s
+ *  - Creator - Coding in Flow
+ *
+ *  - To update document in firestore
+ *  - URL - https://www.youtube.com/watch?v=TBr_5QH1EvQ
+ *  - Creator - Coding in Flow
+ *
+ * This Activity loads all images to images associated with a particular folder into a recyclerview with grid manager
  */
 public class GoogleDriveFragment extends Fragment implements MediaDisplayItemClickListener, AlbumUploadListener {
 

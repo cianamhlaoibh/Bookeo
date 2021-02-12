@@ -26,8 +26,20 @@ import ie.bookeo.model.drive.GoogleDriveMediaItem;
 
 
 /**
- * Google Drive Docs
- * https://developers.google.com/drive/api/v3/search-files
+ * References
+ *
+ *  - Google Drive API in Android Studio Tutorial Series
+ *  - URL - https://www.youtube.com/watch?v=KuXeMoJwcis&list=PLF0BIlN2vd8sqGfhxmzJ93SmfMLMtM1nW
+ *  - Creator - Coding With Tea
+ *
+ *  - Search for files and folders
+ *  - URL - https://developers.google.com/drive/api/v3/search-files
+ *  - Creator - Google Drive Docs
+ *
+ *  - Download files
+ *  - URL - https://developers.google.com/drive/api/v3/manage-downloads
+ *  - Creator - Google Drive Docs
+ *
  */
 public class DriveServiceHelper {
 
@@ -45,27 +57,7 @@ public class DriveServiceHelper {
 
     }
 
-    public Task<String> createPDFFile(String filepath) {
-        return Tasks.call(mExecutor, () -> {
-            File fileMetaData = new File();
-            fileMetaData.setName("mypdffile");
-
-            java.io.File file = new java.io.File(filepath);
-            FileContent mediaContent = new FileContent("application/pdf", file);
-
-            File myFile = null;
-            try {
-                myFile = mDriveService.files().create(fileMetaData, mediaContent).execute();
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            if (file == null) {
-                throw new IOException("Null result when requesting file creation");
-            }
-            return myFile.getId();//id of file in drive
-        });
-    }
-
+    //https://developers.google.com/drive/api/v3/search-files
     public Task<ArrayList<GoogleDriveMediaItem>> getListImages() {
         ArrayList<GoogleDriveMediaItem> driveMedia = new ArrayList<>();
        return Tasks.call(mExecutor, () -> {
@@ -95,6 +87,7 @@ public class DriveServiceHelper {
         });
     }
 
+    //https://developers.google.com/drive/api/v3/search-files
     public Task<ArrayList<DriveFolder>> getRootFolders() {
         ArrayList<DriveFolder> driveFolders = new ArrayList<>();
         return Tasks.call(mExecutor, () -> {
@@ -124,6 +117,7 @@ public class DriveServiceHelper {
         });
     }
 
+    //https://developers.google.com/drive/api/v3/search-files
     public Task<ArrayList<DriveFolder>> getSubFolders(String id) {
         ArrayList<DriveFolder> driveFolders = new ArrayList<>();
         return Tasks.call(mExecutor, () -> {
@@ -153,6 +147,7 @@ public class DriveServiceHelper {
         });
     }
 
+    //https://developers.google.com/drive/api/v3/manage-downloads
     public Task<byte[]> downloadFile(String fileId) {
         return Tasks.call(mExecutor, () -> {
             byte[] data;

@@ -26,18 +26,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.tabs.TabLayout;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -75,6 +67,35 @@ import ie.bookeo.utils.MyCreateListener;
 import ie.bookeo.utils.ShowGallery;
 import ie.bookeo.view.mediaExplorer.AddAlbumFragment;
 import ie.bookeo.view.mediaExplorer.MainActivity;
+
+/**
+ * References
+ *  - URL - https://github.com/CodeBoy722/Android-Simple-Image-Gallery
+ *  - Creator - CodeBoy 722
+ *  - Modified by Cian O Sullivan
+ *
+ *  - URL - https://medium.com/better-programming/gmail-like-list-67bc51adc68a
+ *  - Github - https://github.com/Mustufa786/MultiSelectionList
+ *  - Creator - Mustufa Ansari
+ *  - Modified by Cian O Sullivan
+ *
+ *  - To program toolbar back button
+ *  - URL https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
+ *
+ *  - To retireve items from firestore
+ *  - URL - https://www.youtube.com/watch?v=Bh0h_ZhX-Qg
+ *  - Creator - Coding in Flow
+ *
+ *  - To add media to firebase storage
+ *  - URL - https://www.youtube.com/watch?v=lPfQN-Sfnjw&t=1013s
+ *  - Creator - Coding in Flow
+ *
+ *  - To update document in firestore
+ *  - URL - https://www.youtube.com/watch?v=TBr_5QH1EvQ
+ *  - Creator - Coding in Flow
+ *
+ * This Activity loads all images to images associated with a particular folder into a recyclerview with grid manager
+ */
 
 public class DriveMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener, AlbumUploadListener {
 

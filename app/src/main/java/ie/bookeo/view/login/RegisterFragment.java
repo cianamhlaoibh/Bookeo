@@ -27,9 +27,16 @@ import ie.bookeo.dao.UserDao;
 import ie.bookeo.view.LandingActivity;
 import ie.bookeo.model.User;
 
-/*
+/**
+ * References
  *
- *https://www.youtube.com/watch?v=ayKMfVt2Sg4
+ *  - Login & Register Android App Using Firebase Tutorial Series
+ *  - URL - https://www.youtube.com/watch?v=tbh9YaWPKKs&list=PLlGT4GXi8_8eVRzsP295cTiz7SbZBn58c
+ *  - Creator - SmallAcademy
+ *
+ *  - Modern Login and Sign up Animation using Fragments and Viewpager
+ *  - URL - https://www.youtube.com/watch?v=ayKMfVt2Sg4
+ *  - Creator - Coding With Tea
  *
  */
 public class RegisterFragment extends Fragment implements View.OnClickListener{

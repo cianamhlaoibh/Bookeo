@@ -46,8 +46,7 @@ public class GoogleDriveMediaItemAdapter extends  RecyclerView.Adapter<MediaAdap
     private ArrayList<GoogleDriveMediaItem> arMediaList;
     private Context contx;
     private MediaDisplayItemClickListener mediaDisplayItemListener = null;
-    //private DriveServiceHelper driveServiceHelper;
-    //
+
     DriveServiceHelper driveServiceHelper = new DriveServiceHelper();
 
     ArrayList<String> fileIds;
@@ -95,22 +94,17 @@ public class GoogleDriveMediaItemAdapter extends  RecyclerView.Adapter<MediaAdap
         for (GoogleDriveMediaItem p : arMediaList) {
             ids.add(p.getFileId());
         }
+
         //reset data value
         data = null;
         RequestOptions options = new RequestOptions();
         options.skipMemoryCache(true);
         options.diskCacheStrategy(DiskCacheStrategy.NONE);
-       // mDriveService.files().get(file.getFileId()).buildHttpRequestUrl())
 
         Glide.with(contx)
-               // .load(driveServiceHelper.executeDownload(arMediaList.get(position).getUuid()))
                 .load(file.getThumbnailLink())
-                //.apply(new RequestOptions().centerCrop())
                 .apply(options)
                 .into(holder.picture);
-
-
-        //setTransitionName(holder.picture, String.valueOf(position) + "_image");
 
         holder.picture.setOnClickListener(new View.OnClickListener() {
             @Override

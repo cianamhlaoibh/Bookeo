@@ -8,8 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A [FragmentPagerAdapter] that returns a fragment corresponding to
- * one of the sections/tabs/pages.
+ * References
+ *
+ * - Android Material Design working with Tabs
+ * - URL - https://www.androidhive.info/2015/09/android-material-design-working-with-tabs/
+ * - Creator - androidhive
+ *
  */
 public class ViewPagerAdapter extends FragmentPagerAdapter {
 
@@ -44,26 +48,5 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
         return mFragmentList.size();
     }
 
-//    @Override
-//    public CharSequence getPageTitle(int position) {
-//        String title = null;
-//        if (position == 0)
-//        {
-//            title = "Device";
-//        }
-//        else if (position == 1)
-//        {
-//            title = "Bookeo";
-//        }
-//        else if (position == 2)
-//        {
-//            title = "Images";
-//        }
-//        else if (position == 3)
-//        {
-//            title = "Drive";
-//        }
-//        return title;
-//    }
 
 }

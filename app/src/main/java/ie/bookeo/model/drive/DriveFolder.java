@@ -2,6 +2,10 @@ package ie.bookeo.model.drive;
 
 public class DriveFolder {
 
+    String id;
+    String name;
+    String path;
+
     public String getId() {
         return id;
     }
@@ -28,9 +32,4 @@ public class DriveFolder {
 
     public DriveFolder() {
     }
-
-    String id;
-    String name;
-    String path;
-
 }

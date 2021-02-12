@@ -34,11 +34,19 @@ import ie.bookeo.dao.UserDao;
 import ie.bookeo.model.User;
 import ie.bookeo.view.LandingActivity;
 
-/*
-*
-*https://www.youtube.com/watch?v=ayKMfVt2Sg4
-*
-*/
+/**
+ * References
+ *
+ * - Firebase Google Sign-in Authentication Android
+ * - URL - https://www.youtube.com/watch?v=2iCx1kK6sOM&list=PLlGT4GXi8_8cJQu-DAJNxIoxAfSfrNSQh
+ * - Creator - SmallAcademy
+ *
+ *  - Modern Login and Sign up Animation using Fragments and Viewpager
+ *  - URL - https://www.youtube.com/watch?v=ayKMfVt2Sg4
+ *  - Creator - Coding With Tea
+ *
+ */
+
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final int GOOGLE_SIGNIN_CODE = 1000;
