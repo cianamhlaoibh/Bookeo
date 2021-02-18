@@ -21,22 +21,24 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.Target;
+
+import net.glxn.qrgen.android.QRCode;
 
 import java.util.List;
 
+
 import ie.bookeo.R;
 import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
-import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
 import ie.bookeo.model.bookeo.MyCaptionStyle;
-import ie.bookeo.view.bookeo.BookeoBook;
 import ie.bookeo.view.bookeo.BookeoPage;
 
+
+/**
+ * Reference
+ *  - URL - https://github.com/kenglxn/QRGen
+ *  - Creator - Ken Gullaksen
+ */
 public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  {
     private List<BookeoMediaItem> items;
     private Context contx;
@@ -70,7 +72,16 @@ public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  
                 style.applyCaptionStyle(style, holder.tvCaption);
             }
         }
-        holder.ivMedia.setOnClickListener(new View.OnClickListener() {
+        if(item.getEnlarged() == null || item.getEnlarged() == false){
+            holder.ivMedia.setVisibility(View.VISIBLE);
+            holder.ivMediaLrg.setVisibility(View.GONE);
+            Glide.with(contx).load(item.getUrl()).into(holder.ivMedia);
+        }else if(item.getEnlarged() == true){
+            holder.ivMediaLrg.setVisibility(View.VISIBLE);
+            holder.ivMedia.setVisibility(View.GONE);
+            Glide.with(contx).load(item.getUrl()).into(holder.ivMediaLrg);
+        }
+        holder.ivPage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(contx, BookeoPage.class);
@@ -84,7 +95,22 @@ public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  
         if(item.getPosition() == -1) {
             dao.updatePosition(item.getAlbumUuid(), item.getUuid(), position);
         }
-        //TODO - GENERATE QR CODE - IF VIDEO CLIP
+        //GENERATE QR CODE - IF VIDEO CLIP
+        String extension = item.getName().substring(item.getName().lastIndexOf("."));
+        if(extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".avi") || extension.equalsIgnoreCase(".mkv")) {
+            // The data that the QR code will contain
+            String data = item.getUrl();
+            // Create the QR code and display
+            Bitmap qr = createQR(data);
+            Glide.with(contx).load(qr).into(holder.ivQR);
+            holder.ivQR.setVisibility(View.VISIBLE);
+        }
+    }
+
+    // Function to create the QR code
+    public static Bitmap createQR(String data){
+        Bitmap myBitmap = QRCode.from(data).bitmap();
+        return myBitmap;
     }
 
     @Override

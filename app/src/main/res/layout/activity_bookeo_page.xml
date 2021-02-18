@@ -83,6 +83,8 @@
             app:layout_constraintStart_toEndOf="@+id/ivSize"
             app:layout_constraintTop_toTopOf="parent" />
 
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageView
@@ -109,11 +111,11 @@
         android:id="@+id/tvCaption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
         android:textSize="8sp"
         app:layout_constraintBottom_toBottomOf="@+id/ivPage"
         app:layout_constraintEnd_toEndOf="@+id/ivPage"
         app:layout_constraintStart_toStartOf="@+id/ivPage"
-        app:layout_constraintTop_toBottomOf="@+id/ivImageStd"
         tools:text="write caption here" />
 
     <ImageView
@@ -124,5 +126,17 @@
         app:layout_constraintStart_toStartOf="@+id/ivPage"
         app:layout_constraintTop_toTopOf="@+id/ivPage"
         app:srcCompat="@drawable/placeholder" />
+
+    <ImageView
+        android:id="@+id/ivQR"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginBottom="2dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/ivPage"
+        app:layout_constraintStart_toStartOf="@+id/ivPage"
+        app:srcCompat="@drawable/qr_sample"
+        tools:visibility="visible"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

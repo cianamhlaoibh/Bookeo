@@ -46,7 +46,7 @@ public class BookeoAlbumBookAdapter extends  RecyclerView.Adapter<BookeoAlbumBoo
                 .into(holder.ivCover);
         holder.tvTitle.setText(album.getName());
         holder.tvDate.setText(album.getCreateDate());
-        holder.ivArrow.setOnClickListener(new View.OnClickListener() {
+        holder.layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(contx, BookeoBook.class);

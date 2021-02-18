@@ -7,7 +7,7 @@
     android:layout_height="wrap_content">
 
     <ImageView
-        android:id="@+id/imageView5"
+        android:id="@+id/ivPage"
         android:layout_width="260dp"
         android:layout_height="180dp"
         android:layout_marginTop="8dp"
@@ -24,10 +24,10 @@
         android:id="@+id/ivMedia"
         android:layout_width="200dp"
         android:layout_height="120dp"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView5"
-        app:layout_constraintEnd_toEndOf="@+id/imageView5"
-        app:layout_constraintStart_toStartOf="@+id/imageView5"
-        app:layout_constraintTop_toTopOf="@+id/imageView5"
+        app:layout_constraintBottom_toBottomOf="@+id/ivPage"
+        app:layout_constraintEnd_toEndOf="@+id/ivPage"
+        app:layout_constraintStart_toStartOf="@+id/ivPage"
+        app:layout_constraintTop_toTopOf="@+id/ivPage"
         app:srcCompat="@drawable/placeholder" />
 
     <ImageView
@@ -37,8 +37,8 @@
         android:layout_marginStart="2dp"
         android:layout_marginBottom="2dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView5"
-        app:layout_constraintStart_toStartOf="@+id/imageView5"
+        app:layout_constraintBottom_toBottomOf="@+id/ivPage"
+        app:layout_constraintStart_toStartOf="@+id/ivPage"
         app:srcCompat="@drawable/qr_sample"
         tools:visibility="visible"/>
 
@@ -46,11 +46,20 @@
         android:id="@+id/tvCaption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
         android:textSize="8sp"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView5"
-        app:layout_constraintEnd_toEndOf="@+id/imageView5"
+        app:layout_constraintBottom_toBottomOf="@+id/ivPage"
+        app:layout_constraintEnd_toEndOf="@+id/ivPage"
         app:layout_constraintStart_toStartOf="@+id/ivQR"
-        app:layout_constraintTop_toBottomOf="@+id/ivMedia"
         tools:text="write caption here" />
+
+    <ImageView
+        android:id="@+id/ivImageLrg"
+        android:layout_width="260dp"
+        android:layout_height="155dp"
+        app:layout_constraintEnd_toEndOf="@+id/ivPage"
+        app:layout_constraintStart_toStartOf="@+id/ivPage"
+        app:layout_constraintTop_toTopOf="@+id/ivPage"
+        app:srcCompat="@drawable/placeholder" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
