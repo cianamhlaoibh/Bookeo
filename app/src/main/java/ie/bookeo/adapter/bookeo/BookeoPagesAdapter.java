@@ -4,13 +4,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,17 +30,22 @@ import com.bumptech.glide.request.target.Target;
 import java.util.List;
 
 import ie.bookeo.R;
+import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
 import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
+import ie.bookeo.model.bookeo.MyCaptionStyle;
 import ie.bookeo.view.bookeo.BookeoBook;
+import ie.bookeo.view.bookeo.BookeoPage;
 
 public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  {
     private List<BookeoMediaItem> items;
     private Context contx;
+    private BookeoMediaItemDao dao;
 
     public BookeoPagesAdapter(List<BookeoMediaItem> items, Context contx) {
         this.items = items;
         this.contx = contx;
+        dao = new BookeoMediaItemDao();
     }
 
     @NonNull
@@ -56,13 +65,25 @@ public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  
         String caption = item.getCaption();
         if (caption != null) {
             holder.tvCaption.setText(caption);
+            MyCaptionStyle style = item.getStyle();
+            if (style != null) {
+                style.applyCaptionStyle(style, holder.tvCaption);
+            }
         }
         holder.ivMedia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO - EDIT IMAGE
+                Intent intent = new Intent(contx, BookeoPage.class);
+                intent.putExtra("id", item.getUuid());
+                intent.putExtra("position", position);
+                intent.putExtra("albumUuid", item.getAlbumUuid());
+                contx.startActivity(intent);
             }
         });
+        //This sets position field when album is first generated
+        if(item.getPosition() == -1) {
+            dao.updatePosition(item.getAlbumUuid(), item.getUuid(), position);
+        }
         //TODO - GENERATE QR CODE - IF VIDEO CLIP
     }
 

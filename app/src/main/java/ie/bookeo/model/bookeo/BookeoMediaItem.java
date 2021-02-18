@@ -2,6 +2,7 @@ package ie.bookeo.model.bookeo;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.accessibility.CaptioningManager;
 
 import ie.bookeo.model.MediaItem;
 
@@ -11,8 +12,12 @@ public class BookeoMediaItem extends MediaItem {
     private String url;
     private String caption;
     private String albumUuid;
+    private int position;
+    private Boolean isEnlarged;
+    private MyCaptionStyle  style;
 
     public BookeoMediaItem() {
+        this.position = -1;
     }
 
     public BookeoMediaItem(String uuid, String url, String name, String date, String albumUuid) {
@@ -21,6 +26,7 @@ public class BookeoMediaItem extends MediaItem {
         super.setName(name);
         super.setDate(date);
         this.albumUuid = albumUuid;
+        this.position = -1;
     }
 
     public BookeoMediaItem(String uuid, String url, String name, String caption, String date, String albumUuid) {
@@ -30,18 +36,8 @@ public class BookeoMediaItem extends MediaItem {
         super.setName(name);
         super.setDate(date);
         this.albumUuid = albumUuid;
+        this.position = -1;
     }
-
-    //protected BookeoMediaItem(Parcel in) {
-        //uuid = in.readString();
-        //url = in.readString();
-
-       // caption = in.readString();
-       // super.setName(name);
-      //  super.setDate(date);
-     //   albumUuid = in.readString();
-   // }
-
 
     public String getUuid() {
         return uuid;
@@ -59,7 +55,6 @@ public class BookeoMediaItem extends MediaItem {
         this.url = url;
     }
 
-
     public String getCaption() {
         return caption;
     }
@@ -76,4 +71,27 @@ public class BookeoMediaItem extends MediaItem {
         this.albumUuid = albumUuid;
     }
 
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
+    public Boolean getEnlarged() {
+        return isEnlarged;
+    }
+
+    public void setEnlarged(Boolean enlarged) {
+        isEnlarged = enlarged;
+    }
+
+    public MyCaptionStyle getStyle() {
+        return style;
+    }
+
+    public void setStyle(MyCaptionStyle style) {
+        this.style = style;
+    }
 }

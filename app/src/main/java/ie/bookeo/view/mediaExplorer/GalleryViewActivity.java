@@ -1,16 +1,11 @@
 package ie.bookeo.view.mediaExplorer;
 
 import android.Manifest;
-import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +21,6 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import ie.bookeo.dao.DeviceMediaDao;
-import ie.bookeo.utils.ShowGallery;
 import ie.bookeo.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -34,7 +28,6 @@ import com.bumptech.glide.request.transition.Transition;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import cn.jzvd.JZVideoPlayerStandard;
@@ -90,7 +83,7 @@ public class GalleryViewActivity extends AppCompatActivity {
         });
 
 
-        final ImageView _btn_action = (ImageView) findViewById(R.id.ivDelete);
+        final ImageView _btn_action = (ImageView) findViewById(R.id.ivColor);
 
             _btn_action.setOnClickListener(new View.OnClickListener() {
                 @Override

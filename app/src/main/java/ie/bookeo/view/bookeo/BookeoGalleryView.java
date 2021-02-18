@@ -77,7 +77,7 @@ public class BookeoGalleryView extends AppCompatActivity {
 
         vpager= (ViewPager) findViewById(R.id.pager);
         ivClose = (ImageView) findViewById(R.id.btn_close);
-        ivDelete = (ImageView) findViewById(R.id.ivDelete);
+        ivDelete = (ImageView) findViewById(R.id.ivColor);
 
         position=b.getInt("position",0);
         callback=b.getInt("callback",0);

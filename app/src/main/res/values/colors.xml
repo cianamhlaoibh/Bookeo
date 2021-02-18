@@ -11,4 +11,7 @@
     <color name="textColorPrimary">#FFFFFF</color>
     <color name="windowBackground">#FFFFFF</color>
     <color name="navigationBarColor">#000000</color>
+    <color name="red">#FF0000</color>
+    <color name="navy">#000080</color>
+    <color name="beige">#CFB997</color>
 </resources>

@@ -20,7 +20,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
@@ -31,7 +30,6 @@ import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.storage.FirebaseStorage;
@@ -40,19 +38,15 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import cn.jzvd.JZVideoPlayerStandard;
 import ie.bookeo.R;
-import ie.bookeo.adapter.bookeo.BookeoMainFolderAdapter;
-import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
 import ie.bookeo.dao.drive.DriveServiceHelper;
-import ie.bookeo.model.drive.GoogleDriveMediaItem;
 import ie.bookeo.utils.LoadListener;
-import ie.bookeo.view.bookeo.BookeoGalleryView;
+
 /**
  * Reference
  *  - URL - https://github.com/sheetalkumar105/androidimagevideogallery
@@ -99,7 +93,7 @@ public class DriveGalleryView extends AppCompatActivity implements LoadListener{
 
         vpager= findViewById(R.id.pager);
         ivClose =  findViewById(R.id.btn_close);
-        ivDelete = findViewById(R.id.ivDelete);
+        ivDelete = findViewById(R.id.ivColor);
         progressBar = findViewById(R.id.loader);
 
         position=b.getInt("position",0);

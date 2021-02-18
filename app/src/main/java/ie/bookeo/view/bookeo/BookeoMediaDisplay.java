@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -34,6 +35,8 @@ import java.util.List;
 import ie.bookeo.R;
 import ie.bookeo.adapter.bookeo.BookeoMediaItemAdapter;
 import ie.bookeo.adapter.MediaAdapterHolder;
+import ie.bookeo.dao.bookeo.BookeoAlbumDao;
+import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
 import ie.bookeo.model.drive.GoogleDriveMediaItem;
 import ie.bookeo.model.gallery_model.DeviceMediaItem;
@@ -64,7 +67,7 @@ import ie.bookeo.utils.ShowGallery;
  * This Activity loads all images to images associated with a particular folder into a recyclerview with grid manager from cloud storage
  */
 
-public class BookeoMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener {
+public class BookeoMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener, View.OnClickListener {
 
     RecyclerView rvMediaItems;
     ArrayList<BookeoMediaItem> mediaItems;
@@ -73,6 +76,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     ImageButton ibAlbum;
     BookeoMediaItemAdapter adapter;
     TextView tvNoMedia;
+    FloatingActionButton fabGenerate;
 
     //DB
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -111,6 +115,9 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         rvMediaItems.setAdapter(adapter);
         pbLoader = findViewById(R.id.loader);
         pbLoader.setVisibility(View.GONE);
+
+        fabGenerate = findViewById(R.id.fabGenerate);
+        fabGenerate.setOnClickListener(this);
 
        // viewVisibility();
     }
@@ -211,6 +218,19 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     }
 
     @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.fabGenerate:
+                BookeoAlbumDao dao = new BookeoAlbumDao();
+                dao.generateBook(uuid);
+                Intent intent = new Intent(this, BookeoBook.class);
+                intent.putExtra("albumUuid", uuid);
+                startActivity(intent);
+                break;
+        }
+    }
+
+    @Override
     public void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> path, Context contx) {}
 
     @Override
@@ -242,4 +262,5 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     public void onLongPress(MediaAdapterHolder holder, GoogleDriveMediaItem item, int position) {
 
     }
+
 }

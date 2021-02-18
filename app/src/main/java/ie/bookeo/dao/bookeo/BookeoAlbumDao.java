@@ -64,4 +64,8 @@ public class BookeoAlbumDao {
         Log.d("SIZE", "getUserAlbums: " + dbAlbums.size());
         return dbAlbums;
     }
+
+    public void generateBook(String uuid) {
+        db.collection("albums").document(uuid).update("isGenerated", true);
+    }
 }

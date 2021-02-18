@@ -10,6 +10,7 @@ public class BookeoAlbum {
     private int count = 0;
     private String firstItem;
     private String fk_user;
+    private Boolean isGenerate;
 
     public BookeoAlbum() {
 
@@ -72,5 +73,13 @@ public class BookeoAlbum {
 
     public void setFk_user(String fk_user) {
         this.fk_user = fk_user;
+    }
+
+    public Boolean getGenerate() {
+        return isGenerate;
+    }
+
+    public void setGenerate(Boolean generate) {
+        isGenerate = generate;
     }
 }
