@@ -14,7 +14,7 @@ public class BookeoMediaItem extends MediaItem {
     private String albumUuid;
     private int position;
     private Boolean isEnlarged;
-    private MyCaptionStyle  style;
+
 
     public BookeoMediaItem() {
         this.position = -1;
@@ -87,11 +87,4 @@ public class BookeoMediaItem extends MediaItem {
         isEnlarged = enlarged;
     }
 
-    public MyCaptionStyle getStyle() {
-        return style;
-    }
-
-    public void setStyle(MyCaptionStyle style) {
-        this.style = style;
-    }
 }

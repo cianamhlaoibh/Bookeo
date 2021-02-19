@@ -28,6 +28,7 @@ import ie.bookeo.adapter.bookeo.BookeoMediaItemAdapter;
 import ie.bookeo.adapter.bookeo.BookeoPagesAdapter;
 import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
+import ie.bookeo.model.bookeo.BookeoPage;
 
 /**
  * Reference
@@ -44,6 +45,7 @@ public class BookeoBook extends AppCompatActivity {
 
     //DB
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    ArrayList<BookeoPage> pages;
     ArrayList<BookeoMediaItem> items;
     String uuid;
     Boolean isGenerated;
@@ -68,9 +70,9 @@ public class BookeoBook extends AppCompatActivity {
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
             int fromPosition = viewHolder.getAdapterPosition();
             int toPosition = target.getAdapterPosition();
-            dao.updatePosition(items.get(fromPosition).getAlbumUuid(), items.get(fromPosition).getUuid(), toPosition);
-            dao.updatePosition(items.get(toPosition).getAlbumUuid(), items.get(toPosition).getUuid(), fromPosition);
-            Collections.swap(items, fromPosition, toPosition);
+            dao.updatePosition(pages.get(fromPosition).getAlbumUuid(), pages.get(fromPosition).getPageUuid(), toPosition);
+            dao.updatePosition(pages.get(toPosition).getAlbumUuid(), pages.get(toPosition).getPageUuid(), fromPosition);
+            Collections.swap(pages, fromPosition, toPosition);
             recyclerView.getAdapter().notifyItemMoved(fromPosition, toPosition);
             return false;
         }
@@ -83,20 +85,20 @@ public class BookeoBook extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         //DB
-        items = new ArrayList<>();
+        pages = new ArrayList<>();
         if(isGenerated) {
-            items = getDbMediaOrdered(uuid);
+            pages = getDbMediaOrdered(uuid);
         }else{
-            items = getDbMedia(uuid);
+            pages = getDbMedia(uuid);
         }
-        adapter = new BookeoPagesAdapter(items, this);
+        adapter = new BookeoPagesAdapter(pages, items,this);
         rvPages.setAdapter(adapter);
     }
 
-    public ArrayList<BookeoMediaItem> getDbMediaOrdered(String albumUuid) {
-        final ArrayList<BookeoMediaItem> mediaItems = new ArrayList<>();
+    public ArrayList<BookeoPage> getDbMediaOrdered(String albumUuid) {
+        final ArrayList<BookeoPage> pages = new ArrayList<>();
 
-        db.collection("albums").document(albumUuid).collection("media_items").orderBy("position").get()
+        db.collection("albums").document(albumUuid).collection("pages").orderBy("pageNumber").get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -106,20 +108,19 @@ public class BookeoBook extends AppCompatActivity {
                             List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
 
                             for (DocumentSnapshot documentSnapshot : list) {
-                                BookeoMediaItem item;
-                                item = documentSnapshot.toObject(BookeoMediaItem.class);
-                                mediaItems.add(item);
+                                BookeoPage page;
+                                page = documentSnapshot.toObject(BookeoPage.class);
+                                pages.add(page);
                             }
                         }
                         adapter.notifyDataSetChanged();
                     }
                 });
-        return mediaItems;
+        return pages;
     }
-    public ArrayList<BookeoMediaItem> getDbMedia(String albumUuid) {
-        final ArrayList<BookeoMediaItem> mediaItems = new ArrayList<>();
-
-        db.collection("albums").document(albumUuid).collection("media_items").get()
+    public ArrayList<BookeoPage> getDbMedia(String albumUuid) {
+        final ArrayList<BookeoPage> pages = new ArrayList<>();
+        db.collection("albums").document(albumUuid).collection("pages").get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -129,14 +130,14 @@ public class BookeoBook extends AppCompatActivity {
                             List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
 
                             for (DocumentSnapshot documentSnapshot : list) {
-                                BookeoMediaItem item;
-                                item = documentSnapshot.toObject(BookeoMediaItem.class);
-                                mediaItems.add(item);
+                                BookeoPage page;
+                                page = documentSnapshot.toObject(BookeoPage.class);
+                                pages.add(page);
                             }
                         }
                         adapter.notifyDataSetChanged();
                     }
                 });
-        return mediaItems;
+        return pages;
     }
 }

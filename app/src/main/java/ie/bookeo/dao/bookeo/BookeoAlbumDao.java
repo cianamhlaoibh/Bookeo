@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ie.bookeo.model.bookeo.BookeoAlbum;
+import ie.bookeo.model.bookeo.BookeoMediaItem;
 
 public class BookeoAlbumDao {
     FirebaseFirestore db;
@@ -67,5 +68,20 @@ public class BookeoAlbumDao {
 
     public void generateBook(String uuid) {
         db.collection("albums").document(uuid).update("isGenerated", true);
+        final ArrayList<BookeoMediaItem> mediaItems = new ArrayList<>();
+        db.collection("albums").document(uuid).collection("media_items").get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+                            for (DocumentSnapshot documentSnapshot : list) {
+                                BookeoMediaItem item = documentSnapshot.toObject(BookeoMediaItem.class);
+                                mediaItems.add(item);
+                            }
+                        }
+                    }
+                });
     }
 }

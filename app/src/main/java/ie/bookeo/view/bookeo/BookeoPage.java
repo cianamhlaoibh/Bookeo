@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 import ie.bookeo.R;
 import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
+import ie.bookeo.dao.bookeo.BookeoPagesDao;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
 import ie.bookeo.model.bookeo.MyCaptionStyle;
 import ie.bookeo.utils.FirebaseResultListener;
@@ -33,8 +34,9 @@ import ie.bookeo.utils.FirebaseResultListener;
 public class BookeoPage extends AppCompatActivity implements View.OnClickListener, FirebaseResultListener {
     String id, albumUuid;
     int postion;
-    BookeoMediaItemDao bookeoMediaItemDao;
+    BookeoPagesDao pagesDao;
     ArrayList<BookeoMediaItem> result;
+    ie.bookeo.model.bookeo.BookeoPage page;
     BookeoMediaItem item;
     ImageView ivImageStd, ivImageLrg, ivCaption, ivEnlarge, ivFilter, ivDelete, ivDone, ivQr;
     TextView tvCaption;
@@ -48,7 +50,7 @@ public class BookeoPage extends AppCompatActivity implements View.OnClickListene
         albumUuid = getIntent().getStringExtra("albumUuid");
         postion = getIntent().getIntExtra("position", -1);
 
-        bookeoMediaItemDao = new BookeoMediaItemDao(this);
+        pagesDao = new BookeoPagesDao(this);
 
         tvCaption = findViewById(R.id.tvCaption);
 
@@ -70,14 +72,14 @@ public class BookeoPage extends AppCompatActivity implements View.OnClickListene
     @Override
     protected void onResume() {
         super.onResume();
-        bookeoMediaItemDao.getMediaItem(id, albumUuid);
+        pagesDao.getPage(albumUuid, id);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.ivDone:
-                bookeoMediaItemDao.updateEnlargement(albumUuid, id, item.getEnlarged());
+                //bookeoMediaItemDao.updateEnlargement(albumUuid, id, item.getEnlarged());
                 finish();
                 break;
             case R.id.ivCaption:
@@ -92,39 +94,9 @@ public class BookeoPage extends AppCompatActivity implements View.OnClickListene
             case R.id.ivSize:
                 break;
             case R.id.ivColor:
-                bookeoMediaItemDao.deleteMediaItem(albumUuid, id, this);
+                //bookeoMediaItemDao.deleteMediaItem(albumUuid, id, this);
                 finish();
                 break;
-        }
-    }
-
-    @Override
-    public void onComplete(BookeoMediaItem item) {
-        this.item = item;
-        if (item.getEnlarged() == null || item.getEnlarged() == false) {
-            ivImageLrg.setVisibility(View.GONE);
-            Glide.with(this).load(item.getUrl()).into(ivImageStd);
-        } else {
-            ivImageStd.setVisibility(View.GONE);
-            Glide.with(this).load(item.getUrl()).into(ivImageLrg);
-        }
-        tvCaption.setText(item.getCaption());
-        MyCaptionStyle style = item.getStyle();
-        if (style != null) {
-            if (style != null) {
-                style.applyCaptionStyle(style, tvCaption);
-            }
-        }
-        checkIsEnlargedOnLoad(item);
-        //GENERATE QR CODE - IF VIDEO CLIP
-        String extension = item.getName().substring(item.getName().lastIndexOf("."));
-        if (extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".avi") || extension.equalsIgnoreCase(".mkv")) {
-            // The data that the QR code will contain
-            String data = item.getUrl();
-            // Create the QR code and display
-            Bitmap qr = createQR(data);
-            Glide.with(this).load(qr).into(ivQr);
-            ivQr.setVisibility(View.VISIBLE);
         }
     }
 
@@ -158,6 +130,42 @@ public class BookeoPage extends AppCompatActivity implements View.OnClickListene
             ivImageStd.setVisibility(View.VISIBLE);
             Glide.with(this).load(item.getUrl()).into(ivImageStd);
             item.setEnlarged(false);
+        }
+    }
+
+    @Override
+    public void onComplete(BookeoMediaItem item) {
+
+    }
+
+    @Override
+    public void onComplete(ie.bookeo.model.bookeo.BookeoPage page) {
+        this.page = page;
+        this.item = page.getItem();
+        if (item.getEnlarged() == null || item.getEnlarged() == false) {
+            ivImageLrg.setVisibility(View.GONE);
+            Glide.with(this).load(item.getUrl()).into(ivImageStd);
+        } else {
+            ivImageStd.setVisibility(View.GONE);
+            Glide.with(this).load(item.getUrl()).into(ivImageLrg);
+        }
+        tvCaption.setText(page.getCaption());
+        MyCaptionStyle style = page.getStyle();
+        if (style != null) {
+            if (style != null) {
+                style.applyCaptionStyle(style, tvCaption);
+            }
+        }
+        checkIsEnlargedOnLoad(item);
+        //GENERATE QR CODE - IF VIDEO CLIP
+        String extension = item.getName().substring(item.getName().lastIndexOf("."));
+        if (extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".avi") || extension.equalsIgnoreCase(".mkv")) {
+            // The data that the QR code will contain
+            String data = item.getUrl();
+            // Create the QR code and display
+            Bitmap qr = createQR(data);
+            Glide.with(this).load(qr).into(ivQr);
+            ivQr.setVisibility(View.VISIBLE);
         }
     }
 }

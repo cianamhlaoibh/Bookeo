@@ -21,6 +21,7 @@ import com.bumptech.glide.Glide;
 import ie.bookeo.R;
 import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
+import ie.bookeo.model.bookeo.BookeoPage;
 import ie.bookeo.model.bookeo.MyCaptionStyle;
 import ie.bookeo.utils.FirebaseResultListener;
 
@@ -31,6 +32,7 @@ public class EditCaptionActivity extends AppCompatActivity implements View.OnCli
     EditText etCaption;
     String caption, format, size, color, id, albumUuid;
     BookeoMediaItemDao dao;
+    BookeoPage page;
     BookeoMediaItem item;
 
     @Override
@@ -164,14 +166,20 @@ public class EditCaptionActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onComplete(BookeoMediaItem item) {
-        this.item = item;
-        etCaption.setText(item.getCaption());
-        MyCaptionStyle style = item.getStyle();
+
+    }
+
+    @Override
+    public void onComplete(BookeoPage page) {
+        this.page = page;
+        this.item = page.getItem();
+        etCaption.setText(page.getCaption());
+        MyCaptionStyle style = page.getStyle();
         if (style != null) {
-                style.applyCaptionStyle(style, etCaption);
-                spFormat.setSelection(((ArrayAdapter)spColor.getAdapter()).getPosition(style.getColor()));
-                spSize.setSelection(((ArrayAdapter)spSize.getAdapter()).getPosition(style.getColor()));
-                spColor.setSelection(((ArrayAdapter)spColor.getAdapter()).getPosition(style.getColor()));
-            }
+            style.applyCaptionStyle(style, etCaption);
+            spFormat.setSelection(((ArrayAdapter)spColor.getAdapter()).getPosition(style.getColor()));
+            spSize.setSelection(((ArrayAdapter)spSize.getAdapter()).getPosition(style.getColor()));
+            spColor.setSelection(((ArrayAdapter)spColor.getAdapter()).getPosition(style.getColor()));
+        }
     }
 }

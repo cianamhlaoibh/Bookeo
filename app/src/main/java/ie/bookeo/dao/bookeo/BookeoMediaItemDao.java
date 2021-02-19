@@ -161,4 +161,18 @@ public class BookeoMediaItemDao {
     public void updateEnlargement(String albumUuid, String uuid, boolean b) {
         db.collection("albums").document(albumUuid).collection("media_items").document(uuid).update("enlarged", b);
     }
+
+    public ArrayList<BookeoMediaItem> getPageItems(String albumUuid,ArrayList<String> mediaUuid) {
+        ArrayList<BookeoMediaItem> items = new ArrayList<>();
+        for (String uuid: mediaUuid) {
+            db.collection("albums").document(albumUuid).collection("media_items").document(uuid).get()
+                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            items.add(documentSnapshot.toObject(BookeoMediaItem.class));
+                        }
+                    });
+        }
+        return items;
+    }
 }

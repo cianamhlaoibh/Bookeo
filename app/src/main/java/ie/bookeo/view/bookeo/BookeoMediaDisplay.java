@@ -31,13 +31,17 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import ie.bookeo.R;
 import ie.bookeo.adapter.bookeo.BookeoMediaItemAdapter;
 import ie.bookeo.adapter.MediaAdapterHolder;
 import ie.bookeo.dao.bookeo.BookeoAlbumDao;
+import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
+import ie.bookeo.dao.bookeo.BookeoPagesDao;
 import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
+import ie.bookeo.model.bookeo.BookeoPage;
 import ie.bookeo.model.drive.GoogleDriveMediaItem;
 import ie.bookeo.model.gallery_model.DeviceMediaItem;
 import ie.bookeo.utils.MarginItemDecoration;
@@ -70,7 +74,6 @@ import ie.bookeo.utils.ShowGallery;
 public class BookeoMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener, View.OnClickListener {
 
     RecyclerView rvMediaItems;
-    ArrayList<BookeoMediaItem> mediaItems;
     ProgressBar pbLoader;
     Toolbar tvFolderName;
     ImageButton ibAlbum;
@@ -101,7 +104,6 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         uuid = getIntent().getStringExtra("folderUuid");
         toolbar.setTitle(name);
 
-        mediaItems = new ArrayList<>();
         rvMediaItems = findViewById(R.id.rvMediaItems);
         rvMediaItems.addItemDecoration(new MarginItemDecoration(this));
         rvMediaItems.hasFixedSize();
@@ -221,12 +223,29 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fabGenerate:
-                BookeoAlbumDao dao = new BookeoAlbumDao();
-                dao.generateBook(uuid);
+                generateBook();
                 Intent intent = new Intent(this, BookeoBook.class);
                 intent.putExtra("albumUuid", uuid);
                 startActivity(intent);
                 break;
+        }
+    }
+
+    private void generateBook() {
+        BookeoAlbumDao bookeoAlbumDao = new BookeoAlbumDao();
+        bookeoAlbumDao.generateBook(uuid);
+        for (final BookeoMediaItem item : items) {
+            String pageUuid = UUID.randomUUID().toString();
+
+            BookeoPage page = new BookeoPage();
+            page.setPageUuid(pageUuid);
+            page.setPageNumber(items.indexOf(item));
+            page.setAlbumUuid(item.getAlbumUuid());
+            page.setItem(item);
+
+            //upload item
+            BookeoPagesDao bookeoPagesDao = new BookeoPagesDao();
+            bookeoPagesDao.addPage(page, this.uuid);
         }
     }
 
