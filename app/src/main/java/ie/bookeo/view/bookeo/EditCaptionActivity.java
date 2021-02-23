@@ -18,20 +18,25 @@ import android.widget.Spinner;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
+
 import ie.bookeo.R;
 import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
+import ie.bookeo.dao.bookeo.BookeoPagesDao;
+import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
 import ie.bookeo.model.bookeo.BookeoPage;
 import ie.bookeo.model.bookeo.MyCaptionStyle;
+import ie.bookeo.utils.FirebasePageResultListener;
 import ie.bookeo.utils.FirebaseResultListener;
 
-public class EditCaptionActivity extends AppCompatActivity implements View.OnClickListener, FirebaseResultListener {
+public class EditCaptionActivity extends AppCompatActivity implements View.OnClickListener, FirebasePageResultListener {
 
     ImageView ivCaption, ivFormat, ivSize, ivColor, ivDone;
     Spinner spFormat, spSize, spColor;
     EditText etCaption;
     String caption, format, size, color, id, albumUuid;
-    BookeoMediaItemDao dao;
+    BookeoPagesDao dao;
     BookeoPage page;
     BookeoMediaItem item;
 
@@ -42,8 +47,8 @@ public class EditCaptionActivity extends AppCompatActivity implements View.OnCli
 
         id = getIntent().getStringExtra("uuid");
         albumUuid = getIntent().getStringExtra("albumUuid");
-        dao = new BookeoMediaItemDao(this);
-        dao.getMediaItem(id, albumUuid);
+        dao = new BookeoPagesDao(this);
+        dao.getPage(albumUuid, id);
 
         etCaption = findViewById(R.id.etCaption);
         ivCaption = findViewById(R.id.ivCaption);
@@ -165,11 +170,6 @@ public class EditCaptionActivity extends AppCompatActivity implements View.OnCli
     }
 
     @Override
-    public void onComplete(BookeoMediaItem item) {
-
-    }
-
-    @Override
     public void onComplete(BookeoPage page) {
         this.page = page;
         this.item = page.getItem();
@@ -181,5 +181,10 @@ public class EditCaptionActivity extends AppCompatActivity implements View.OnCli
             spSize.setSelection(((ArrayAdapter)spSize.getAdapter()).getPosition(style.getColor()));
             spColor.setSelection(((ArrayAdapter)spColor.getAdapter()).getPosition(style.getColor()));
         }
+    }
+
+    @Override
+    public void onComplete(ArrayList<BookeoPage> pages) {
+
     }
 }

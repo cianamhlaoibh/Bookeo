@@ -29,7 +29,6 @@ import ie.bookeo.utils.FirebaseResultListener;
 public class BookeoMediaItemDao {
     FirebaseFirestore db;
     StorageReference storageReference;
-    FirebaseResultListener listener;
 
 
     public BookeoMediaItemDao() {
@@ -37,11 +36,6 @@ public class BookeoMediaItemDao {
         storageReference = FirebaseStorage.getInstance().getReference("media_items");
     }
 
-    public BookeoMediaItemDao(FirebaseResultListener listener) {
-        db = FirebaseFirestore.getInstance();
-        storageReference = FirebaseStorage.getInstance().getReference("media_items");
-        this.listener = listener;
-    }
 
     // //https://www.youtube.com/watch?v=Bh0h_ZhX-Qghttps://www.youtube.com/watch?v=Bh0h_ZhX-Qg - add and retireve documents
     public void addMediaItem(BookeoMediaItem item, String filepath) {
@@ -138,28 +132,8 @@ public class BookeoMediaItemDao {
         return mediaItems;
     }
 
-    public void getMediaItem(String uuid, String albumUuid) {
-        //final ArrayList<BookeoMediaItem> item = new ArrayList<BookeoMediaItem>();
-        db.collection("albums").document(albumUuid).collection("media_items").document(uuid).get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        listener.onComplete(task.getResult().toObject(BookeoMediaItem.class));
-                        //item.add();
-                    }
-                });
-    }
-
     public void updatePosition(String albumUuid, String uuid, int position ) {
         db.collection("albums").document(albumUuid).collection("media_items").document(uuid).update("position", position);
-    }
-    public void updateCaption(String albumUuid, String uuid, String caption, MyCaptionStyle style) {
-        db.collection("albums").document(albumUuid).collection("media_items").document(uuid).update("caption", caption);
-        db.collection("albums").document(albumUuid).collection("media_items").document(uuid).update("style", style);
-    }
-
-    public void updateEnlargement(String albumUuid, String uuid, boolean b) {
-        db.collection("albums").document(albumUuid).collection("media_items").document(uuid).update("enlarged", b);
     }
 
     public ArrayList<BookeoMediaItem> getPageItems(String albumUuid,ArrayList<String> mediaUuid) {

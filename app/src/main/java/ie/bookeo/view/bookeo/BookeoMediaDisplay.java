@@ -44,6 +44,8 @@ import ie.bookeo.model.bookeo.BookeoMediaItem;
 import ie.bookeo.model.bookeo.BookeoPage;
 import ie.bookeo.model.drive.GoogleDriveMediaItem;
 import ie.bookeo.model.gallery_model.DeviceMediaItem;
+import ie.bookeo.utils.FirebasePageResultListener;
+import ie.bookeo.utils.FirebaseResultListener;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 import ie.bookeo.utils.ShowGallery;
@@ -71,19 +73,21 @@ import ie.bookeo.utils.ShowGallery;
  * This Activity loads all images to images associated with a particular folder into a recyclerview with grid manager from cloud storage
  */
 
-public class BookeoMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener, View.OnClickListener {
+public class BookeoMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener, View.OnClickListener, FirebaseResultListener, FirebasePageResultListener {
 
     RecyclerView rvMediaItems;
     ProgressBar pbLoader;
-    Toolbar tvFolderName;
-    ImageButton ibAlbum;
     BookeoMediaItemAdapter adapter;
     TextView tvNoMedia;
-    FloatingActionButton fabGenerate;
+    FloatingActionButton fabGenerate, fabUpdate;
 
     //DB
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     ArrayList<BookeoMediaItem> items;
+    ArrayList<BookeoPage> pages;
+    BookeoAlbumDao dao;
+    BookeoPagesDao pagesDao;
+    BookeoAlbum album;
     String name, uuid;
 
     @Override
@@ -111,17 +115,24 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         tvNoMedia = findViewById(R.id.tvNoMedia);
         //DB
         items = new ArrayList<>();
-        items = getDbMedia(uuid);
-
-        adapter = new BookeoMediaItemAdapter(items, BookeoMediaDisplay.this, this);
-        rvMediaItems.setAdapter(adapter);
         pbLoader = findViewById(R.id.loader);
         pbLoader.setVisibility(View.GONE);
 
         fabGenerate = findViewById(R.id.fabGenerate);
         fabGenerate.setOnClickListener(this);
+        fabUpdate = findViewById(R.id.fabUpdate);
+        fabUpdate.setOnClickListener(this);
 
-       // viewVisibility();
+    }
+
+    private void checkIsGenerated() {
+        if (album.getGenerated() == null) {
+            fabGenerate.setVisibility(View.VISIBLE);
+            fabUpdate.setVisibility(View.GONE);
+        }else{
+            fabUpdate.setVisibility(View.VISIBLE);
+            fabGenerate.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -130,6 +141,9 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         items = getDbMedia(uuid);
         adapter = new BookeoMediaItemAdapter(items, BookeoMediaDisplay.this, this);
         rvMediaItems.setAdapter(adapter);
+        dao = new BookeoAlbumDao(this);
+        dao.getAlbum(uuid);
+        pagesDao = new BookeoPagesDao(this);
     }
 
     public void viewVisibility(ArrayList<BookeoMediaItem> items) {
@@ -223,29 +237,72 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fabGenerate:
-                generateBook();
-                Intent intent = new Intent(this, BookeoBook.class);
-                intent.putExtra("albumUuid", uuid);
-                startActivity(intent);
+                generateAlbum();
                 break;
+            case R.id.fabUpdate:
+                pagesDao.getPages(uuid);
         }
     }
 
-    private void generateBook() {
-        BookeoAlbumDao bookeoAlbumDao = new BookeoAlbumDao();
-        bookeoAlbumDao.generateBook(uuid);
-        for (final BookeoMediaItem item : items) {
-            String pageUuid = UUID.randomUUID().toString();
+    private void updateAlbumBook() {
+        ArrayList<String> uuids = new ArrayList<>();
+        ArrayList<String> itemUuids = new ArrayList<>();
+        ArrayList<BookeoMediaItem> pageItems = new ArrayList<>();
+        //adds new images
+        for (BookeoPage page : pages) {
+            uuids.add(page.getItem().getUuid());
+            pageItems.add(page.getItem());
+        }
+        for (BookeoMediaItem item : items) {
+            itemUuids.add(item.getUuid());
+        }
+        for (BookeoMediaItem item : items) {
+            if (!uuids.contains(item.getUuid())) {
+                String pageUuid = UUID.randomUUID().toString();
 
-            BookeoPage page = new BookeoPage();
-            page.setPageUuid(pageUuid);
-            page.setPageNumber(items.indexOf(item));
-            page.setAlbumUuid(item.getAlbumUuid());
-            page.setItem(item);
+                BookeoPage page = new BookeoPage();
+                page.setPageUuid(pageUuid);
+                page.setPageNumber(items.indexOf(item));
+                page.setAlbumUuid(item.getAlbumUuid());
+                page.setItem(item);
 
-            //upload item
-            BookeoPagesDao bookeoPagesDao = new BookeoPagesDao();
-            bookeoPagesDao.addPage(page, this.uuid);
+                //upload item
+                pagesDao.addPage(page, this.uuid);
+            }
+        }
+        //remove Imaged
+        for(BookeoPage page : pages){
+            if(!itemUuids.contains(page.getItem().getUuid())){
+                pagesDao.deletePage(this.uuid, page.getPageUuid());
+            }
+        }
+        Intent intent = new Intent(this, BookeoBook.class);
+        intent.putExtra("albumUuid", uuid);
+        startActivity(intent);
+    }
+
+
+
+    private void generateAlbum() {
+        if(album.getGenerated() == null || album.getGenerated() == false) {
+            BookeoAlbumDao bookeoAlbumDao = new BookeoAlbumDao();
+            bookeoAlbumDao.generateBook(uuid);
+            for (final BookeoMediaItem item : items) {
+                String pageUuid = UUID.randomUUID().toString();
+
+                BookeoPage page = new BookeoPage();
+                page.setPageUuid(pageUuid);
+                page.setPageNumber(items.indexOf(item));
+                page.setAlbumUuid(item.getAlbumUuid());
+                page.setItem(item);
+
+                //upload item
+                pagesDao.addPage(page, this.uuid);
+
+                Intent intent = new Intent(this, BookeoBook.class);
+                intent.putExtra("albumUuid", uuid);
+                startActivity(intent);
+            }
         }
     }
 
@@ -282,4 +339,21 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
 
     }
 
+    @Override
+    public void onComplete(BookeoAlbum album) {
+      this.album = album;
+      checkIsGenerated();
+    }
+
+    @Override
+    public void onComplete(BookeoPage item) {
+
+    }
+
+    @Override
+    public void onComplete(ArrayList<BookeoPage> pages) {
+        this.pages = new ArrayList<>();
+        this.pages.addAll(pages);
+        updateAlbumBook();
+    }
 }

@@ -1,9 +1,9 @@
 package ie.bookeo.utils;
 
+import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
 import ie.bookeo.model.bookeo.BookeoPage;
 
 public interface FirebaseResultListener {
-    void onComplete(BookeoMediaItem item);
-    void onComplete(BookeoPage item);
+    void onComplete(BookeoAlbum album);
 }

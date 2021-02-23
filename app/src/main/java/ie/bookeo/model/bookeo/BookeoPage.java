@@ -7,6 +7,7 @@ public class BookeoPage {
     private String caption;
     private int pageNumber;
     private MyCaptionStyle  style;
+    private Boolean isEnlarged;
 
     public BookeoMediaItem getItem() {
         return item;
@@ -60,5 +61,13 @@ public class BookeoPage {
 
     public void setStyle(MyCaptionStyle style) {
         this.style = style;
+    }
+
+    public Boolean getEnlarged() {
+        return isEnlarged;
+    }
+
+    public void setEnlarged(Boolean enlarged) {
+        isEnlarged = enlarged;
     }
 }

@@ -62,7 +62,7 @@ public class BookeoBooksFragment extends Fragment {
         final ArrayList<BookeoAlbum> dbAlbums = new ArrayList<>();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         String userId = firebaseAuth.getCurrentUser().getUid();
-        db.collection("albums").whereEqualTo("fk_user", userId).whereEqualTo("isGenerated", true).get()
+        db.collection("albums").whereEqualTo("fk_user", userId).whereEqualTo("generated", true).get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
 
                     String data = "";

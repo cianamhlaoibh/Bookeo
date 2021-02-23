@@ -71,7 +71,7 @@
             android:name=".view.drive.DriveGalleryView"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".view.bookeo.BookeoPage"
+            android:name=".view.bookeo.BookeoPageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".view.bookeo.EditCaptionActivity"
             android:theme="@style/AppTheme.NoActionBar"/>

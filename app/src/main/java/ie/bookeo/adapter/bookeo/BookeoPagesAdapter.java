@@ -3,28 +3,17 @@ package ie.bookeo.adapter.bookeo;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
 import net.glxn.qrgen.android.QRCode;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -33,6 +22,7 @@ import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
 import ie.bookeo.model.bookeo.BookeoPage;
 import ie.bookeo.model.bookeo.MyCaptionStyle;
+import ie.bookeo.view.bookeo.BookeoPageActivity;
 
 
 /**
@@ -69,7 +59,7 @@ public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  
                            .load(item.getUrl())
                            .fitCenter()
                            .into(holder.ivMedia);
-                   String caption = item.getCaption();
+                   String caption = page.getCaption();
                    if (caption != null) {
                        holder.tvCaption.setText(caption);
                        MyCaptionStyle style = page.getStyle();
@@ -77,11 +67,12 @@ public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  
                            style.applyCaptionStyle(style, holder.tvCaption);
                        }
                    }
-                   if (item.getEnlarged() == null || item.getEnlarged() == false) {
+                   //TODO
+                   if (page.getEnlarged() == null || page.getEnlarged() == false) {
                        holder.ivMedia.setVisibility(View.VISIBLE);
                        holder.ivMediaLrg.setVisibility(View.GONE);
                        Glide.with(contx).load(item.getUrl()).into(holder.ivMedia);
-                   } else if (item.getEnlarged() == true) {
+                   } else if (page.getEnlarged() == true) {
                        holder.ivMediaLrg.setVisibility(View.VISIBLE);
                        holder.ivMedia.setVisibility(View.GONE);
                        Glide.with(contx).load(item.getUrl()).into(holder.ivMediaLrg);
@@ -101,7 +92,7 @@ public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  
             holder.ivPage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(contx, ie.bookeo.view.bookeo.BookeoPage.class);
+                    Intent intent = new Intent(contx, BookeoPageActivity.class);
                     intent.putExtra("id", page.getPageUuid());
                     intent.putExtra("position", position);
                     intent.putExtra("albumUuid", page.getAlbumUuid());

@@ -19,8 +19,11 @@ import java.util.ArrayList;
 import ie.bookeo.R;
 import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
 import ie.bookeo.dao.bookeo.BookeoPagesDao;
+import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
+import ie.bookeo.model.bookeo.BookeoPage;
 import ie.bookeo.model.bookeo.MyCaptionStyle;
+import ie.bookeo.utils.FirebasePageResultListener;
 import ie.bookeo.utils.FirebaseResultListener;
 
 /**
@@ -31,7 +34,7 @@ import ie.bookeo.utils.FirebaseResultListener;
  *
  */
 
-public class BookeoPage extends AppCompatActivity implements View.OnClickListener, FirebaseResultListener {
+public class BookeoPageActivity extends AppCompatActivity implements View.OnClickListener, FirebasePageResultListener {
     String id, albumUuid;
     int postion;
     BookeoPagesDao pagesDao;
@@ -79,7 +82,7 @@ public class BookeoPage extends AppCompatActivity implements View.OnClickListene
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.ivDone:
-                //bookeoMediaItemDao.updateEnlargement(albumUuid, id, item.getEnlarged());
+                pagesDao.updateEnlargement(albumUuid, id, page.getEnlarged());
                 finish();
                 break;
             case R.id.ivCaption:
@@ -107,11 +110,12 @@ public class BookeoPage extends AppCompatActivity implements View.OnClickListene
     }
 
     private void checkIsEnlargedOnLoad(BookeoMediaItem item) {
-        if(item.getEnlarged() == null || item.getEnlarged() == false){
+        //TODO
+        if(page.getEnlarged() == null || page.getEnlarged() == false){
             ivImageStd.setVisibility(View.VISIBLE);
             ivImageLrg.setVisibility(View.GONE);
             Glide.with(this).load(item.getUrl()).into(ivImageStd);
-        }else if(item.getEnlarged() == true){
+        }else if(page.getEnlarged() == true){
             ivImageLrg.setVisibility(View.VISIBLE);
             ivImageStd.setVisibility(View.GONE);
             Glide.with(this).load(item.getUrl()).into(ivImageLrg);
@@ -120,29 +124,25 @@ public class BookeoPage extends AppCompatActivity implements View.OnClickListene
 
 
     private void checkIsEnlarged(BookeoMediaItem item) {
-        if(item.getEnlarged() == null || item.getEnlarged() == false){
+        if(page.getEnlarged() == null || page.getEnlarged() == false){
             ivImageStd.setVisibility(View.GONE);
             ivImageLrg.setVisibility(View.VISIBLE);
             Glide.with(this).load(item.getUrl()).into(ivImageLrg);
-            item.setEnlarged(true);
-        }else if(item.getEnlarged() == true){
+            page.setEnlarged(true);
+        }else if(page.getEnlarged() == true){
             ivImageLrg.setVisibility(View.GONE);
             ivImageStd.setVisibility(View.VISIBLE);
             Glide.with(this).load(item.getUrl()).into(ivImageStd);
-            item.setEnlarged(false);
+            page.setEnlarged(false);
         }
     }
 
-    @Override
-    public void onComplete(BookeoMediaItem item) {
-
-    }
 
     @Override
     public void onComplete(ie.bookeo.model.bookeo.BookeoPage page) {
         this.page = page;
         this.item = page.getItem();
-        if (item.getEnlarged() == null || item.getEnlarged() == false) {
+        if (page.getEnlarged() == null || page.getEnlarged() == false) {
             ivImageLrg.setVisibility(View.GONE);
             Glide.with(this).load(item.getUrl()).into(ivImageStd);
         } else {
@@ -167,5 +167,10 @@ public class BookeoPage extends AppCompatActivity implements View.OnClickListene
             Glide.with(this).load(qr).into(ivQr);
             ivQr.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onComplete(ArrayList<BookeoPage> pages) {
+
     }
 }

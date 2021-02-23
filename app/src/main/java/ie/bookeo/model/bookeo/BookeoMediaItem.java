@@ -13,8 +13,6 @@ public class BookeoMediaItem extends MediaItem {
     private String caption;
     private String albumUuid;
     private int position;
-    private Boolean isEnlarged;
-
 
     public BookeoMediaItem() {
         this.position = -1;
@@ -77,14 +75,6 @@ public class BookeoMediaItem extends MediaItem {
 
     public void setPosition(int position) {
         this.position = position;
-    }
-
-    public Boolean getEnlarged() {
-        return isEnlarged;
-    }
-
-    public void setEnlarged(Boolean enlarged) {
-        isEnlarged = enlarged;
     }
 
 }

@@ -51,7 +51,7 @@ public class BookeoAlbumBookAdapter extends  RecyclerView.Adapter<BookeoAlbumBoo
             public void onClick(View v) {
                 Intent intent = new Intent(contx, BookeoBook.class);
                 intent.putExtra("albumUuid", album.getUuid());
-                intent.putExtra("isGenerated", album.getGenerate());
+                intent.putExtra("isGenerated", album.getGenerated());
                 contx.startActivity(intent);
             }
         });
