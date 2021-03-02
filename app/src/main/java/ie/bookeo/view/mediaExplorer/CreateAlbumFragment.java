@@ -34,12 +34,14 @@ import ie.bookeo.adapter.mediaExplorer.MediaFolderAdapter;
 import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.gallery_model.AlbumFolder;
 import ie.bookeo.utils.AddAlbumListener;
+import ie.bookeo.utils.AlbumUploadListener;
 import ie.bookeo.utils.Config;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MyCreateListener;
 
-public class CreateAlbumFragment extends DialogFragment implements AddAlbumListener, MyCreateListener{
+public class CreateAlbumFragment extends DialogFragment implements AddAlbumListener, MyCreateListener, AlbumUploadListener {
 
+    private static AlbumUploadListener uploadListener;
     RecyclerView rvFolder;
     ImageView ivAdd;
     Toolbar toolbar;
@@ -51,13 +53,13 @@ public class CreateAlbumFragment extends DialogFragment implements AddAlbumListe
 
     }
 
-    public static CreateAlbumFragment newInstance(String title){
+    public static CreateAlbumFragment newInstance(String title, AlbumUploadListener listener){
         CreateAlbumFragment createAlbumFragment = new CreateAlbumFragment();
         Bundle args = new Bundle();
         args.putString("title", title);
         createAlbumFragment.setArguments(args);
         createAlbumFragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.CustomDialog);
-
+        uploadListener = listener;
         return createAlbumFragment;
     }
 
@@ -73,7 +75,7 @@ public class CreateAlbumFragment extends DialogFragment implements AddAlbumListe
        // if(folders.isEmpty()){
             //tvEmpty.setVisibility(View.VISIBLE);
         //}else{
-           bookeoFolderAdapter = new BookeoCreateFolderAdapter(folders, getContext(), this);
+           bookeoFolderAdapter = new BookeoCreateFolderAdapter(folders, getContext(), this, this);
            rvFolder.setAdapter(bookeoFolderAdapter);
        // }
 
@@ -130,6 +132,8 @@ public class CreateAlbumFragment extends DialogFragment implements AddAlbumListe
         return dbAlbums;
     }
 
+
+
     @Override
     public void onStart() {
         super.onStart();
@@ -168,5 +172,11 @@ public class CreateAlbumFragment extends DialogFragment implements AddAlbumListe
     public void onCreated(BookeoAlbum bookeoAlbum) {
         folders.add(bookeoAlbum);
         bookeoFolderAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onUploadAlbumClicked(String albumUuid) {
+        uploadListener.onUploadAlbumClicked(albumUuid);
+        dismiss();
     }
 }

@@ -66,6 +66,7 @@ import ie.bookeo.adapter.bookeo.BookeoFolderAdapter;
 import ie.bookeo.adapter.drive.GoogleDriveFolderAdapter;
 import ie.bookeo.adapter.drive.GoogleDriveMediaItemAdapter;
 import ie.bookeo.adapter.MediaAdapterHolder;
+import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
 import ie.bookeo.dao.drive.DriveServiceHelper;
 import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
@@ -80,6 +81,7 @@ import ie.bookeo.utils.MediaDisplayItemClickListener;
 import ie.bookeo.utils.MyCreateListener;
 import ie.bookeo.utils.ShowGallery;
 import ie.bookeo.view.mediaExplorer.AddAlbumFragment;
+import ie.bookeo.view.mediaExplorer.CreateAlbumFragment;
 import ie.bookeo.view.mediaExplorer.MainActivity;
 
 /**
@@ -110,7 +112,7 @@ import ie.bookeo.view.mediaExplorer.MainActivity;
  *
  * This Activity loads all images to images associated with a particular folder into a recyclerview with grid manager
  */
-public class GoogleDriveFragment extends Fragment implements MediaDisplayItemClickListener, AlbumUploadListener {
+public class GoogleDriveFragment extends Fragment implements MediaDisplayItemClickListener {
 
     DriveServiceHelper driveServiceHelper;
     Button btnDriveSignIn, btnDriveResync;
@@ -129,9 +131,6 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
 
     //DB
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private BookeoFolderAdapter bookeoFolderAdapter;
-    private RecyclerView rvAlbums;
-    private List<BookeoAlbum> albums;
     TextView tvUploading;
     ProgressBar pbLoader;
     DriveLoginListener driveLogoutListener;
@@ -197,15 +196,6 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
 
         actionCallback = new ActionCallback();
 
-        //DB - albums for user to upload to when long press
-        albums = new ArrayList<>();
-        albums = getAlbums();
-
-        rvAlbums = root.findViewById(R.id.rvBookeoAlbumIcons);
-        bookeoFolderAdapter = new BookeoFolderAdapter(albums, getContext(), this);
-        rvAlbums.addItemDecoration(new MarginItemDecoration(getContext()));
-        rvAlbums.hasFixedSize();
-        rvAlbums.setAdapter(bookeoFolderAdapter);
         return root;
     }
 
@@ -314,41 +304,6 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
                 });
     }
 
-    public ArrayList<BookeoAlbum> getAlbums() {
-        final ArrayList<BookeoAlbum> dbAlbums = new ArrayList<>();
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        String userId = firebaseAuth.getCurrentUser().getUid();
-        db.collection("albums").whereEqualTo("fk_user", userId).get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-
-                    String data = "";
-
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-
-                        if (!queryDocumentSnapshots.isEmpty()) {
-
-                            List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
-
-                            for (DocumentSnapshot documentSnapshot : list) {
-                                BookeoAlbum album = new BookeoAlbum();
-                                album = documentSnapshot.toObject(BookeoAlbum.class);
-
-                                BookeoAlbum arAlbum = new BookeoAlbum(album.getUuid(), album.getName(), album.getCreateDate());
-
-                                dbAlbums.add(arAlbum);
-
-                                //data = albums.get(0).getUuid() + " " + albums.get(0).getName() + " " + album.getCreateDate();
-                                Log.d("OUTPUT", "onSuccess create: " + arAlbum.getName());
-                            }
-                        }
-                        bookeoFolderAdapter.notifyDataSetChanged();
-                    }
-                });
-        Log.d("SIZE", "getAlbums: added" + dbAlbums.size());
-        return dbAlbums;
-    }
-
     /**
      * @param holder   The ViewHolder for the clicked picture
      * @param position The position in the grid of the picture that was clicked
@@ -390,7 +345,6 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
         tabLayout.setVisibility(View.GONE);
         toggleActionBar(position);
         mAdapter.toggleIcon(holder, position);
-        rvAlbums.setVisibility(View.VISIBLE);
     }
 
     /*
@@ -417,85 +371,9 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
         }
     }
 
-    @Override
-    public void onUploadAlbumClicked(final String albumUuid) {
-        StorageReference storageReference = FirebaseStorage.getInstance().getReference("media_items");
-        List<GoogleDriveMediaItem> uploadItems;
-        uploadItems = mAdapter.getUploadItems();
-        ProgressDialog progressDialog = new ProgressDialog(getContext());
-        progressDialog.setTitle("Uploading to Google Drive");
-        progressDialog.setMessage("Please wait...");
-        progressDialog.show();
 
-        for (final GoogleDriveMediaItem uploadItem : uploadItems) {
-            final String uuid = UUID.randomUUID().toString();
 
-            BookeoMediaItem upload = new BookeoMediaItem();
-            upload.setUuid(uuid);
-            upload.setName(uploadItem.getName());
-            upload.setDate(uploadItem.getDate());
-            upload.setAlbumUuid(albumUuid);
-            //https://www.youtube.com/watch?v=Bh0h_ZhX-Qghttps://www.youtube.com/watch?v=Bh0h_ZhX-Qg - add and retireve documents
-            db.collection("albums").document(albumUuid).collection("media_items").document(uuid)
-                    .set(upload)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Log.d("SUCCESS", "DocumentSnapshot added with ID: " + uuid);
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.w("ERROR", "Error adding document", e);
-                            progressDialog.dismiss();
-                        }
-                    });
-            //https://www.youtube.com/watch?v=lPfQN-Sfnjw&t=1013s - Firebase Storage - Upload Images
-            final StorageReference fileRef = storageReference.child(uuid);
-            final Executor mExecutor = Executors.newSingleThreadExecutor();
-            DriveServiceHelper driveServiceHelper = new DriveServiceHelper();
-            driveServiceHelper.downloadFile(uploadItem.getFileId())
-                    .addOnCompleteListener(mExecutor, new OnCompleteListener<byte[]>() {
-                        @Override
-                        public void onComplete(@NonNull Task<byte[]> task) {
-                            byte[] data = task.getResult();
-                            //https://stackoverflow.com/questions/9897458/how-to-convert-byte-to-inputstream
-                            InputStream myInputStream = new ByteArrayInputStream(data);
-                            fileRef.putStream(myInputStream)
-                                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                        @Override
-                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                            //  https://stackoverflow.com/questions/57183427/download-url-is-getting-as-com-google-android-gms-tasks-zzu441922b-while-using/57183557
-                                            fileRef.getDownloadUrl()
-                                                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                                        @Override
-                                                        public void onSuccess(Uri uri) {
-                                                            String url = uri.toString();
-                                                            //upload.setUrl(url);
-                                                            //https://www.youtube.com/watch?v=TBr_5QH1EvQ - update firstore
-                                                            db.collection("albums").document(albumUuid).collection("media_items").document(uuid).update("url", url);
-                                                            db.collection("albums").document(albumUuid).update("firstItem", url);
-                                                            Log.d("URL", "onSuccess: " + uri.toString());
-                                                        }
-                                                    });
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                        }
-                    });
-        }
-        progressDialog.dismiss();
-        Toast.makeText(getContext(), "Upload Successful", Toast.LENGTH_SHORT).show();
-        actionMode.finish();
-    }
-
-    class ActionCallback implements ActionMode.Callback, MyCreateListener {
+    class ActionCallback implements ActionMode.Callback, AlbumUploadListener {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             toggleStatusBarColor(getActivity(), R.color.blue_grey_700);
@@ -512,8 +390,8 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if (item.getItemId() == R.id.add) {
-                AddAlbumFragment addAlbumFragment = AddAlbumFragment.newInstance("Create Bookeo Album", this, "root");
-                addAlbumFragment.show(getActivity().getSupportFragmentManager(), Config.CREATE_BOOKEO_ALBUM);
+                CreateAlbumFragment createAlbumFragment = CreateAlbumFragment.newInstance("Create Bookeo Album", this);
+                createAlbumFragment.show(getActivity().getSupportFragmentManager(), Config.CREATE_BOOKEO_ALBUM);
                 mAdapter.notifyDataSetChanged();
                 //mode.finish();
                 return true;
@@ -528,13 +406,86 @@ public class GoogleDriveFragment extends Fragment implements MediaDisplayItemCli
             toggleStatusBarColor(getActivity(), R.color.colorPrimary);
             toolbar.setVisibility(View.VISIBLE);
             tabLayout.setVisibility(View.VISIBLE);
-            rvAlbums.setVisibility(View.GONE);
         }
+
         @Override
-        public void onCreated(BookeoAlbum bookeoAlbum) {
-            albums.add(bookeoAlbum);
-            bookeoFolderAdapter.notifyDataSetChanged();
+        public void onUploadAlbumClicked(final String albumUuid) {
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference("media_items");
+            List<GoogleDriveMediaItem> uploadItems;
+            uploadItems = mAdapter.getUploadItems();
+            ProgressDialog progressDialog = new ProgressDialog(getContext());
+            progressDialog.setTitle("Uploading to Google Drive");
+            progressDialog.setMessage("Please wait...");
+            progressDialog.show();
+
+            for (final GoogleDriveMediaItem uploadItem : uploadItems) {
+                final String uuid = UUID.randomUUID().toString();
+
+                BookeoMediaItem upload = new BookeoMediaItem();
+                upload.setUuid(uuid);
+                upload.setName(uploadItem.getName());
+                upload.setDate(uploadItem.getDate());
+                upload.setAlbumUuid(albumUuid);
+                //https://www.youtube.com/watch?v=Bh0h_ZhX-Qghttps://www.youtube.com/watch?v=Bh0h_ZhX-Qg - add and retireve documents
+                db.collection("albums").document(albumUuid).collection("media_items").document(uuid)
+                        .set(upload)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d("SUCCESS", "DocumentSnapshot added with ID: " + uuid);
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w("ERROR", "Error adding document", e);
+                                progressDialog.dismiss();
+                            }
+                        });
+                //https://www.youtube.com/watch?v=lPfQN-Sfnjw&t=1013s - Firebase Storage - Upload Images
+                final StorageReference fileRef = storageReference.child(uuid);
+                final Executor mExecutor = Executors.newSingleThreadExecutor();
+                DriveServiceHelper driveServiceHelper = new DriveServiceHelper();
+                driveServiceHelper.downloadFile(uploadItem.getFileId())
+                        .addOnCompleteListener(mExecutor, new OnCompleteListener<byte[]>() {
+                            @Override
+                            public void onComplete(@NonNull Task<byte[]> task) {
+                                byte[] data = task.getResult();
+                                //https://stackoverflow.com/questions/9897458/how-to-convert-byte-to-inputstream
+                                InputStream myInputStream = new ByteArrayInputStream(data);
+                                fileRef.putStream(myInputStream)
+                                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                //  https://stackoverflow.com/questions/57183427/download-url-is-getting-as-com-google-android-gms-tasks-zzu441922b-while-using/57183557
+                                                fileRef.getDownloadUrl()
+                                                        .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                            @Override
+                                                            public void onSuccess(Uri uri) {
+                                                                String url = uri.toString();
+                                                                //upload.setUrl(url);
+                                                                //https://www.youtube.com/watch?v=TBr_5QH1EvQ - update firstore
+                                                                db.collection("albums").document(albumUuid).collection("media_items").document(uuid).update("url", url);
+                                                                db.collection("albums").document(albumUuid).update("firstItem", url);
+                                                                Log.d("URL", "onSuccess: " + uri.toString());
+                                                            }
+                                                        });
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            }
+                        });
+            }
+            progressDialog.dismiss();
+            Toast.makeText(getContext(), "Upload Successful", Toast.LENGTH_SHORT).show();
+            actionMode.finish();
         }
+
     }
     /*
       this will toggle or action bar color

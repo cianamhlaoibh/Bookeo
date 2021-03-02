@@ -105,17 +105,4 @@
                 tools:visibility="visible" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
-    <ie.bookeo.utils.CustomRecyclerView
-        android:id="@+id/rvBookeoAlbumIcons"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="@color/white"
-        android:backgroundTint="@android:color/secondary_text_light"
-        android:clipToPadding="false"
-        android:columnWidth="@dimen/picture_column_width"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible" />
 </androidx.constraintlayout.widget.ConstraintLayout>

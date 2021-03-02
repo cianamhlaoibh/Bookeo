@@ -79,7 +79,7 @@ import java.util.UUID;
  * This Activity loads all images to images associated with a particular folder into a recyclerview with grid manager
  */
 
-public class MediaDisplayActivity extends AppCompatActivity implements MediaDisplayItemClickListener, MyCreateListener, AlbumUploadListener {
+public class MediaDisplayActivity extends AppCompatActivity implements MediaDisplayItemClickListener, AlbumUploadListener {
 
     RecyclerView rvImage;
     ArrayList<DeviceMediaItem> arAllMedia;
@@ -96,12 +96,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
     private DeviceMediaDao deviceMediaDao;
 
     //DB
-    private BookeoAlbumDao bookeoAlbumDao;
     private BookeoMediaItemDao bookeoMediaItemDao;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private BookeoFolderAdapter bookeoFolderAdapter;
-    private RecyclerView rvAlbums;
-    private List<BookeoAlbum> albums;
 
 
     @Override
@@ -147,52 +142,7 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
             pbLoader.setVisibility(View.GONE);
         }
 
-        //DB - albums for user to upload to when long press
-        albums = new ArrayList<>();
-        albums = getUserAlbums();
-
-        rvAlbums = findViewById(R.id.rvBookeoAlbumIcons);
-        bookeoFolderAdapter = new BookeoFolderAdapter(albums, getApplicationContext(), this);
-        rvAlbums.addItemDecoration(new MarginItemDecoration(this));
-        rvAlbums.hasFixedSize();
-        rvAlbums.setAdapter(bookeoFolderAdapter);
     }
-
-    public ArrayList<BookeoAlbum> getUserAlbums() {
-        final ArrayList<BookeoAlbum> dbAlbums = new ArrayList<>();
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        String userId = firebaseAuth.getCurrentUser().getUid();
-        db.collection("albums").whereEqualTo("fk_user", userId).get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-
-                    String data = "";
-
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-
-                        if (!queryDocumentSnapshots.isEmpty()) {
-
-                            List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
-
-                            for (DocumentSnapshot documentSnapshot : list) {
-                                BookeoAlbum album = new BookeoAlbum();
-                                album = documentSnapshot.toObject(BookeoAlbum.class);
-
-                                BookeoAlbum arAlbum = new BookeoAlbum(album.getUuid(), album.getName(), album.getCreateDate());
-
-                                dbAlbums.add(arAlbum);
-
-                                //data = albums.get(0).getUuid() + " " + albums.get(0).getName() + " " + album.getCreateDate();
-                                Log.d("OUTPUT", "onSuccess create: " + arAlbum.getName());
-                            }
-                        }
-                        bookeoFolderAdapter.notifyDataSetChanged();
-                    }
-                });
-        Log.d("SIZE", "getAlbums: added" + dbAlbums.size());
-        return dbAlbums;
-    }
-
     /**
      * @param holder   The ViewHolder for the clicked picture
      * @param position The position in the grid of the picture that was clicked
@@ -230,7 +180,6 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         toolbar.setVisibility(View.GONE);
         toggleActionBar(position);
         adapter.toggleIcon(view, position);
-        rvAlbums.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -271,12 +220,6 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
             rvImage.setAdapter(new MediaAdapter(arAllMedia, MediaDisplayActivity.this, this));
             pbLoader.setVisibility(View.GONE);
         }
-    }
-
-    @Override
-    public void onCreated(BookeoAlbum bookeoAlbum) {
-        albums.add(bookeoAlbum);
-        bookeoFolderAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -323,10 +266,9 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
             if (item.getItemId() == R.id.add) {
               // AddAlbumFragment addAlbumFragment = AddAlbumFragment.newInstance("Create Bookeo Album", MediaDisplayActivity.this);
               //addAlbumFragment.show(getSupportFragmentManager(), Config.CREATE_BOOKEO_ALBUM);
-                CreateAlbumFragment createAlbumFragment = CreateAlbumFragment.newInstance("Create Bookeo Album");
+                CreateAlbumFragment createAlbumFragment = CreateAlbumFragment.newInstance("Create Bookeo Album", MediaDisplayActivity.this);
                 createAlbumFragment.show(getSupportFragmentManager(), Config.CREATE_BOOKEO_ALBUM);
                 adapter.notifyDataSetChanged();
-                //mode.finish();
                 return true;
             }
             return false;
@@ -338,7 +280,6 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
             actionMode = null;
             toggleStatusBarColor(MediaDisplayActivity.this, R.color.colorPrimary);
             toolbar.setVisibility(View.VISIBLE);
-            rvAlbums.setVisibility(View.GONE);
             MediaDisplayActivity.this.recreate();
           //  adapter.notifyDataSetChanged();
         }

@@ -39,11 +39,13 @@ public class BookeoCreateFolderAdapter extends RecyclerView.Adapter<BookeoCreate
     private Context contx;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private AddAlbumListener lisenter;
+    private AlbumUploadListener uploadListener;
 
-    public BookeoCreateFolderAdapter(List<BookeoAlbum> albums, Context folderContx, AddAlbumListener lisenter) {
+    public BookeoCreateFolderAdapter(List<BookeoAlbum> albums, Context folderContx, AddAlbumListener lisenter, AlbumUploadListener uploadListener) {
         this.arAlbums = albums;
         this.contx = folderContx;
        this.lisenter = lisenter;
+        this.uploadListener = uploadListener;
     }
     @NonNull
     @Override
@@ -72,6 +74,13 @@ public class BookeoCreateFolderAdapter extends RecyclerView.Adapter<BookeoCreate
             @Override
             public void onClick(View v) {
                 lisenter.addAlbum(album);
+            }
+        });
+
+        holder.ivUpload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                uploadListener.onUploadAlbumClicked(album.getUuid());
             }
         });
     }

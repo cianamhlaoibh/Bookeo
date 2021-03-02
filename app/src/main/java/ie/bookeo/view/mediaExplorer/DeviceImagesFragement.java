@@ -52,7 +52,7 @@ import ie.bookeo.utils.MediaDisplayItemClickListener;
 import ie.bookeo.utils.MyCreateListener;
 import ie.bookeo.utils.ShowGallery;
 
-public class DeviceImagesFragement extends Fragment implements MediaDisplayItemClickListener,  AlbumUploadListener {
+public class DeviceImagesFragement extends Fragment implements MediaDisplayItemClickListener {
     RecyclerView rvImage;
     ArrayList<DeviceMediaItem> arAllMedia;
     ProgressBar pbLoader;
@@ -71,10 +71,7 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
 
     //DB
     private BookeoMediaItemDao bookeoMediaItemDao;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private BookeoFolderAdapter bookeoFolderAdapter;
-    private RecyclerView rvAlbums;
-    private List<BookeoAlbum> albums;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -100,50 +97,7 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
             rvImage.setAdapter(adapter);
             pbLoader.setVisibility(View.GONE);
 
-        //DB - albums for user to upload to when long press
-        albums = new ArrayList<>();
-        albums = getAlbums();
-
-        rvAlbums = root.findViewById(R.id.rvBookeoAlbumIcons);
-        bookeoFolderAdapter = new BookeoFolderAdapter(albums, getContext(), this);
-        rvAlbums.addItemDecoration(new MarginItemDecoration(getContext()));
-        rvAlbums.hasFixedSize();
-        rvAlbums.setAdapter(bookeoFolderAdapter);
         return root;
-    }
-    public ArrayList<BookeoAlbum> getAlbums() {
-        final ArrayList<BookeoAlbum> dbAlbums = new ArrayList<>();
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        String userId = firebaseAuth.getCurrentUser().getUid();
-        db.collection("albums").whereEqualTo("fk_user", userId).get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-
-                    String data = "";
-
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-
-                        if (!queryDocumentSnapshots.isEmpty()) {
-
-                            List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
-
-                            for (DocumentSnapshot documentSnapshot : list) {
-                                BookeoAlbum album = new BookeoAlbum();
-                                album = documentSnapshot.toObject(BookeoAlbum.class);
-
-                                BookeoAlbum arAlbum = new BookeoAlbum(album.getUuid(), album.getName(), album.getCreateDate());
-
-                                dbAlbums.add(arAlbum);
-
-                                //data = albums.get(0).getUuid() + " " + albums.get(0).getName() + " " + album.getCreateDate();
-                                Log.d("OUTPUT", "onSuccess create: " + arAlbum.getName());
-                            }
-                        }
-                        bookeoFolderAdapter.notifyDataSetChanged();
-                    }
-                });
-        Log.d("SIZE", "getAlbums: added" + dbAlbums.size());
-        return dbAlbums;
     }
 
     /**
@@ -183,7 +137,6 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
         tabLayout.setVisibility(View.GONE);
         toggleActionBar(position);
         adapter.toggleIcon(view, position);
-        rvAlbums.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -225,38 +178,9 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
         }
     }
 
-    @Override
-    public void onUploadAlbumClicked(final String albumUuid) {
-        List<DeviceMediaItem> uploadItems;
-        uploadItems = adapter.getUploadItems();
 
-        for (final DeviceMediaItem uploadItem : uploadItems) {
-            final String uuid = UUID.randomUUID().toString();
 
-            BookeoMediaItem upload = new BookeoMediaItem();
-            upload.setUuid(uuid);
-            upload.setName(uploadItem.getName());
-            upload.setDate(uploadItem.getDate());
-            upload.setAlbumUuid(albumUuid);
-
-            //upload item
-            bookeoMediaItemDao = new BookeoMediaItemDao();
-            bookeoMediaItemDao.addMediaItem(upload, uploadItem.getPath());
-
-            //Toast.makeText(MediaDisplayActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-
-        Toast.makeText(getContext(), "Upload Successful", Toast.LENGTH_SHORT).show();
-        //https://stackoverflow.com/questions/39296873/how-can-i-recreate-a-fragment
-        getFragmentManager()
-                .beginTransaction()
-                .detach(DeviceImagesFragement.this)
-                .attach(DeviceImagesFragement.this)
-                .commit();
-        actionMode.finish();
-    }
-
-    class ActionCallback implements ActionMode.Callback, MyCreateListener{
+    class ActionCallback implements ActionMode.Callback, AlbumUploadListener{
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             toggleStatusBarColor(getActivity(), R.color.blue_grey_700);
@@ -273,8 +197,8 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if (item.getItemId() == R.id.add) {
-                AddAlbumFragment addAlbumFragment = AddAlbumFragment.newInstance("Create Bookeo Album", this, "root");
-                addAlbumFragment.show(getActivity().getSupportFragmentManager(), Config.CREATE_BOOKEO_ALBUM);
+                CreateAlbumFragment createAlbumFragment = CreateAlbumFragment.newInstance("Create Bookeo Album", this);
+                createAlbumFragment.show(getActivity().getSupportFragmentManager(), Config.CREATE_BOOKEO_ALBUM);
                 adapter.notifyDataSetChanged();
                 //mode.finish();
                 return true;
@@ -289,7 +213,6 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
             toggleStatusBarColor(getActivity(), R.color.colorPrimary);
             toolbar.setVisibility(View.VISIBLE);
             tabLayout.setVisibility(View.VISIBLE);
-            rvAlbums.setVisibility(View.GONE);
             getFragmentManager()
                     .beginTransaction()
                     .detach(DeviceImagesFragement.this)
@@ -297,10 +220,36 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
                     .commit();
             //  adapter.notifyDataSetChanged();
         }
+
         @Override
-        public void onCreated(BookeoAlbum bookeoAlbum) {
-            albums.add(bookeoAlbum);
-            bookeoFolderAdapter.notifyDataSetChanged();
+        public void onUploadAlbumClicked(final String albumUuid) {
+            List<DeviceMediaItem> uploadItems;
+            uploadItems = adapter.getUploadItems();
+
+            for (final DeviceMediaItem uploadItem : uploadItems) {
+                final String uuid = UUID.randomUUID().toString();
+
+                BookeoMediaItem upload = new BookeoMediaItem();
+                upload.setUuid(uuid);
+                upload.setName(uploadItem.getName());
+                upload.setDate(uploadItem.getDate());
+                upload.setAlbumUuid(albumUuid);
+
+                //upload item
+                bookeoMediaItemDao = new BookeoMediaItemDao();
+                bookeoMediaItemDao.addMediaItem(upload, uploadItem.getPath());
+
+                //Toast.makeText(MediaDisplayActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+
+            Toast.makeText(getContext(), "Upload Successful", Toast.LENGTH_SHORT).show();
+            //https://stackoverflow.com/questions/39296873/how-can-i-recreate-a-fragment
+            getFragmentManager()
+                    .beginTransaction()
+                    .detach(DeviceImagesFragement.this)
+                    .attach(DeviceImagesFragement.this)
+                    .commit();
+            actionMode.finish();
         }
     }
     /*
