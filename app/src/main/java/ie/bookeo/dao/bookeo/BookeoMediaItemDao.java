@@ -24,17 +24,26 @@ import java.util.List;
 
 import ie.bookeo.model.bookeo.BookeoMediaItem;
 import ie.bookeo.model.bookeo.MyCaptionStyle;
+import ie.bookeo.utils.FirebaseMediaItemsResultListener;
 import ie.bookeo.utils.FirebaseResultListener;
 
 public class BookeoMediaItemDao {
     FirebaseFirestore db;
     StorageReference storageReference;
+    FirebaseMediaItemsResultListener listener;
 
 
     public BookeoMediaItemDao() {
         db = FirebaseFirestore.getInstance();
         storageReference = FirebaseStorage.getInstance().getReference("media_items");
     }
+
+    public BookeoMediaItemDao(FirebaseMediaItemsResultListener listener) {
+        db = FirebaseFirestore.getInstance();
+        storageReference = FirebaseStorage.getInstance().getReference("media_items");
+        this.listener = listener;
+    }
+
 
 
     // //https://www.youtube.com/watch?v=Bh0h_ZhX-Qghttps://www.youtube.com/watch?v=Bh0h_ZhX-Qg - add and retireve documents
@@ -88,7 +97,7 @@ public class BookeoMediaItemDao {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(contx, "Image Deleted", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(contx, "Media Deleted", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -115,16 +124,10 @@ public class BookeoMediaItemDao {
                             for (DocumentSnapshot documentSnapshot : list) {
                                 BookeoMediaItem item = new BookeoMediaItem();
                                 item = documentSnapshot.toObject(BookeoMediaItem.class);
-
                                 BookeoMediaItem arItem = new BookeoMediaItem(item.getUuid(), item.getUrl(), item.getName(), item.getDate(), item.getAlbumUuid());
-
                                 mediaItems.add(arItem);
-
-                                //data = albums.get(0).getUuid() + " " + albums.get(0).getName() + " " + album.getCreateDate();
-                                //Log.d("OUTPUT", "onSuccess create: " + arItem.getUrl());
-                                //Log.d("OUTPUT--", "onSuccess create: " + mediaItems.get(0).getUrl());
-                                //Log.d("SIZE--", "onSuccess create: " + mediaItems.size());
                             }
+                            listener.onComplete(mediaItems);
                         }
                     }
                 });

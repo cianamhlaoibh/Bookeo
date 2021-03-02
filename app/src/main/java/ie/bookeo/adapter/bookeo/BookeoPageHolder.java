@@ -1,5 +1,6 @@
 package ie.bookeo.adapter.bookeo;
 
+import android.app.MediaRouteButton;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -12,6 +13,7 @@ import ie.bookeo.R;
 
 public class BookeoPageHolder extends RecyclerView.ViewHolder {
 
+    public ImageView ivRemove;
     ImageView ivPage, ivMedia, ivMediaLrg, ivQR;
     TextView tvCaption;
 
@@ -23,5 +25,6 @@ public class BookeoPageHolder extends RecyclerView.ViewHolder {
         ivQR = itemView.findViewById(R.id.ivQR);
         tvCaption = itemView.findViewById(R.id.tvCaption);
         ivMediaLrg = itemView.findViewById(R.id.ivImageLrg);
+        ivRemove = itemView.findViewById(R.id.ivRemove);
     }
 }

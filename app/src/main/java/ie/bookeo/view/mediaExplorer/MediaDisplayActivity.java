@@ -34,6 +34,7 @@ import ie.bookeo.dao.DeviceMediaDao;
 import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
 import ie.bookeo.model.drive.GoogleDriveMediaItem;
+import ie.bookeo.utils.AddAlbumListener;
 import ie.bookeo.utils.AlbumUploadListener;
 import ie.bookeo.utils.Config;
 import ie.bookeo.utils.MyCreateListener;
@@ -320,8 +321,10 @@ public class MediaDisplayActivity extends AppCompatActivity implements MediaDisp
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if (item.getItemId() == R.id.add) {
-                AddAlbumFragment addAlbumFragment = AddAlbumFragment.newInstance("Create Bookeo Album", MediaDisplayActivity.this);
-                addAlbumFragment.show(getSupportFragmentManager(), Config.CREATE_BOOKEO_ALBUM);
+              // AddAlbumFragment addAlbumFragment = AddAlbumFragment.newInstance("Create Bookeo Album", MediaDisplayActivity.this);
+              //addAlbumFragment.show(getSupportFragmentManager(), Config.CREATE_BOOKEO_ALBUM);
+                CreateAlbumFragment createAlbumFragment = CreateAlbumFragment.newInstance("Create Bookeo Album");
+                createAlbumFragment.show(getSupportFragmentManager(), Config.CREATE_BOOKEO_ALBUM);
                 adapter.notifyDataSetChanged();
                 //mode.finish();
                 return true;

@@ -50,13 +50,13 @@ public class AddAlbumFragment extends DialogFragment {
     }
 
 
-    public static AddAlbumFragment newInstance(String title, MyCreateListener listener){
+    public static AddAlbumFragment newInstance(String title, MyCreateListener listener, String parentUuid){
         mylistener = listener;
         AddAlbumFragment albumCreateDialogFragment = new AddAlbumFragment();
         Bundle args = new Bundle();
         args.putString("title", title);
         albumCreateDialogFragment.setArguments(args);
-
+        args.putString("parentUuid",parentUuid);
         albumCreateDialogFragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.CustomDialog);
 
         return albumCreateDialogFragment;
@@ -112,11 +112,12 @@ public class AddAlbumFragment extends DialogFragment {
         String date = DATE_FORMAT.format(today);
         //Read more: https://www.java67.com/2013/01/how-to-format-date-in-java-simpledateformat-example.html#ixzz6fppjpeYL
         final String uuid = UUID.randomUUID().toString();
+        String parent = getArguments().getString("parentUuid");
         //assign to user
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         String userId = firebaseAuth.getCurrentUser().getUid();
         //add to firebase
-        final BookeoAlbum bookeoAlbum = new BookeoAlbum(uuid, name, date, userId);
+        final BookeoAlbum bookeoAlbum = new BookeoAlbum(uuid, name, date, userId, parent);
         bookeoAlbumDao = new BookeoAlbumDao();
         int[] result = bookeoAlbumDao.addAlbum(bookeoAlbum, getContext());
         //If added to firestore update rvAlbum

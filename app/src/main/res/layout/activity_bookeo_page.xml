@@ -20,7 +20,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:title="Edit Page 1" >
+            app:title="Edit Page" >
             <ImageView
                 android:id="@+id/ivDone"
                 android:layout_width="wrap_content"
@@ -138,5 +138,17 @@
         app:layout_constraintStart_toStartOf="@+id/ivPage"
         app:srcCompat="@drawable/qr_sample"
         tools:visibility="visible"/>
+
+    <ImageView
+        android:id="@+id/ivQrLrg"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvCaption"
+        app:srcCompat="@drawable/qr_sample"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

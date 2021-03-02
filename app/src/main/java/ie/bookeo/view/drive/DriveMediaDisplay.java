@@ -425,7 +425,7 @@ public class DriveMediaDisplay extends AppCompatActivity implements MediaDisplay
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if (item.getItemId() == R.id.add) {
-                AddAlbumFragment addAlbumFragment = AddAlbumFragment.newInstance("Create Bookeo Album", this);
+                AddAlbumFragment addAlbumFragment = AddAlbumFragment.newInstance("Create Bookeo Album", this, "root");
                 addAlbumFragment.show(getSupportFragmentManager(), Config.CREATE_BOOKEO_ALBUM);
                 adapter.notifyDataSetChanged();
                 //mode.finish();

@@ -273,7 +273,7 @@ public class DeviceImagesFragement extends Fragment implements MediaDisplayItemC
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if (item.getItemId() == R.id.add) {
-                AddAlbumFragment addAlbumFragment = AddAlbumFragment.newInstance("Create Bookeo Album", this);
+                AddAlbumFragment addAlbumFragment = AddAlbumFragment.newInstance("Create Bookeo Album", this, "root");
                 addAlbumFragment.show(getActivity().getSupportFragmentManager(), Config.CREATE_BOOKEO_ALBUM);
                 adapter.notifyDataSetChanged();
                 //mode.finish();

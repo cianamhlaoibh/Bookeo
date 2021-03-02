@@ -11,6 +11,7 @@ public class BookeoAlbum {
     private String firstItem;
     private String fk_user;
     private Boolean generated;
+    private String parent;
 
     public BookeoAlbum() {
 
@@ -20,11 +21,12 @@ public class BookeoAlbum {
         this.name = name;
         this.createDate = date;
     }
-    public BookeoAlbum(String uuid, String name, String date, String fk_user) {
+    public BookeoAlbum(String uuid, String name, String date, String fk_user, String parent) {
         this.uuid = uuid;
         this.name = name;
         this.createDate = date;
         this.fk_user = fk_user;
+        this.parent = parent;
     }
 
     public String getUuid() {
@@ -81,5 +83,13 @@ public class BookeoAlbum {
 
     public void setGenerated(Boolean generated) {
         this.generated = generated;
+    }
+
+    public String getParent() {
+        return parent;
+    }
+
+    public void setParent(String parent) {
+        this.parent = parent;
     }
 }

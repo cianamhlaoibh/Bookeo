@@ -81,7 +81,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_update"
+        app:srcCompat="@drawable/ic_arrow"
         tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

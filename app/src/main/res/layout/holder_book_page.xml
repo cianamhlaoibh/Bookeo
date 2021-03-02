@@ -62,4 +62,16 @@
         app:layout_constraintTop_toTopOf="@+id/ivPage"
         app:srcCompat="@drawable/placeholder" />
 
+    <ImageView
+        android:id="@+id/ivRemove"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="2dp"
+        android:background="@drawable/ticked_image"
+        android:src="@drawable/ic_delete_white"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@+id/ivPage"
+        app:layout_constraintTop_toTopOf="@+id/ivPage"
+        tools:visibility="visible" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

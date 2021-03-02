@@ -41,7 +41,7 @@ public class BookeoPageActivity extends AppCompatActivity implements View.OnClic
     ArrayList<BookeoMediaItem> result;
     ie.bookeo.model.bookeo.BookeoPage page;
     BookeoMediaItem item;
-    ImageView ivImageStd, ivImageLrg, ivCaption, ivEnlarge, ivFilter, ivDelete, ivDone, ivQr;
+    ImageView ivImageStd, ivImageLrg, ivCaption, ivEnlarge, ivFilter, ivDelete, ivDone, ivQr, ivQrLrg;
     TextView tvCaption;
 
     @Override
@@ -60,6 +60,7 @@ public class BookeoPageActivity extends AppCompatActivity implements View.OnClic
         ivImageStd = findViewById(R.id.ivImageStd);
         ivImageLrg = findViewById(R.id.ivImageLrg);
         ivQr = findViewById(R.id.ivQR);
+        ivQrLrg = findViewById(R.id.ivQrLrg);
         ivDone = findViewById(R.id.ivDone);
         ivCaption = findViewById(R.id.ivCaption);
         ivEnlarge = findViewById(R.id.ivFormat);
@@ -70,6 +71,7 @@ public class BookeoPageActivity extends AppCompatActivity implements View.OnClic
         ivEnlarge.setOnClickListener(this);
         ivFilter.setOnClickListener(this);
         ivDelete.setOnClickListener(this);
+        ivQr.setOnClickListener(this);
     }
 
     @Override
@@ -82,6 +84,9 @@ public class BookeoPageActivity extends AppCompatActivity implements View.OnClic
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.ivDone:
+                if(page.getEnlarged() == null){
+                    page.setEnlarged(false);
+                }
                 pagesDao.updateEnlargement(albumUuid, id, page.getEnlarged());
                 finish();
                 break;
@@ -100,6 +105,12 @@ public class BookeoPageActivity extends AppCompatActivity implements View.OnClic
                 //bookeoMediaItemDao.deleteMediaItem(albumUuid, id, this);
                 finish();
                 break;
+            case R.id.ivQR:
+                if(ivQrLrg.getVisibility() == View.GONE){
+                    ivQrLrg.setVisibility(View.VISIBLE);
+                }else{
+                    ivQrLrg.setVisibility(View.GONE);
+                }
         }
     }
 
@@ -110,7 +121,6 @@ public class BookeoPageActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void checkIsEnlargedOnLoad(BookeoMediaItem item) {
-        //TODO
         if(page.getEnlarged() == null || page.getEnlarged() == false){
             ivImageStd.setVisibility(View.VISIBLE);
             ivImageLrg.setVisibility(View.GONE);
@@ -165,6 +175,7 @@ public class BookeoPageActivity extends AppCompatActivity implements View.OnClic
             // Create the QR code and display
             Bitmap qr = createQR(data);
             Glide.with(this).load(qr).into(ivQr);
+            Glide.with(this).load(qr).into(ivQrLrg);
             ivQr.setVisibility(View.VISIBLE);
         }
     }

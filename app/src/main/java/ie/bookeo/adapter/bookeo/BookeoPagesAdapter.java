@@ -14,11 +14,13 @@ import com.bumptech.glide.Glide;
 
 import net.glxn.qrgen.android.QRCode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 import ie.bookeo.R;
 import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
+import ie.bookeo.dao.bookeo.BookeoPagesDao;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
 import ie.bookeo.model.bookeo.BookeoPage;
 import ie.bookeo.model.bookeo.MyCaptionStyle;
@@ -29,18 +31,22 @@ import ie.bookeo.view.bookeo.BookeoPageActivity;
  * Reference
  *  - URL - https://github.com/kenglxn/QRGen
  *  - Creator - Ken Gullaksen
+ *
+ *  -URL: https://stackoverflow.com/questions/41404866/show-hide-buttons-in-recyclerview-adapter-from-activity
  */
 public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  {
     private List<BookeoPage> pages;
     private Context contx;
-    private BookeoMediaItemDao dao;
-    private List<BookeoMediaItem> items;
+    private BookeoPagesDao dao;
+    private BookeoMediaItemDao itemsDao;
+    private boolean activate;
 
-    public BookeoPagesAdapter(List<BookeoPage> pages, List<BookeoMediaItem> items, Context contx) {
+    public BookeoPagesAdapter(List<BookeoPage> pages, Context contx) {
         this.pages = pages;
-        this.items = items;
         this.contx = contx;
-        dao = new BookeoMediaItemDao();
+        dao = new BookeoPagesDao();
+        itemsDao = new BookeoMediaItemDao();
+        activate = false;
     }
 
     @NonNull
@@ -66,8 +72,9 @@ public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  
                        if (style != null) {
                            style.applyCaptionStyle(style, holder.tvCaption);
                        }
+                   }else{
+                       holder.tvCaption.setVisibility(View.GONE);
                    }
-                   //TODO
                    if (page.getEnlarged() == null || page.getEnlarged() == false) {
                        holder.ivMedia.setVisibility(View.VISIBLE);
                        holder.ivMediaLrg.setVisibility(View.GONE);
@@ -77,6 +84,15 @@ public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  
                        holder.ivMedia.setVisibility(View.GONE);
                        Glide.with(contx).load(item.getUrl()).into(holder.ivMediaLrg);
                    }
+               holder.ivRemove.setOnClickListener(new View.OnClickListener() {
+                   @Override
+                   public void onClick(View v) {
+                       dao.deletePage(page.getAlbumUuid(), page.getPageUuid());
+                       itemsDao.deleteMediaItem(page.getAlbumUuid(), page.getItem().getUuid(), contx);
+                       pages.remove(position);
+                       notifyDataSetChanged();
+                   }
+               });
                //GENERATE QR CODE - IF VIDEO CLIP
                String extension = item.getName().substring(item.getName().lastIndexOf("."));
                if (extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".avi") || extension.equalsIgnoreCase(".mkv")) {
@@ -86,6 +102,8 @@ public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  
                    Bitmap qr = createQR(data);
                    Glide.with(contx).load(qr).into(holder.ivQR);
                    holder.ivQR.setVisibility(View.VISIBLE);
+               }else{
+                   holder.ivQR.setVisibility(View.GONE);
                }
 
 
@@ -99,17 +117,23 @@ public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  
                     contx.startActivity(intent);
                 }
             });
-            //This sets position field when album is first generated
-           // if(page.getPageNumber() == -1) {
-            //    dao.updatePosition(item.getAlbumUuid(), item.getUuid(), position);
-            //}
 
+        if (activate) {
+            holder.ivRemove.setVisibility(View.VISIBLE);
+        } else {
+            holder.ivRemove.setVisibility(View.INVISIBLE);
+        }
     }
 
     // Function to create the QR code
     public static Bitmap createQR(String data){
         Bitmap myBitmap = QRCode.from(data).bitmap();
         return myBitmap;
+    }
+
+    public void activateButtons(boolean activate) {
+        this.activate = activate;
+        notifyDataSetChanged(); //need to call it for the child views to be re-created with buttons.
     }
 
     @Override
