@@ -89,8 +89,8 @@ public class BookeoBook extends AppCompatActivity implements View.OnClickListene
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
             int fromPosition = viewHolder.getAdapterPosition();
             int toPosition = target.getAdapterPosition();
-            dao.updatePosition(pages.get(fromPosition).getAlbumUuid(), pages.get(fromPosition).getPageUuid(), toPosition);
-            dao.updatePosition(pages.get(toPosition).getAlbumUuid(), pages.get(toPosition).getPageUuid(), fromPosition);
+            pagesDao.updatePosition(pages.get(fromPosition).getAlbumUuid(), pages.get(fromPosition).getPageUuid(), toPosition);
+            pagesDao.updatePosition(pages.get(toPosition).getAlbumUuid(), pages.get(toPosition).getPageUuid(), fromPosition);
             Collections.swap(pages, fromPosition, toPosition);
             recyclerView.getAdapter().notifyItemMoved(fromPosition, toPosition);
             return false;
@@ -104,7 +104,6 @@ public class BookeoBook extends AppCompatActivity implements View.OnClickListene
     protected void onResume() {
         super.onResume();
         //DB
-        pages = null;
         pages = new ArrayList<>();
         if(isGenerated) {
             pages = getDbMediaOrdered(uuid);
@@ -121,7 +120,6 @@ public class BookeoBook extends AppCompatActivity implements View.OnClickListene
 
     public ArrayList<BookeoPage> getDbMediaOrdered(String albumUuid) {
         final ArrayList<BookeoPage> pages = new ArrayList<>();
-
         db.collection("albums").document(albumUuid).collection("pages").orderBy("pageNumber").get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
@@ -223,6 +221,9 @@ public class BookeoBook extends AppCompatActivity implements View.OnClickListene
     @Override
     public void onComplete(ArrayList<BookeoMediaItem> items) {
         this.items = new ArrayList<>();
+        if(!this.items.isEmpty()) {
+            this.items.clear();
+        }
         this.items.addAll(items);
         updateAlbumBook();
     }
@@ -240,5 +241,11 @@ public class BookeoBook extends AppCompatActivity implements View.OnClickListene
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
     }
 }

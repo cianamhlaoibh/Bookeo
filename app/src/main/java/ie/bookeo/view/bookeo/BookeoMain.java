@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,11 +30,12 @@ import ie.bookeo.view.drive.GoogleDriveFragment;
 import ie.bookeo.view.mediaExplorer.DeviceImagesFragement;
 import ie.bookeo.view.mediaExplorer.FolderViewFragment;
 
-public class BookeoMain extends AppCompatActivity {
+public class BookeoMain extends AppCompatActivity implements View.OnClickListener{
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private ViewPagerAdapter viewPagerAdapter;
+    private ImageView ivQrScan;
     MenuInflater inflater;
     Menu optionMenu;
 
@@ -42,6 +45,9 @@ public class BookeoMain extends AppCompatActivity {
         setContentView(R.layout.activity_bookeo_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        ivQrScan = findViewById(R.id.ivQrScan);
+        ivQrScan.setOnClickListener(this);
     }
 
     @Override
@@ -116,4 +122,14 @@ public class BookeoMain extends AppCompatActivity {
 
         }
     };
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.ivQrScan:
+                Intent intent = new Intent(this, CodeScannerActivity.class);
+                startActivity(intent);
+                break;
+        }
+    }
 }

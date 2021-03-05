@@ -1,4 +1,4 @@
-package ie.bookeo.adapter.drive;
+package ie.bookeo.adapter.bookeo;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,25 +9,23 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ie.bookeo.R;
-import ie.bookeo.dao.drive.DriveServiceHelper;
+import ie.bookeo.adapter.drive.FolderHolder;
+import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.drive.DriveFolder;
+import ie.bookeo.view.bookeo.BookeoMediaDisplay;
 import ie.bookeo.view.drive.DriveMediaDisplay;
 
-public class GoogleDriveFolderAdapter extends RecyclerView.Adapter<FolderHolder> {
+public class BookeoSubFolderAdapter extends RecyclerView.Adapter<FolderHolder> {
 
-    private List<DriveFolder> arFolders;
+    private ArrayList<BookeoAlbum> arFolders;
     private Context contx;
 
-    public void setHelper(DriveServiceHelper helper) {
-        this.helper = helper;
-    }
 
-    private DriveServiceHelper helper;
-
-    public GoogleDriveFolderAdapter(List<DriveFolder> arFolders, Context folderContx) {
+    public BookeoSubFolderAdapter(ArrayList<BookeoAlbum> arFolders, Context folderContx) {
         this.arFolders = arFolders;
         this.contx = folderContx;
     }
@@ -41,16 +39,16 @@ public class GoogleDriveFolderAdapter extends RecyclerView.Adapter<FolderHolder>
 
     @Override
     public void onBindViewHolder(@NonNull FolderHolder holder, int position) {
-        final DriveFolder folder = arFolders.get(position);
+        BookeoAlbum folder = arFolders.get(position);
 
-        String text = ""+ folder.getName();
+        String text = folder.getName();
         holder.tvFolderName.setText(text);
 
         holder.tvFolderName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(contx, DriveMediaDisplay.class);
-                intent.putExtra("folderId", folder.getId());
+                Intent intent = new Intent(contx, BookeoMediaDisplay.class);
+                intent.putExtra("folderUuid", folder.getUuid());
                 intent.putExtra("folderName", folder.getName());
                 contx.startActivity(intent);
             }
@@ -62,3 +60,4 @@ public class GoogleDriveFolderAdapter extends RecyclerView.Adapter<FolderHolder>
         return arFolders.size();
     }
 }
+

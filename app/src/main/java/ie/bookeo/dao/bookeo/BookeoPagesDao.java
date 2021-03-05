@@ -76,6 +76,10 @@ public class BookeoPagesDao {
         db.collection("albums").document(albumUuid).collection("pages").document(uuid).update("style", style);
     }
 
+    public void updatePosition(String albumUuid, String uuid, int position ) {
+        db.collection("albums").document(albumUuid).collection("pages").document(uuid).update("position", position);
+    }
+
     public void updateEnlargement(String albumUuid, String uuid, boolean b) {
         db.collection("albums").document(albumUuid).collection("pages").document(uuid).update("enlarged", b);
     }

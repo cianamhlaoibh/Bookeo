@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#000"
+    android:fitsSystemWindows="true">
+
+
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="0dp"/>
+
+
+    <LinearLayout
+        android:paddingLeft="15dp"
+        android:layout_marginTop="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#eee"
+            android:textSize="14dp"
+            android:text=""/>
+
+    </LinearLayout>
+
+
+    <ImageView
+        android:src="@drawable/ic_back"
+        android:id="@+id/btn_close"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:clickable="true"
+        android:layout_alignParentTop="true"
+        android:padding="7dp"
+        app:tint="#FFFFFF" />
+
+    <ImageView
+        android:id="@+id/ivInfo"
+        android:src="@drawable/ic_info"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="right"
+        android:layout_alignParentRight="true"
+        android:clickable="true"
+        android:layout_alignParentTop="true"
+        android:padding="10dp"
+        app:tint="#ffffff" />
+
+    <ProgressBar
+        android:id="@+id/loader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        tools:visibility="visible" />
+
+</FrameLayout>

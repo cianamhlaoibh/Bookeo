@@ -61,7 +61,7 @@ public class BookeoAlbumsFragment extends Fragment implements MediaDisplayItemCl
         final ArrayList<BookeoAlbum> dbAlbums = new ArrayList<>();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         String userId = firebaseAuth.getCurrentUser().getUid();
-        db.collection("albums").whereEqualTo("fk_user", userId).get()
+        db.collection("albums").whereEqualTo("fk_user", userId).whereEqualTo("parent", "root").get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
 
                     String data = "";

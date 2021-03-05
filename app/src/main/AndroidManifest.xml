@@ -10,6 +10,7 @@
         android:required="true" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
         android:name=".MyApplication"
@@ -20,6 +21,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity
+            android:name=".view.bookeo.CodeScannerActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".view.SplashScreenActivity"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
@@ -73,8 +77,12 @@
         <activity
             android:name=".view.bookeo.BookeoPageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".view.bookeo.EditCaptionActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".view.bookeo.EditCaptionActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".view.bookeo.QrGalleryView"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

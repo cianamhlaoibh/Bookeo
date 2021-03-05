@@ -10,7 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
@@ -36,19 +36,20 @@ import java.util.UUID;
 import ie.bookeo.R;
 import ie.bookeo.adapter.bookeo.BookeoMediaItemAdapter;
 import ie.bookeo.adapter.MediaAdapterHolder;
+import ie.bookeo.adapter.bookeo.BookeoSubFolderAdapter;
+import ie.bookeo.adapter.drive.GoogleDriveFolderAdapter;
 import ie.bookeo.dao.bookeo.BookeoAlbumDao;
-import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
 import ie.bookeo.dao.bookeo.BookeoPagesDao;
 import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
 import ie.bookeo.model.bookeo.BookeoPage;
 import ie.bookeo.model.drive.GoogleDriveMediaItem;
 import ie.bookeo.model.gallery_model.DeviceMediaItem;
-import ie.bookeo.utils.FirebasePageResultListener;
 import ie.bookeo.utils.FirebaseResultListener;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 import ie.bookeo.utils.ShowGallery;
+import ie.bookeo.utils.SubFolderResultListener;
 
 /**
  * Reference
@@ -73,9 +74,9 @@ import ie.bookeo.utils.ShowGallery;
  * This Activity loads all images to images associated with a particular folder into a recyclerview with grid manager from cloud storage
  */
 
-public class BookeoMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener, View.OnClickListener, FirebaseResultListener{
+public class BookeoMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener, View.OnClickListener, FirebaseResultListener, SubFolderResultListener {
 
-    RecyclerView rvMediaItems;
+    RecyclerView rvMediaItems, rvFolders;
     ProgressBar pbLoader;
     BookeoMediaItemAdapter adapter;
     TextView tvNoMedia;
@@ -84,6 +85,8 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     //DB
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     ArrayList<BookeoMediaItem> items;
+    ArrayList<BookeoAlbum> folders;
+    BookeoSubFolderAdapter subFolderAdapter;
     BookeoAlbumDao dao;
     BookeoPagesDao pagesDao;
     BookeoAlbum album;
@@ -106,6 +109,11 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         name = getIntent().getStringExtra("folderName");
         uuid = getIntent().getStringExtra("folderUuid");
         toolbar.setTitle(name);
+
+        dao = new BookeoAlbumDao(this, this);
+        rvFolders = findViewById(R.id.rvFolders);
+        rvFolders.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
+
 
         rvMediaItems = findViewById(R.id.rvMediaItems);
         rvMediaItems.addItemDecoration(new MarginItemDecoration(this));
@@ -140,8 +148,8 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         items = getDbMedia(uuid);
         adapter = new BookeoMediaItemAdapter(items, BookeoMediaDisplay.this, this);
         rvMediaItems.setAdapter(adapter);
-        dao = new BookeoAlbumDao(this);
         dao.getAlbum(uuid);
+        dao.getSubFolders(uuid);
         pagesDao = new BookeoPagesDao();
     }
 
@@ -150,6 +158,10 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
             tvNoMedia.setVisibility(View.VISIBLE);
         else
             tvNoMedia.setVisibility(View.GONE);
+    }
+
+    public void getSubFolders(){
+
     }
 
     //https://www.youtube.com/watch?v=Bh0h_ZhX-Qg
@@ -305,6 +317,15 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     @Override
     public void onLongPress(MediaAdapterHolder holder, GoogleDriveMediaItem item, int position) {
 
+    }
+
+    @Override
+    public void onSubFolderResult(ArrayList<BookeoAlbum> albums) {
+        folders = albums;
+        Log.d("onSubFolderResult", "onSubFolderResult: " + albums.size());
+        Log.d("onSubFolderResult", "onSubFolderResult: " + folders.size());
+        subFolderAdapter = new BookeoSubFolderAdapter(folders, getApplicationContext());
+        rvFolders.setAdapter(subFolderAdapter);
     }
 
 }

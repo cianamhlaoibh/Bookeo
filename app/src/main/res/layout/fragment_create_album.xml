@@ -19,9 +19,9 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            android:backgroundTint="@color/colorPrimaryDark"
+            android:backgroundTint="@color/colorAccent"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:title="Folder Name">
+            app:title="Create n' Upload">
 
         <ImageView
             android:id="@+id/ivAdd"
@@ -29,7 +29,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:adjustViewBounds="true"
-            android:src="@drawable/ic_add" />
+            android:src="@drawable/ic_add"
+            android:paddingRight="10dp"/>
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 

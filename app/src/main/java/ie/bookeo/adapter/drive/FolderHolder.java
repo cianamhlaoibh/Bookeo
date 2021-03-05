@@ -5,13 +5,16 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.text.BreakIterator;
+
 import ie.bookeo.R;
 
-public class DriveFolderHolder extends RecyclerView.ViewHolder {
+public class FolderHolder extends RecyclerView.ViewHolder {
 
-    TextView tvFolderName;
+    public TextView tvFolderName;
 
-    public DriveFolderHolder(@NonNull View itemView) {
+    public FolderHolder(@NonNull View itemView) {
         super(itemView);
         tvFolderName = itemView.findViewById(R.id.tvFolderName);
     }

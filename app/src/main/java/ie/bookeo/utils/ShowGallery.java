@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import ie.bookeo.model.drive.GoogleDriveMediaItem;
 import ie.bookeo.view.bookeo.BookeoGalleryView;
+import ie.bookeo.view.bookeo.QrGalleryView;
 import ie.bookeo.view.drive.DriveGalleryView;
 import ie.bookeo.view.mediaExplorer.GalleryViewActivity;
 
@@ -53,6 +54,12 @@ public class ShowGallery {
         //ArrayList<> byteList = new ArrayList<Byte>();
        //intent.putCharSequenceArrayListExtra("driveItems", byteList);
 //        intent.putExtra("bundle", data);
+        contx.startActivity(intent);
+    }
+
+    public static void qrShow(Context contx, String result) {
+        Intent intent = new Intent(contx, QrGalleryView.class);
+        intent.putExtra("result", result);
         contx.startActivity(intent);
     }
 }

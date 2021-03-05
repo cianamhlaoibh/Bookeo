@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -129,6 +130,26 @@ public class BookeoMediaItemDao {
                             }
                             listener.onComplete(mediaItems);
                         }
+                    }
+                });
+        //Log.d("SIZE", "onSuccess create: " + mediaItems.size());
+        return mediaItems;
+    }
+
+    public ArrayList<BookeoMediaItem> getItem(String albumUuid, String uuid, Context contx) {
+        final ArrayList<BookeoMediaItem> mediaItems = new ArrayList<>();
+        db.collection("albums").document(albumUuid).collection("media_items").document(uuid).get()
+               .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                   @Override
+                   public void onSuccess(DocumentSnapshot documentSnapshot) {
+                       mediaItems.add(documentSnapshot.toObject(BookeoMediaItem.class));
+                       listener.onComplete(mediaItems);
+                   }
+               })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d("db_err", "onFailure: " + e.getMessage());
                     }
                 });
         //Log.d("SIZE", "onSuccess create: " + mediaItems.size());
