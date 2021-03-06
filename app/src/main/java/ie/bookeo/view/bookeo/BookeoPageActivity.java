@@ -171,7 +171,7 @@ public class BookeoPageActivity extends AppCompatActivity implements View.OnClic
         String extension = item.getName().substring(item.getName().lastIndexOf("."));
         if (extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".avi") || extension.equalsIgnoreCase(".mkv")) {
             // The data that the QR code will contain
-            String data = item.getUrl();
+            String data = item.getAlbumUuid()+","+item.getUuid();
             // Create the QR code and display
             Bitmap qr = createQR(data);
             Glide.with(this).load(qr).into(ivQr);

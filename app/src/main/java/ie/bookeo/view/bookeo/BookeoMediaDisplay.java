@@ -81,6 +81,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     BookeoMediaItemAdapter adapter;
     TextView tvNoMedia;
     FloatingActionButton fabGenerate, fabUpdate;
+    Toolbar toolbar;
 
     //DB
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -102,13 +103,12 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
 
         setContentView(R.layout.activity_bookeo_media_display);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar =  findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         name = getIntent().getStringExtra("folderName");
         uuid = getIntent().getStringExtra("folderUuid");
-        toolbar.setTitle(name);
 
         dao = new BookeoAlbumDao(this, this);
         rvFolders = findViewById(R.id.rvFolders);
@@ -216,10 +216,18 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
                 startActivity(new Intent(this, OssLicensesMenuActivity.class));
             //https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
             case android.R.id.home:
-                Intent intent = new Intent(BookeoMediaDisplay.this, BookeoMain.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
+                if(album.getParent().equals("root")) {
+                    Intent intent = new Intent(BookeoMediaDisplay.this, BookeoMain.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                }else{
+                    Intent intent = new Intent(getApplicationContext(), BookeoMediaDisplay.class);
+                    intent.putExtra("folderUuid",album.getUuid());
+                    intent.putExtra("folderName",album.getName());
+                    finish();
+                    startActivity(intent);
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -284,6 +292,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     public void onComplete(BookeoAlbum album) {
         this.album = album;
         checkIsGenerated();
+        toolbar.setTitle(album.getName());
     }
 
     @Override
