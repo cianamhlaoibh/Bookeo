@@ -85,6 +85,7 @@ public class InfoFragment extends DialogFragment implements View.OnClickListener
             case R.id.tvLocation:
                 Intent intent = new Intent(getContext(), BookeoMediaDisplay.class);
                 intent.putExtra("folderUuid",getArguments().getString("albumUuid"));
+                intent.putExtra("uuid",getArguments().getString("uuid"));
                 startActivity(intent);
                 break;
             case R.id.btnCancel:

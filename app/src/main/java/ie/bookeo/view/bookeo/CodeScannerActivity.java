@@ -43,7 +43,10 @@ public class CodeScannerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_code_scanner);
         scannerView = findViewById(R.id.scanner_view);
-
+        if(checkWriteExternalPermission())
+            _init();
+        else
+            grantPermission();
     }
 
     public void _init() {
@@ -56,6 +59,7 @@ public class CodeScannerActivity extends AppCompatActivity {
                     public void run() {
                         Toast.makeText(getApplicationContext(), "Scan Successful", Toast.LENGTH_SHORT).show();
                         ShowGallery.qrShow(getApplicationContext(), result.getText());
+                        finish();
                     }
                 });
             }
@@ -69,11 +73,15 @@ public class CodeScannerActivity extends AppCompatActivity {
         mCodeScanner.startPreview();
     }
 
+    public void _init_res() {
+        mCodeScanner.startPreview();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         if(checkWriteExternalPermission())
-            _init();
+            _init_res();
         else
             grantPermission();
     }

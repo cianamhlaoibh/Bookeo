@@ -48,33 +48,34 @@ import ie.bookeo.model.gallery_model.DeviceMediaItem;
 import ie.bookeo.utils.FirebaseResultListener;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
+import ie.bookeo.utils.ScrollListener;
 import ie.bookeo.utils.ShowGallery;
 import ie.bookeo.utils.SubFolderResultListener;
 
 /**
  * Reference
- *  - URL - https://github.com/CodeBoy722/Android-Simple-Image-Gallery
- *  - Creator - CodeBoy 722
- *  - Modified by Cian O Sullivan
- *
- *  - URL - https://medium.com/better-programming/gmail-like-list-67bc51adc68a
- *  - Github - https://github.com/Mustufa786/MultiSelectionList
- *  - Creator - Mustufa Ansari
- *  - Modified by Cian O Sullivan
- *
- *  - To display license activity
- *  - URL - https://developers.google.com/android/guides/opensource
- *
- *   - To program toolbar back button
- *   -URL https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
- *
- *   - To retireve items from firestore
- *   - URL - https://www.youtube.com/watch?v=Bh0h_ZhX-Qg
- *
+ * - URL - https://github.com/CodeBoy722/Android-Simple-Image-Gallery
+ * - Creator - CodeBoy 722
+ * - Modified by Cian O Sullivan
+ * <p>
+ * - URL - https://medium.com/better-programming/gmail-like-list-67bc51adc68a
+ * - Github - https://github.com/Mustufa786/MultiSelectionList
+ * - Creator - Mustufa Ansari
+ * - Modified by Cian O Sullivan
+ * <p>
+ * - To display license activity
+ * - URL - https://developers.google.com/android/guides/opensource
+ * <p>
+ * - To program toolbar back button
+ * -URL https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
+ * <p>
+ * - To retireve items from firestore
+ * - URL - https://www.youtube.com/watch?v=Bh0h_ZhX-Qg
+ * <p>
  * This Activity loads all images to images associated with a particular folder into a recyclerview with grid manager from cloud storage
  */
 
-public class BookeoMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener, View.OnClickListener, FirebaseResultListener, SubFolderResultListener {
+public class BookeoMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener, View.OnClickListener, FirebaseResultListener, SubFolderResultListener, ScrollListener {
 
     RecyclerView rvMediaItems, rvFolders;
     ProgressBar pbLoader;
@@ -91,7 +92,10 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     BookeoAlbumDao dao;
     BookeoPagesDao pagesDao;
     BookeoAlbum album;
-    String name, uuid;
+    String name, uuid, itemUuid;
+    static int scrollPosition;
+
+    ScrollListener scrollListener;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -103,14 +107,15 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
 
         setContentView(R.layout.activity_bookeo_media_display);
 
-        toolbar =  findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         name = getIntent().getStringExtra("folderName");
         uuid = getIntent().getStringExtra("folderUuid");
+        itemUuid = getIntent().getStringExtra("uuid");
 
-        dao = new BookeoAlbumDao(this, this);
+        dao = new BookeoAlbumDao(this, this, getApplicationContext());
         rvFolders = findViewById(R.id.rvFolders);
         rvFolders.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
 
@@ -136,7 +141,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         if (album.getGenerated() == null) {
             fabGenerate.setVisibility(View.VISIBLE);
             fabUpdate.setVisibility(View.GONE);
-        }else{
+        } else {
             fabUpdate.setVisibility(View.VISIBLE);
             fabGenerate.setVisibility(View.GONE);
         }
@@ -153,21 +158,17 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         pagesDao = new BookeoPagesDao();
     }
 
+
     public void viewVisibility(ArrayList<BookeoMediaItem> items) {
-        if(items.isEmpty())
+        if (items.isEmpty())
             tvNoMedia.setVisibility(View.VISIBLE);
         else
             tvNoMedia.setVisibility(View.GONE);
     }
 
-    public void getSubFolders(){
-
-    }
-
     //https://www.youtube.com/watch?v=Bh0h_ZhX-Qg
     public ArrayList<BookeoMediaItem> getDbMedia(String albumUuid) {
         final ArrayList<BookeoMediaItem> mediaItems = new ArrayList<>();
-
         db.collection("albums").document(albumUuid).collection("media_items").get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
@@ -179,21 +180,24 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
 
                             for (DocumentSnapshot documentSnapshot : list) {
                                 BookeoMediaItem item = new BookeoMediaItem();
-                                    item = documentSnapshot.toObject(BookeoMediaItem.class);
+                                item = documentSnapshot.toObject(BookeoMediaItem.class);
 
                                 BookeoMediaItem arItem = new BookeoMediaItem(item.getUuid(), item.getUrl(), item.getName(), item.getDate(), item.getAlbumUuid());
-
                                 mediaItems.add(arItem);
-
-                                //data = albums.get(0).getUuid() + " " + albums.get(0).getName() + " " + album.getCreateDate();
-                                Log.d("OUTPUT", "onSuccess create: " + arItem.getUrl());
-                                Log.d("OUTPUT--", "onSuccess create: " + mediaItems.get(0).getUrl());
-                                Log.d("SIZE--", "onSuccess create: " + mediaItems.size());
                             }
+                            //when qr code scan scroll to item position
+                            if (uuid != null) {
+                                for (int i = 0; i < mediaItems.size(); i++) {
+                                    String u = mediaItems.get(i).getUuid();
+                                    if(u.equals(itemUuid)){
+                                       rvMediaItems.scrollToPosition(i);
+                                    }
+                                }
                             }
+                        }
                         viewVisibility(mediaItems);
                         adapter.notifyDataSetChanged();
-                        }
+                    }
                 });
         Log.d("SIZE", "onSuccess create: " + mediaItems.size());
         return mediaItems;
@@ -214,17 +218,17 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
                 //https://developers.google.com/android/guides/opensource
                 OssLicensesMenuActivity.setActivityTitle(getString(R.string.custom_license_title));
                 startActivity(new Intent(this, OssLicensesMenuActivity.class));
-            //https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
+                //https://stackoverflow.com/questions/35810229/how-to-display-and-set-click-event-on-back-arrow-on-toolbar
             case android.R.id.home:
-                if(album.getParent().equals("root")) {
+                if (album.getParent().equals("root")) {
                     Intent intent = new Intent(BookeoMediaDisplay.this, BookeoMain.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                     finish();
-                }else{
+                } else {
                     Intent intent = new Intent(getApplicationContext(), BookeoMediaDisplay.class);
-                    intent.putExtra("folderUuid",album.getUuid());
-                    intent.putExtra("folderName",album.getName());
+                    intent.putExtra("folderUuid", album.getUuid());
+                    intent.putExtra("folderName", album.getName());
                     finish();
                     startActivity(intent);
                 }
@@ -247,7 +251,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getApplicationContext(), "Error Trying to Delete Album " + name , Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Error Trying to Delete Album " + name, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -264,12 +268,13 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
             case R.id.fabUpdate:
                 Intent intent = new Intent(this, BookeoBook.class);
                 intent.putExtra("albumUuid", uuid);
-                startActivity(intent);;
+                startActivity(intent);
+                ;
         }
     }
 
     private void generateAlbum() {
-        if(album.getGenerated() == null || album.getGenerated() == false) {
+        if (album.getGenerated() == null || album.getGenerated() == false) {
             BookeoAlbumDao bookeoAlbumDao = new BookeoAlbumDao();
             bookeoAlbumDao.generateBook(uuid);
             for (final BookeoMediaItem item : items) {
@@ -296,7 +301,8 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     }
 
     @Override
-    public void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> path, Context contx) {}
+    public void onPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> path, Context contx) {
+    }
 
     @Override
     public void onBPicClicked(MediaAdapterHolder holder, int position, ArrayList<String> names, ArrayList<String> urls, ArrayList<String> uuids, String albumUuid) {
@@ -337,4 +343,8 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         rvFolders.setAdapter(subFolderAdapter);
     }
 
+    @Override
+    public void onCompleteScroll(int postion) {
+        rvMediaItems.scrollToPosition(postion);
+    }
 }
