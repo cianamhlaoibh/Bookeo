@@ -41,6 +41,7 @@ public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  
     private BookeoMediaItemDao itemsDao;
     private boolean activate;
 
+
     public BookeoPagesAdapter(List<BookeoPage> pages, Context contx) {
         this.pages = pages;
         this.contx = contx;
@@ -94,17 +95,17 @@ public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  
                    }
                });
                //GENERATE QR CODE - IF VIDEO CLIP
-               String extension = item.getName().substring(item.getName().lastIndexOf("."));
-               if (extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".avi") || extension.equalsIgnoreCase(".mkv")) {
+               //String extension = item.getName().substring(item.getName().lastIndexOf("."));
+               //if (extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".avi") || extension.equalsIgnoreCase(".mkv")) {
                    // The data that the QR code will contain
                    String data = item.getAlbumUuid()+","+item.getUuid();
                    // Create the QR code and display
                    Bitmap qr = createQR(data);
                    Glide.with(contx).load(qr).into(holder.ivQR);
                    holder.ivQR.setVisibility(View.VISIBLE);
-               }else{
-                   holder.ivQR.setVisibility(View.GONE);
-               }
+               //}else{
+//                   holder.ivQR.setVisibility(View.GONE);
+               //}
 
 
             holder.ivPage.setOnClickListener(new View.OnClickListener() {
@@ -112,7 +113,6 @@ public class BookeoPagesAdapter extends RecyclerView.Adapter<BookeoPageHolder>  
                 public void onClick(View v) {
                     Intent intent = new Intent(contx, BookeoPageActivity.class);
                     intent.putExtra("id", page.getPageUuid());
-                    intent.putExtra("position", position);
                     intent.putExtra("albumUuid", page.getAlbumUuid());
                     contx.startActivity(intent);
                 }

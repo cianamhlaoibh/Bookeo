@@ -77,7 +77,7 @@ public class BookeoPagesDao {
     }
 
     public void updatePosition(String albumUuid, String uuid, int position ) {
-        db.collection("albums").document(albumUuid).collection("pages").document(uuid).update("position", position);
+        db.collection("albums").document(albumUuid).collection("pages").document(uuid).update("pageNumber", position);
     }
 
     public void updateEnlargement(String albumUuid, String uuid, boolean b) {
@@ -86,5 +86,22 @@ public class BookeoPagesDao {
 
     public void deletePage(String albumUuid, String uuid) {
         db.collection("albums").document(albumUuid).collection("pages").document(uuid).delete();
+    }
+
+    public void getCoverPage(String albumUuid){
+        final BookeoPage page = new BookeoPage();
+        db.collection("albums").document(albumUuid).collection("pages").whereEqualTo("type", "cover").get()
+              .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                  @Override
+                  public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                      if (!queryDocumentSnapshots.isEmpty()) {
+                          List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+                          BookeoPage page = list.get(0).toObject(BookeoPage.class);
+                          if(page!=null) {
+                              listener.onComplete(page);
+                          }
+                      }
+                  }
+              });
     }
 }

@@ -108,7 +108,7 @@ public class QrGalleryView extends AppCompatActivity implements FirebaseMediaIte
     }
 
     @Override
-    public void onComplete(ArrayList<BookeoMediaItem> items) {
+    public void OnComplete(ArrayList<BookeoMediaItem> items) {
         if(!items.isEmpty()){
             item = items.get(0);
             _init();

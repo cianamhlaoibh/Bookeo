@@ -46,6 +46,8 @@ import ie.bookeo.model.bookeo.BookeoPage;
 import ie.bookeo.model.drive.GoogleDriveMediaItem;
 import ie.bookeo.model.gallery_model.DeviceMediaItem;
 import ie.bookeo.utils.FirebaseResultListener;
+import ie.bookeo.utils.ItemClickListener;
+import ie.bookeo.utils.ItemListener;
 import ie.bookeo.utils.MarginItemDecoration;
 import ie.bookeo.utils.MediaDisplayItemClickListener;
 import ie.bookeo.utils.ScrollListener;
@@ -75,7 +77,7 @@ import ie.bookeo.utils.SubFolderResultListener;
  * This Activity loads all images to images associated with a particular folder into a recyclerview with grid manager from cloud storage
  */
 
-public class BookeoMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener, View.OnClickListener, FirebaseResultListener, SubFolderResultListener, ScrollListener {
+public class BookeoMediaDisplay extends AppCompatActivity implements MediaDisplayItemClickListener, View.OnClickListener, FirebaseResultListener, SubFolderResultListener, ScrollListener, ItemListener {
 
     RecyclerView rvMediaItems, rvFolders;
     ProgressBar pbLoader;
@@ -93,7 +95,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     BookeoPagesDao pagesDao;
     BookeoAlbum album;
     String name, uuid, itemUuid;
-    static int scrollPosition;
+    Boolean selectMode;
 
     ScrollListener scrollListener;
 
@@ -114,6 +116,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         name = getIntent().getStringExtra("folderName");
         uuid = getIntent().getStringExtra("folderUuid");
         itemUuid = getIntent().getStringExtra("uuid");
+        selectMode = getIntent().getBooleanExtra("selectMode", false);
 
         dao = new BookeoAlbumDao(this, this, getApplicationContext());
         rvFolders = findViewById(R.id.rvFolders);
@@ -151,8 +154,11 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     protected void onResume() {
         super.onResume();
         items = getDbMedia(uuid);
-        adapter = new BookeoMediaItemAdapter(items, BookeoMediaDisplay.this, this);
+        adapter = new BookeoMediaItemAdapter(items, BookeoMediaDisplay.this, this, this);
         rvMediaItems.setAdapter(adapter);
+        if(selectMode == true){
+            adapter.selectMode(true);
+        }
         dao.getAlbum(uuid);
         dao.getSubFolders(uuid);
         pagesDao = new BookeoPagesDao();
@@ -277,20 +283,8 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
         if (album.getGenerated() == null || album.getGenerated() == false) {
             BookeoAlbumDao bookeoAlbumDao = new BookeoAlbumDao();
             bookeoAlbumDao.generateBook(uuid);
-            for (final BookeoMediaItem item : items) {
-                String pageUuid = UUID.randomUUID().toString();
-
-                BookeoPage page = new BookeoPage();
-                page.setPageUuid(pageUuid);
-                page.setPageNumber(items.indexOf(item));
-                page.setAlbumUuid(item.getAlbumUuid());
-                page.setItem(item);
-
-                //upload item
-                pagesDao.addPage(page, this.uuid);
             }
         }
-    }
 
 
     @Override
@@ -346,5 +340,17 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
     @Override
     public void onCompleteScroll(int postion) {
         rvMediaItems.scrollToPosition(postion);
+    }
+
+    @Override
+    public void onClick(BookeoMediaItem item) {
+        BookeoPage coverpage = new BookeoPage();
+        coverpage.setItem(item);
+        coverpage.setAlbumUuid(item.getAlbumUuid());
+        coverpage.setType("cover");
+        final String uuid = UUID.randomUUID().toString();
+        coverpage.setPageUuid(uuid);
+        pagesDao.addPage(coverpage, item.getAlbumUuid());
+        finish();
     }
 }

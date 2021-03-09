@@ -36,7 +36,6 @@ import ie.bookeo.utils.FirebaseResultListener;
 
 public class BookeoPageActivity extends AppCompatActivity implements View.OnClickListener, FirebasePageResultListener {
     String id, albumUuid;
-    int postion;
     BookeoPagesDao pagesDao;
     ArrayList<BookeoMediaItem> result;
     ie.bookeo.model.bookeo.BookeoPage page;
@@ -51,7 +50,6 @@ public class BookeoPageActivity extends AppCompatActivity implements View.OnClic
 
         id = getIntent().getStringExtra("id");
         albumUuid = getIntent().getStringExtra("albumUuid");
-        postion = getIntent().getIntExtra("position", -1);
 
         pagesDao = new BookeoPagesDao(this);
 
@@ -168,8 +166,8 @@ public class BookeoPageActivity extends AppCompatActivity implements View.OnClic
         }
         checkIsEnlargedOnLoad(item);
         //GENERATE QR CODE - IF VIDEO CLIP
-        String extension = item.getName().substring(item.getName().lastIndexOf("."));
-        if (extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".avi") || extension.equalsIgnoreCase(".mkv")) {
+        //String extension = item.getName().substring(item.getName().lastIndexOf("."));
+        //if (extension.equalsIgnoreCase(".mp4") || extension.equalsIgnoreCase(".avi") || extension.equalsIgnoreCase(".mkv")) {
             // The data that the QR code will contain
             String data = item.getAlbumUuid()+","+item.getUuid();
             // Create the QR code and display
@@ -177,7 +175,7 @@ public class BookeoPageActivity extends AppCompatActivity implements View.OnClic
             Glide.with(this).load(qr).into(ivQr);
             Glide.with(this).load(qr).into(ivQrLrg);
             ivQr.setVisibility(View.VISIBLE);
-        }
+        //}
     }
 
     @Override

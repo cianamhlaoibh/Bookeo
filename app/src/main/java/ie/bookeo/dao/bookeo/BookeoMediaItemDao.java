@@ -128,7 +128,7 @@ public class BookeoMediaItemDao {
                                 BookeoMediaItem arItem = new BookeoMediaItem(item.getUuid(), item.getUrl(), item.getName(), item.getDate(), item.getAlbumUuid());
                                 mediaItems.add(arItem);
                             }
-                            listener.onComplete(mediaItems);
+                            listener.OnComplete(mediaItems);
                         }
                     }
                 });
@@ -143,7 +143,7 @@ public class BookeoMediaItemDao {
                    @Override
                    public void onSuccess(DocumentSnapshot documentSnapshot) {
                        mediaItems.add(documentSnapshot.toObject(BookeoMediaItem.class));
-                       listener.onComplete(mediaItems);
+                       listener.OnComplete(mediaItems);
                    }
                })
                 .addOnFailureListener(new OnFailureListener() {
