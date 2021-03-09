@@ -22,6 +22,8 @@ import ie.bookeo.R;
 import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.utils.AddAlbumListener;
 import ie.bookeo.utils.AlbumUploadListener;
+import ie.bookeo.utils.ItemClickListener;
+import ie.bookeo.utils.SubFolderResultListener;
 
 /**
  * Reference
@@ -40,12 +42,15 @@ public class BookeoCreateFolderAdapter extends RecyclerView.Adapter<BookeoCreate
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private AddAlbumListener lisenter;
     private AlbumUploadListener uploadListener;
+    private ItemClickListener clickListener;
 
-    public BookeoCreateFolderAdapter(List<BookeoAlbum> albums, Context folderContx, AddAlbumListener lisenter, AlbumUploadListener uploadListener) {
+    public BookeoCreateFolderAdapter(List<BookeoAlbum> albums, Context folderContx, AddAlbumListener lisenter, AlbumUploadListener uploadListener, ItemClickListener clickListener) {
         this.arAlbums = albums;
         this.contx = folderContx;
        this.lisenter = lisenter;
         this.uploadListener = uploadListener;
+        this.clickListener = clickListener;
+
     }
     @NonNull
     @Override
@@ -65,8 +70,7 @@ public class BookeoCreateFolderAdapter extends RecyclerView.Adapter<BookeoCreate
         holder.tvFolderName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                arAlbums = null;
-                arAlbums = getSubFolders(album.getUuid());
+                clickListener.onClick(album.getUuid());
             }
         });
 
@@ -85,43 +89,15 @@ public class BookeoCreateFolderAdapter extends RecyclerView.Adapter<BookeoCreate
         });
     }
 
-    private ArrayList<BookeoAlbum> getSubFolders(String parentUuid) {
-        final ArrayList<BookeoAlbum> dbAlbums = new ArrayList<>();
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        String userId = firebaseAuth.getCurrentUser().getUid();
-        db.collection("albums").whereEqualTo("parent", parentUuid).get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-
-                    String data = "";
-
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-
-                        if (!queryDocumentSnapshots.isEmpty()) {
-
-                            List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
-
-                            for (DocumentSnapshot documentSnapshot : list) {
-                                BookeoAlbum album = new BookeoAlbum();
-                                album = documentSnapshot.toObject(BookeoAlbum.class);
-
-                                BookeoAlbum arAlbum = new BookeoAlbum(album.getUuid(), album.getName(), album.getCreateDate());
-
-                                dbAlbums.add(arAlbum);
-
-                                //data = albums.get(0).getUuid() + " " + albums.get(0).getName() + " " + album.getCreateDate();
-                                Log.d("OUTPUT", "onSuccess create: " + arAlbum.getName());
-                            }
-                        }
-                        notifyDataSetChanged();
-                    }
-                });
-        Log.d("SIZE", "getAlbums: added" + dbAlbums.size());
-        return dbAlbums;
-    }
-
     @Override
     public int getItemCount() {
         return arAlbums.size();
+    }
+
+    //This implemented as adapter.notifyDataSetChanged not working in Fragment
+    public void updateDataSet(ArrayList<BookeoAlbum> albums) {
+        arAlbums.clear();
+        arAlbums.addAll(albums);
+        notifyDataSetChanged();
     }
 }

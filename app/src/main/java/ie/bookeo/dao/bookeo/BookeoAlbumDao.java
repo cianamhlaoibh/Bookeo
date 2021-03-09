@@ -10,6 +10,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -26,14 +27,26 @@ public class BookeoAlbumDao {
     FirebaseFirestore db;
     FirebaseResultListener listener;
     SubFolderResultListener subFolderResultListener;
+    Context context;
 
     public BookeoAlbumDao() {
         db = FirebaseFirestore.getInstance();
     }
 
+    public BookeoAlbumDao(FirebaseResultListener listener, SubFolderResultListener subFolderResultListener, Context context) {
+        db = FirebaseFirestore.getInstance();
+        this.listener = listener;
+        this.subFolderResultListener =subFolderResultListener;
+        this.context = context;
+    }
     public BookeoAlbumDao(FirebaseResultListener listener, SubFolderResultListener subFolderResultListener) {
         db = FirebaseFirestore.getInstance();
         this.listener = listener;
+        this.subFolderResultListener =subFolderResultListener;
+    }
+
+    public BookeoAlbumDao(SubFolderResultListener subFolderResultListener) {
+        db = FirebaseFirestore.getInstance();
         this.subFolderResultListener =subFolderResultListener;
     }
 
@@ -68,7 +81,9 @@ public class BookeoAlbumDao {
     }
 
     public void getSubFolders(String parentUuid){
-        db.collection("albums").whereEqualTo("parent", parentUuid).get()
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        String userId = firebaseAuth.getCurrentUser().getUid();
+        db.collection("albums").whereEqualTo("fk_user", userId).whereEqualTo("parent", parentUuid).get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -80,41 +95,15 @@ public class BookeoAlbumDao {
                             for (DocumentSnapshot documentSnapshot : list) {
                                 BookeoAlbum album = new BookeoAlbum();
                                 album = documentSnapshot.toObject(BookeoAlbum.class);
-
-                                final BookeoAlbum arAlbum = new BookeoAlbum(album.getUuid(), album.getName(), album.getCreateDate());
-                                arAlbum.setFirstItem(album.getFirstItem());
-
-
-                                dbAlbums.add(arAlbum);
-
-                                //data = albums.get(0).getUuid() + " " + albums.get(0).getName() + " " + album.getCreateDate();
-                                Log.d("OUTPUT", "onSuccess create: " + arAlbum.getName());
+                                dbAlbums.add(album);
                             }
                             subFolderResultListener.onSubFolderResult(dbAlbums);
+                        }else{
+                            Toast.makeText(context, "There is no Sub-Albums", Toast.LENGTH_SHORT).show();
                         }
                     }
-                });
-    }
 
-    public ArrayList<BookeoAlbum> getUserAlbums(String userId) {
-        final ArrayList<BookeoAlbum> dbAlbums = new ArrayList<>();
-        db.collection("albums").whereEqualTo("fk_user", userId).get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        if (!queryDocumentSnapshots.isEmpty()) {
-                            List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
-                            for (DocumentSnapshot documentSnapshot : list) {
-                                                 BookeoAlbum album = new BookeoAlbum();
-                                album = documentSnapshot.toObject(BookeoAlbum.class);
-                                BookeoAlbum arAlbum = new BookeoAlbum(album.getUuid(), album.getName(), album.getCreateDate());
-                                dbAlbums.add(arAlbum);
-                            }
-                        }
-                    }
                 });
-        Log.d("SIZE", "getUserAlbums: " + dbAlbums.size());
-        return dbAlbums;
     }
 
     public void generateBook(String uuid) {
