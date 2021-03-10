@@ -83,6 +83,12 @@
         <activity
             android:name=".view.bookeo.QrGalleryView"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".view.bookeo.BookeoCoverActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".view.bookeo.EditTitleActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

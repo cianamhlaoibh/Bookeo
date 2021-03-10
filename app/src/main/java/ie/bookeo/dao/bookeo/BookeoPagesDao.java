@@ -104,4 +104,8 @@ public class BookeoPagesDao {
                   }
               });
     }
+
+    public void updateTitle(String albumUuid, String id, String caption) {
+        db.collection("albums").document(albumUuid).collection("pages").document(id).update("caption", caption);
+    }
 }

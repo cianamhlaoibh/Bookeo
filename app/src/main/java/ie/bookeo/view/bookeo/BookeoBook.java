@@ -201,7 +201,7 @@ public class BookeoBook extends AppCompatActivity implements View.OnClickListene
                 startActivity(selectIntent);
                 break;
             case R.id.ivCoverPage:
-                Intent viewPage = new Intent(getApplicationContext(), BookeoPageActivity.class);
+                Intent viewPage = new Intent(getApplicationContext(), BookeoCoverActivity.class);
                 viewPage.putExtra("id", coverPage.getPageUuid());
                 viewPage.putExtra("albumUuid", coverPage.getAlbumUuid());
                 startActivity(viewPage);

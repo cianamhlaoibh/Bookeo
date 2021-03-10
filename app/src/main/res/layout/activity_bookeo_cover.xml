@@ -48,30 +48,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_caption"
-            app:layout_constraintEnd_toStartOf="@+id/ivFormat"
+            app:layout_constraintEnd_toStartOf="@+id/ivColor"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/ivFormat"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_enlarge"
-            app:layout_constraintEnd_toStartOf="@+id/ivSize"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/ivCaption"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/ivSize"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_filter"
-            app:layout_constraintEnd_toStartOf="@+id/ivColor"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/ivFormat"
-            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/ivColor"
@@ -80,9 +61,8 @@
             android:src="@drawable/ic_delete_white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/ivSize"
+            app:layout_constraintStart_toEndOf="@+id/ivTitle"
             app:layout_constraintTop_toTopOf="parent" />
-
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -97,47 +77,30 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbarLayout"
         app:srcCompat="@drawable/page" />
 
-    <ImageView
-        android:id="@+id/ivImageStd"
-        android:layout_width="250dp"
-        android:layout_height="150dp"
-        app:layout_constraintBottom_toBottomOf="@+id/ivPage"
-        app:layout_constraintEnd_toEndOf="@+id/ivPage"
-        app:layout_constraintStart_toStartOf="@+id/ivPage"
-        app:layout_constraintTop_toTopOf="@+id/ivPage"
-        app:srcCompat="@drawable/placeholder" />
-
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="2dp"
-        android:textSize="8sp"
-        app:layout_constraintBottom_toBottomOf="@+id/ivPage"
-        app:layout_constraintEnd_toEndOf="@+id/ivPage"
-        app:layout_constraintStart_toStartOf="@+id/ivPage"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="27dp"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="italic"
+        android:typeface="serif"
+        app:layout_constraintBottom_toBottomOf="@+id/ivCover"
+        app:layout_constraintEnd_toEndOf="@+id/ivCover"
         tools:text="write caption here" />
-
-    <ImageView
-        android:id="@+id/ivImageLrg"
-        android:layout_width="325dp"
-        android:layout_height="200dp"
-        app:layout_constraintEnd_toEndOf="@+id/ivPage"
-        app:layout_constraintStart_toStartOf="@+id/ivPage"
-        app:layout_constraintTop_toTopOf="@+id/ivPage"
-        app:srcCompat="@drawable/placeholder" />
 
     <ImageView
         android:id="@+id/ivQR"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:layout_marginStart="2dp"
-        android:layout_marginBottom="2dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/ivPage"
-        app:layout_constraintStart_toStartOf="@+id/ivPage"
-        app:srcCompat="@drawable/qr_sample"
-        tools:visibility="visible"/>
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/ivCover"
+        app:layout_constraintStart_toStartOf="@+id/ivCover"
+        app:srcCompat="@drawable/qr_sample" />
 
     <ImageView
         android:id="@+id/ivQrLrg"
@@ -147,8 +110,8 @@
         app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvCaption"
+        app:layout_constraintTop_toBottomOf="@+id/ivCover"
         app:srcCompat="@drawable/qr_sample"
-        tools:visibility="visible" />
+        tools:visibility="invisible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
