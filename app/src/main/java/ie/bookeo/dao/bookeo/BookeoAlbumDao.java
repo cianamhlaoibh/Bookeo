@@ -45,9 +45,9 @@ public class BookeoAlbumDao {
         this.subFolderResultListener =subFolderResultListener;
     }
 
-    public BookeoAlbumDao(SubFolderResultListener subFolderResultListener) {
+    public BookeoAlbumDao(FirebaseResultListener listener) {
         db = FirebaseFirestore.getInstance();
-        this.subFolderResultListener =subFolderResultListener;
+        this.listener = listener;
     }
 
     public int[] addAlbum(BookeoAlbum album, Context contx) {

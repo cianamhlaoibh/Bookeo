@@ -26,7 +26,7 @@ import ie.bookeo.utils.ShowGallery;
 
 /**
  * Reference
- *  - URL - https://github.com/sheetalkumar105/androidimagevideogallery
+ *  - URL - https://github.com/yuriy-budiyev/code-scanner
  *  - Creator - Yuriy Budiyev
  *  - Modified by Cian O Sullivan
  *

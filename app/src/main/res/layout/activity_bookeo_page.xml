@@ -44,7 +44,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
-            android:id="@+id/ivTitle"
+            android:id="@+id/ivCaption"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_caption"
@@ -88,7 +88,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageView
-        android:id="@+id/ivCover"
+        android:id="@+id/ivPage"
         android:layout_width="325dp"
         android:layout_height="225dp"
         android:layout_marginTop="32dp"
@@ -108,7 +108,7 @@
         app:srcCompat="@drawable/placeholder" />
 
     <TextView
-        android:id="@+id/tvTitle"
+        android:id="@+id/tvCaption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="2dp"

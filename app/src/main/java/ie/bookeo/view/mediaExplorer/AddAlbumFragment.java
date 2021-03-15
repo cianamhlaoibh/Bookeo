@@ -83,7 +83,7 @@ public class AddAlbumFragment extends DialogFragment {
 //                Handler handler = new Handler();
 //                handler.postDelayed(new Runnable() {
 //                    public void run() {
-                        getDialog().dismiss();;
+               // getDialog().dismiss(); ;
 //                    }
 //                }, 1000);//wait a second to add album to database before dismissing activity
 
@@ -106,23 +106,25 @@ public class AddAlbumFragment extends DialogFragment {
         if(TextUtils.isEmpty(name)){
             etAlbumName.setError("Please enter album name");
             return;
-        }
-        Date today = new Date();
-        SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
-        String date = DATE_FORMAT.format(today);
-        //Read more: https://www.java67.com/2013/01/how-to-format-date-in-java-simpledateformat-example.html#ixzz6fppjpeYL
-        final String uuid = UUID.randomUUID().toString();
-        String parent = getArguments().getString("parentUuid");
-        //assign to user
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        String userId = firebaseAuth.getCurrentUser().getUid();
-        //add to firebase
-        final BookeoAlbum bookeoAlbum = new BookeoAlbum(uuid, name, date, userId, parent);
-        bookeoAlbumDao = new BookeoAlbumDao();
-        int[] result = bookeoAlbumDao.addAlbum(bookeoAlbum, getContext());
-        //If added to firestore update rvAlbum
-        if(result[0] != -1){
-            mylistener.onCreated(bookeoAlbum);
+        }else {
+            Date today = new Date();
+            SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
+            String date = DATE_FORMAT.format(today);
+            //Read more: https://www.java67.com/2013/01/how-to-format-date-in-java-simpledateformat-example.html#ixzz6fppjpeYL
+            final String uuid = UUID.randomUUID().toString();
+            String parent = getArguments().getString("parentUuid");
+            //assign to user
+            FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+            String userId = firebaseAuth.getCurrentUser().getUid();
+            //add to firebase
+            final BookeoAlbum bookeoAlbum = new BookeoAlbum(uuid, name, date, userId, parent);
+            bookeoAlbumDao = new BookeoAlbumDao();
+            int[] result = bookeoAlbumDao.addAlbum(bookeoAlbum, getContext());
+            //If added to firestore update rvAlbum
+            if (result[0] != -1) {
+                mylistener.onCreated(bookeoAlbum);
+            }
+            getDialog().dismiss();
         }
     }
     @Override

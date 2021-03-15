@@ -233,7 +233,7 @@ public class BookeoMediaDisplay extends AppCompatActivity implements MediaDispla
                     finish();
                 } else {
                     Intent intent = new Intent(getApplicationContext(), BookeoMediaDisplay.class);
-                    intent.putExtra("folderUuid", album.getUuid());
+                    intent.putExtra("folderUuid", album.getParent());
                     intent.putExtra("folderName", album.getName());
                     finish();
                     startActivity(intent);

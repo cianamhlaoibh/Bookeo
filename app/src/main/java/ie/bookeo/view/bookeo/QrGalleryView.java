@@ -2,6 +2,7 @@ package ie.bookeo.view.bookeo;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -14,6 +15,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,20 +27,25 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 
 import cn.jzvd.JZVideoPlayerStandard;
 import ie.bookeo.R;
 import ie.bookeo.adapter.bookeo.BookeoMainFolderAdapter;
+import ie.bookeo.dao.bookeo.BookeoAlbumDao;
 import ie.bookeo.dao.bookeo.BookeoMediaItemDao;
+import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
 import ie.bookeo.utils.Config;
 import ie.bookeo.utils.FirebaseMediaItemsResultListener;
+import ie.bookeo.utils.FirebaseResultListener;
 import ie.bookeo.view.mediaExplorer.AddAlbumFragment;
 import ie.bookeo.view.mediaExplorer.CreateAlbumFragment;
 
-public class QrGalleryView extends AppCompatActivity implements FirebaseMediaItemsResultListener {
+public class QrGalleryView extends AppCompatActivity implements FirebaseMediaItemsResultListener, FirebaseResultListener {
 
     private BookeoMainFolderAdapter bookeoMainFolderAdapter;
     private BookeoMediaItemDao bookeoMediaItemDao;
@@ -52,8 +59,13 @@ public class QrGalleryView extends AppCompatActivity implements FirebaseMediaIte
     String result;
     String uuid;
     String albumUuid;
-    private BookeoMediaItemDao dao;
+   private BookeoMediaItemDao daoItem;
     private BookeoMediaItem item;
+    BookeoAlbumDao daoAlbum;
+    BookeoAlbum album;
+    String[] arrOfStr;
+    String userId;
+
 
     int callback;
     public String TAG = QrGalleryView.this.getClass().getSimpleName();
@@ -78,12 +90,16 @@ public class QrGalleryView extends AppCompatActivity implements FirebaseMediaIte
         callback = b.getInt("callback", 0);
 
 
+
         result = this.getIntent().getExtras().getString("result");
-        String[] arrOfStr = result.split(",", 2);
+        arrOfStr = result.split(",", 2);
         albumUuid = arrOfStr[0];
-        uuid = arrOfStr[1];
-        dao = new BookeoMediaItemDao(this);
-        dao.getItem(albumUuid, uuid, this);
+
+        daoAlbum = new BookeoAlbumDao(this);
+        daoAlbum.getAlbum(albumUuid);
+
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        userId = firebaseAuth.getCurrentUser().getUid();
 
         ivClose.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -168,6 +184,36 @@ public class QrGalleryView extends AppCompatActivity implements FirebaseMediaIte
 
             }
         });
+    }
+
+    @Override
+    public void onComplete(BookeoAlbum album) {
+        this.album = album;
+        albumUuid = arrOfStr[0];
+        if(arrOfStr.length > 1) {
+            if(album.getFk_user().equals(userId)) {
+                uuid = arrOfStr[1];
+                daoItem = new BookeoMediaItemDao(this);
+                daoItem.getItem(albumUuid, uuid, this);
+            }else{
+                Toast.makeText(this, "You do not have permission to access this media", Toast.LENGTH_LONG).show();
+                finish();
+                Intent intent = new Intent(this, CodeScannerActivity.class);
+                startActivity(intent);
+            }
+        }else{
+            if(album.getFk_user().equals(userId)){
+                Intent intent = new Intent(this, BookeoMediaDisplay.class);
+                intent.putExtra("folderUuid",albumUuid);
+                startActivity(intent);
+            }else{
+                //Snackbar.make(vpager, "You do not have permission to access this folder", Snackbar.LENGTH_LONG).show();
+                Toast.makeText(this, "You do not have permission to access this folder", Toast.LENGTH_LONG).show();
+                finish();
+                Intent intent = new Intent(this, CodeScannerActivity.class);
+                startActivity(intent);;
+            }
+        }
     }
 
 

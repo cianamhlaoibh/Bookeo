@@ -1,6 +1,7 @@
 package ie.bookeo.view.bookeo;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+
+import net.glxn.qrgen.android.QRCode;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,7 +59,7 @@ public class BookeoBook extends AppCompatActivity implements View.OnClickListene
     BookeoPagesDao pagesDao;
     BookeoPage coverPage;
     ConstraintLayout cover;
-    ImageView ivBackgroud, ivAddPage, ivDeletePage, ivDeleteBook, ivAddCover, ivCoverPage;
+    ImageView ivBackgroud, ivAddPage, ivDeletePage, ivDeleteBook, ivAddCover, ivCoverPage, ivQR;
     String status = "DEACTIVE";
 
     //DB
@@ -93,6 +96,7 @@ public class BookeoBook extends AppCompatActivity implements View.OnClickListene
         cover = findViewById(R.id.cover);
         ivCoverPage.setOnClickListener(this);
         tvTitle = findViewById(R.id.tvTitle);
+        ivQR = findViewById(R.id.ivQR);
     }
 
     //https://androidapps-development-blogs.medium.com/drag-and-drop-reorder-in-recyclerview-android-2a3093d16ba2
@@ -156,7 +160,7 @@ public class BookeoBook extends AppCompatActivity implements View.OnClickListene
     }
     public ArrayList<BookeoPage> getDbMedia(String albumUuid) {
         final ArrayList<BookeoPage> pages = new ArrayList<>();
-        db.collection("albums").document(albumUuid).collection("pages").whereEqualTo("type","standard").get()
+        db.collection("albums").document(albumUuid).collection("pages").whereEqualTo("type","standard").orderBy("pageNumber").get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -195,10 +199,12 @@ public class BookeoBook extends AppCompatActivity implements View.OnClickListene
                 }
                 break;
             case R.id.ivAddCover:
-                Intent selectIntent = new Intent(getApplicationContext(), BookeoMediaDisplay.class);
-                selectIntent.putExtra("folderUuid", uuid);
-                selectIntent.putExtra("selectMode", true);
-                startActivity(selectIntent);
+                //if(cover!=null) {
+                    Intent selectIntent = new Intent(getApplicationContext(), BookeoMediaDisplay.class);
+                    selectIntent.putExtra("folderUuid", uuid);
+                    selectIntent.putExtra("selectMode", true);
+                    startActivity(selectIntent);
+               // }
                 break;
             case R.id.ivCoverPage:
                 Intent viewPage = new Intent(getApplicationContext(), BookeoCoverActivity.class);
@@ -288,11 +294,20 @@ public class BookeoBook extends AppCompatActivity implements View.OnClickListene
             ivAddCover.setVisibility(View.GONE);
             tvTitle.setVisibility(View.VISIBLE);
             tvTitle.setText(item.getCaption());
+            String data = item.getAlbumUuid();
+            // Create the QR code and display
+            Bitmap qr = createQR(data);
+            Glide.with(this).load(qr). into(ivQR);
+            ivQR.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
     public void onComplete(ArrayList<BookeoPage> pages) {
 
+    }
+    public static Bitmap createQR(String data){
+        Bitmap myBitmap = QRCode.from(data).bitmap();
+        return myBitmap;
     }
 }

@@ -145,12 +145,14 @@ public class CreateAlbumFragment extends DialogFragment implements View.OnClickL
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.toolbar:
-                BookeoAlbum album = folders.get(0);
-                if (album.getParent().equals("root")) {
-                    dismiss();
-                } else {
-                    String parentUuid = album.getParent();
-                    dao.getAlbum(parentUuid);
+                if(!folders.isEmpty()) {
+                    BookeoAlbum album = folders.get(0);
+                    if (album.getParent().equals("root")) {
+                        dismiss();
+                    } else {
+                        String parentUuid = album.getParent();
+                        dao.getAlbum(parentUuid);
+                    }
                 }
                 break;
             case R.id.ivAdd:

@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.SimpleDateFormat;
@@ -24,6 +25,7 @@ import ie.bookeo.dao.bookeo.BookeoAlbumDao;
 import ie.bookeo.model.bookeo.BookeoAlbum;
 import ie.bookeo.model.bookeo.BookeoMediaItem;
 import ie.bookeo.utils.Config;
+import ie.bookeo.utils.FirebaseResultListener;
 import ie.bookeo.utils.MyCreateListener;
 import ie.bookeo.view.mediaExplorer.AddAlbumFragment;
 
